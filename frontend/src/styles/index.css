@@ -1,0 +1,425 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Estilos base personalizados */
+@layer base {
+  * {
+    /* Removido @apply border-border; pois a classe não existe */
+  }
+  
+  body {
+    @apply bg-gradient-to-br from-black via-gray-900 to-black text-white;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  }
+
+  /* Scrollbar personalizada */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-black/20;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gradient-to-b from-green-500 to-green-600 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gradient-to-b from-green-400 to-green-500;
+  }
+
+  /* Seleção de texto personalizada */
+  ::selection {
+    @apply bg-green-500/30 text-white;
+  }
+
+  ::-moz-selection {
+    @apply bg-green-500/30 text-white;
+  }
+}
+
+/* Componentes personalizados */
+@layer components {
+  /* Gradientes de texto - Spotify theme */
+  .text-gradient {
+    @apply bg-gradient-to-r from-green-400 to-green-500 bg-clip-text text-transparent;
+  }
+
+  .text-gradient-spotify {
+    @apply bg-gradient-to-r from-green-400 to-green-500 bg-clip-text text-transparent;
+  }
+
+  .text-gradient-purple {
+    @apply bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent;
+  }
+
+  .text-gradient-blue {
+    @apply bg-gradient-to-r from-green-400 to-green-500 bg-clip-text text-transparent;
+  }
+
+  .text-gradient-green {
+    @apply bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent;
+  }
+
+  /* Efeitos de glassmorphism */
+  .glass {
+    @apply backdrop-blur-xl bg-black/20 border border-white/10;
+  }
+
+  .glass-light {
+    @apply backdrop-blur-lg bg-white/5 border border-white/5;
+  }
+
+  .glass-dark {
+    @apply backdrop-blur-2xl bg-black/40 border border-white/20;
+  }
+
+  /* Cards com gradientes - Spotify theme */
+  .card-gradient-spotify {
+    @apply bg-gradient-to-br from-green-600 to-green-700;
+  }
+
+  .card-gradient-purple {
+    @apply bg-gradient-to-br from-green-600 to-green-700;
+  }
+
+  .card-gradient-blue {
+    @apply bg-gradient-to-br from-green-600 to-green-700;
+  }
+
+  .card-gradient-green {
+    @apply bg-gradient-to-br from-green-600 to-green-700;
+  }
+
+  .card-gradient-pink {
+    @apply bg-gradient-to-br from-green-600 to-green-700;
+  }
+
+  /* Botões com gradientes - Spotify theme */
+  .btn-gradient-primary {
+    @apply bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700;
+  }
+
+  .btn-gradient-success {
+    @apply bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700;
+  }
+
+  .btn-gradient-info {
+    @apply bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700;
+  }
+
+  .btn-gradient-warning {
+    @apply bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700;
+  }
+
+  .btn-gradient-danger {
+    @apply bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700;
+  }
+
+  /* Efeitos de hover */
+  .hover-lift {
+    @apply transition-all duration-300 hover:transform hover:scale-105 hover:shadow-2xl;
+  }
+
+  .hover-glow {
+    @apply transition-all duration-300 hover:shadow-lg hover:shadow-green-500/25;
+  }
+
+  .hover-border-glow {
+    @apply transition-all duration-300 hover:border-green-500/50 hover:shadow-lg hover:shadow-green-500/25;
+  }
+
+  /* Animações personalizadas */
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-float-delayed {
+    animation: float 6s ease-in-out infinite;
+    animation-delay: 2s;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .animate-bounce-slow {
+    animation: bounce 3s infinite;
+  }
+
+  .animate-spin-slow {
+    animation: spin 8s linear infinite;
+  }
+
+  /* Efeitos de partículas - Spotify theme */
+  .particle {
+    @apply absolute w-1 h-1 bg-green-400/40 rounded-full;
+  }
+
+  .particle-purple {
+    @apply bg-green-400/40;
+  }
+
+  .particle-pink {
+    @apply bg-green-400/40;
+  }
+
+  .particle-blue {
+    @apply bg-green-400/40;
+  }
+
+  /* Efeitos de brilho */
+  .shine {
+    @apply relative overflow-hidden;
+  }
+
+  .shine::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full;
+    animation: shine 3s infinite;
+  }
+
+  /* Efeitos de ondas - Spotify theme */
+  .wave {
+    @apply relative overflow-hidden;
+  }
+
+  .wave::after {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-r from-green-500/20 via-transparent to-green-500/20;
+    animation: wave 4s ease-in-out infinite;
+  }
+}
+
+/* Utilitários personalizados */
+@layer utilities {
+  /* Sombras com cores - Spotify theme */
+  .shadow-spotify {
+    box-shadow: 0 10px 25px -3px rgba(29, 185, 84, 0.3);
+  }
+
+  .shadow-purple {
+    box-shadow: 0 10px 25px -3px rgba(29, 185, 84, 0.3);
+  }
+
+  .shadow-pink {
+    box-shadow: 0 10px 25px -3px rgba(29, 185, 84, 0.3);
+  }
+
+  .shadow-blue {
+    box-shadow: 0 10px 25px -3px rgba(29, 185, 84, 0.3);
+  }
+
+  .shadow-green {
+    box-shadow: 0 10px 25px -3px rgba(29, 185, 84, 0.3);
+  }
+
+  /* Gradientes de fundo */
+  .bg-gradient-music {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+
+  .bg-gradient-sunset {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  }
+
+  .bg-gradient-ocean {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  }
+
+  .bg-gradient-forest {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  }
+
+  /* Efeitos de texto */
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .text-shadow-lg {
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  }
+
+  .text-glow {
+    text-shadow: 0 0 20px rgba(29, 185, 84, 0.5);
+  }
+
+  /* Efeitos de borda - Spotify theme */
+  .border-gradient {
+    border-image: linear-gradient(45deg, #1DB954, #1ed760) 1;
+  }
+
+  .border-glow {
+    box-shadow: 0 0 20px rgba(29, 185, 84, 0.3);
+  }
+}
+
+/* Animações keyframes */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes shine {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes wave {
+  0%, 100% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes slideInFromLeft {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromRight {
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromTop {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromBottom {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes rotateIn {
+  0% {
+    transform: rotate(-180deg) scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: rotate(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Classes de animação */
+.animate-slide-in-left {
+  animation: slideInFromLeft 0.6s ease-out;
+}
+
+.animate-slide-in-right {
+  animation: slideInFromRight 0.6s ease-out;
+}
+
+.animate-slide-in-top {
+  animation: slideInFromTop 0.6s ease-out;
+}
+
+.animate-slide-in-bottom {
+  animation: slideInFromBottom 0.6s ease-out;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.6s ease-out;
+}
+
+.animate-rotate-in {
+  animation: rotateIn 0.8s ease-out;
+}
+
+/* Responsividade para animações */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Efeitos de foco para acessibilidade - Spotify theme */
+.focus-visible:focus {
+  @apply outline-none ring-2 ring-green-500 ring-offset-2 ring-offset-black;
+}
+
+/* Estados de loading */
+.loading-skeleton {
+  @apply animate-pulse bg-gray-700 rounded;
+}
+
+.loading-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
