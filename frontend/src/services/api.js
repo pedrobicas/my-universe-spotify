@@ -100,11 +100,33 @@ export const spotifyAPI = {
   getPlaylists: (limit = 50) => 
     api.get(`/api/playlists?limit=${limit}`),
   
+  getPlaylistTracks: (playlistId) => 
+    api.get(`/api/playlists/${playlistId}/tracks`),
+  
   createPlaylist: (data) => 
     api.post('/api/playlists', data),
   
+  updatePlaylist: (playlistId, data) => 
+    api.put(`/api/playlists/${playlistId}`, data),
+  
+  deletePlaylist: (playlistId) => 
+    api.delete(`/api/playlists/${playlistId}`),
+  
   addTracksToPlaylist: (playlistId, trackUris) => 
     api.post(`/api/playlists/${playlistId}/tracks`, { trackUris }),
+  
+  removeTracksFromPlaylist: (playlistId, trackUris) => 
+    api.delete(`/api/playlists/${playlistId}/tracks`, { data: { trackUris } }),
+  
+  reorderPlaylistTracks: (playlistId, rangeStart, insertBefore, rangeLength = 1) => 
+    api.put(`/api/playlists/${playlistId}/tracks/reorder`, { 
+      rangeStart, 
+      insertBefore, 
+      rangeLength 
+    }),
+  
+  getPlaylistAnalytics: (playlistId) => 
+    api.get(`/api/playlists/${playlistId}/analytics`),
   
   // Audio features
   getAudioFeatures: (trackIds) => 
@@ -117,6 +139,9 @@ export const spotifyAPI = {
   // Search
   searchTracks: (query, limit = 20) => 
     api.get(`/api/search/tracks?q=${encodeURIComponent(query)}&limit=${limit}`),
+  
+  searchPlaylists: (query, limit = 20) => 
+    api.get(`/api/search/playlists?q=${encodeURIComponent(query)}&limit=${limit}`),
   
   // Track details
   getTrack: (trackId) => 

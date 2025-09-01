@@ -16,8 +16,13 @@ router.get('/top/artists', apiController.getTopArtists);
 
 // Playlists
 router.get('/playlists', apiController.getPlaylists);
+router.get('/playlists/:playlistId/tracks', apiController.getPlaylistTracks);
 router.post('/playlists', apiController.createPlaylist);
+router.put('/playlists/:playlistId', apiController.updatePlaylist);
+router.delete('/playlists/:playlistId', apiController.deletePlaylist);
 router.post('/playlists/:playlistId/tracks', apiController.addTracksToPlaylist);
+router.delete('/playlists/:playlistId/tracks', apiController.removeTracksFromPlaylist);
+router.put('/playlists/:playlistId/tracks/reorder', apiController.reorderPlaylistTracks);
 
 // Audio features
 router.get('/audio-features', apiController.getAudioFeatures);
@@ -27,8 +32,12 @@ router.get('/recently-played', apiController.getRecentlyPlayed);
 
 // Search
 router.get('/search/tracks', apiController.searchTracks);
+router.get('/search/playlists', apiController.searchPlaylists);
 
 // Track details
 router.get('/tracks/:trackId', apiController.getTrack);
+
+// Playlist analytics
+router.get('/playlists/:playlistId/analytics', apiController.getPlaylistAnalytics);
 
 module.exports = router;

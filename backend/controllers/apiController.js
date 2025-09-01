@@ -60,6 +60,21 @@ class ApiController {
     }
   }
 
+  // Get playlist tracks
+  async getPlaylistTracks(req, res) {
+    try {
+      const { playlistId } = req.params;
+      const tracks = await spotifyService.getPlaylistTracks(req.accessToken, playlistId);
+      res.json(tracks);
+    } catch (error) {
+      console.error('Get playlist tracks error:', error);
+      res.status(500).json({ 
+        error: 'Failed to get playlist tracks',
+        message: error.message 
+      });
+    }
+  }
+
   // Create new playlist
   async createPlaylist(req, res) {
     try {
@@ -90,6 +105,52 @@ class ApiController {
     }
   }
 
+  // Update playlist
+  async updatePlaylist(req, res) {
+    try {
+      const { playlistId } = req.params;
+      const { name, description, public: isPublic, collaborative } = req.body;
+      
+      if (!name) {
+        return res.status(400).json({ 
+          error: 'Playlist name is required',
+          message: 'Please provide a name for the playlist' 
+        });
+      }
+
+      const updatedPlaylist = await spotifyService.updatePlaylist(
+        req.accessToken, 
+        playlistId, 
+        { name, description, public: isPublic, collaborative }
+      );
+      
+      res.json(updatedPlaylist);
+    } catch (error) {
+      console.error('Update playlist error:', error);
+      res.status(500).json({ 
+        error: 'Failed to update playlist',
+        message: error.message 
+      });
+    }
+  }
+
+  // Delete playlist
+  async deletePlaylist(req, res) {
+    try {
+      const { playlistId } = req.params;
+      
+      await spotifyService.deletePlaylist(req.accessToken, playlistId);
+      
+      res.json({ message: 'Playlist deleted successfully' });
+    } catch (error) {
+      console.error('Delete playlist error:', error);
+      res.status(500).json({ 
+        error: 'Failed to delete playlist',
+        message: error.message 
+      });
+    }
+  }
+
   // Add tracks to playlist
   async addTracksToPlaylist(req, res) {
     try {
@@ -114,6 +175,66 @@ class ApiController {
       console.error('Add tracks to playlist error:', error);
       res.status(500).json({ 
         error: 'Failed to add tracks to playlist',
+        message: error.message 
+      });
+    }
+  }
+
+  // Remove tracks from playlist
+  async removeTracksFromPlaylist(req, res) {
+    try {
+      const { playlistId } = req.params;
+      const { trackUris } = req.body;
+      
+      if (!trackUris || !Array.isArray(trackUris) || trackUris.length === 0) {
+        return res.status(400).json({ 
+          error: 'Track URIs are required',
+          message: 'Please provide an array of track URIs to remove' 
+        });
+      }
+
+      const result = await spotifyService.removeTracksFromPlaylist(
+        req.accessToken, 
+        playlistId, 
+        trackUris
+      );
+      
+      res.json(result);
+    } catch (error) {
+      console.error('Remove tracks from playlist error:', error);
+      res.status(500).json({ 
+        error: 'Failed to remove tracks from playlist',
+        message: error.message 
+      });
+    }
+  }
+
+  // Reorder playlist tracks
+  async reorderPlaylistTracks(req, res) {
+    try {
+      const { playlistId } = req.params;
+      const { rangeStart, insertBefore, rangeLength = 1 } = req.body;
+      
+      if (rangeStart === undefined || insertBefore === undefined) {
+        return res.status(400).json({ 
+          error: 'Range start and insert before are required',
+          message: 'Please provide rangeStart and insertBefore parameters' 
+        });
+      }
+
+      const result = await spotifyService.reorderPlaylistTracks(
+        req.accessToken, 
+        playlistId, 
+        rangeStart, 
+        insertBefore, 
+        rangeLength
+      );
+      
+      res.json(result);
+    } catch (error) {
+      console.error('Reorder playlist tracks error:', error);
+      res.status(500).json({ 
+        error: 'Failed to reorder playlist tracks',
         message: error.message 
       });
     }
@@ -209,6 +330,34 @@ class ApiController {
     }
   }
 
+  // Search playlists
+  async searchPlaylists(req, res) {
+    try {
+      const { q, limit = 20 } = req.query;
+      
+      if (!q) {
+        return res.status(400).json({ 
+          error: 'Search query is required',
+          message: 'Please provide a search query' 
+        });
+      }
+
+      const searchResults = await spotifyService.searchPlaylists(
+        req.accessToken, 
+        q, 
+        parseInt(limit)
+      );
+      
+      res.json(searchResults);
+    } catch (error) {
+      console.error('Search playlists error:', error);
+      res.status(500).json({ 
+        error: 'Failed to search playlists',
+        message: error.message 
+      });
+    }
+  }
+
   // Get track details
   async getTrack(req, res) {
     try {
@@ -227,6 +376,33 @@ class ApiController {
       console.error('Get track error:', error);
       res.status(500).json({ 
         error: 'Failed to get track details',
+        message: error.message 
+      });
+    }
+  }
+
+  // Get playlist analytics
+  async getPlaylistAnalytics(req, res) {
+    try {
+      const { playlistId } = req.params;
+      
+      if (!playlistId) {
+        return res.status(400).json({ 
+          error: 'Playlist ID is required',
+          message: 'Please provide a playlist ID' 
+        });
+      }
+
+      const analytics = await spotifyService.getPlaylistAnalytics(
+        req.accessToken, 
+        playlistId
+      );
+      
+      res.json(analytics);
+    } catch (error) {
+      console.error('Get playlist analytics error:', error);
+      res.status(500).json({ 
+        error: 'Failed to get playlist analytics',
         message: error.message 
       });
     }

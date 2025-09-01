@@ -58,7 +58,7 @@ cd my-universe-spotify
 #### Backend (.env)
 ```bash
 cd backend
-cp .env.example .env
+cp env.example .env
 ```
 
 Edite o arquivo `.env` com suas credenciais do Spotify:

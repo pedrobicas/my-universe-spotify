@@ -1,3 +1,6 @@
+/* Importar animações personalizadas */
+@import './animations.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

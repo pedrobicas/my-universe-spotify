@@ -527,8 +527,8 @@ const Dashboard = () => {
       {/* Conteúdo principal */}
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Navegação por abas */}
-        <div className="mb-6">
-          <div className="flex flex-wrap justify-center gap-2 p-2 bg-black/20 backdrop-blur-sm border border-white/10 rounded-xl shadow-lg">
+        <div className="mb-8">
+          <div className="flex flex-wrap justify-center gap-1 p-1 bg-black/20 backdrop-blur-sm border border-white/10 rounded-lg">
             {tabs.map((tab, index) => {
               const Icon = tab.icon
               const isActive = activeTab === tab.value
@@ -536,31 +536,41 @@ const Dashboard = () => {
                 <button
                   key={tab.value}
                   onClick={() => setActiveTab(tab.value)}
-                  className={`group relative flex items-center space-x-2 px-5 py-3 rounded-lg font-medium transition-all duration-300 ease-out transform tab-button ${
+                  className={`group relative flex items-center space-x-3 px-4 py-2.5 rounded-md font-medium transition-all duration-300 ease-out tab-button overflow-hidden ${
+                    isActive ? 'active' : ''
+                  } ${
                     isActive
-                      ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg shadow-green-500/25 scale-105'
-                      : 'bg-white/5 text-gray-300 hover:bg-white/15 hover:text-white hover:scale-105'
+                      ? 'text-green-400'
+                      : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'
                   }`}
                   style={{
                     animationDelay: `${index * 100}ms`
                   }}
                 >
-                  {/* Indicador de ativo */}
+                  {/* Linha de progresso para botão ativo */}
                   {isActive && (
-                    <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-green-600 rounded-lg opacity-20 blur-sm animate-pulse"></div>
+                    <div className="absolute bottom-0 left-0 h-0.5 bg-green-400 rounded-full animate-progress"></div>
                   )}
                   
                   {/* Conteúdo do botão */}
-                  <div className="relative z-10 flex items-center space-x-2">
-                    <div className={`p-1.5 rounded-md transition-all duration-300 ${
+                  <div className="flex items-center space-x-3">
+                    <div className={`icon-container p-1.5 rounded-md transition-all duration-300 ${
                       isActive 
-                        ? 'bg-white/20 text-white' 
-                        : 'bg-white/10 text-gray-400 group-hover:bg-white/20 group-hover:text-white'
+                        ? 'bg-green-400/20 text-green-400' 
+                        : 'bg-gray-600/30 text-gray-500 group-hover:bg-gray-500/30 group-hover:text-gray-300'
                     }`}>
-                      <Icon className="w-4 h-4" />
+                      <Icon className={`w-4 h-4 transition-all duration-300 ${
+                        isActive ? 'text-green-400' : 'text-gray-500 group-hover:text-gray-300'
+                      }`} />
                     </div>
-                    <span className="font-semibold text-sm">{tab.label}</span>
+                    <span className={`text-sm font-medium transition-all duration-300 ${
+                      isActive ? 'text-green-400' : 'text-gray-500 group-hover:text-gray-300'
+                    }`}>
+                      {tab.label}
+                    </span>
                   </div>
+                  
+
                 </button>
               )
             })}
@@ -685,38 +695,38 @@ const Dashboard = () => {
             </div>
 
             {/* Top 3 Músicas Mais Ouvidas */}
-            <Card className="bg-black/20 backdrop-blur-sm border border-white/10">
+            <Card className="bg-black/20 backdrop-blur-sm border border-white/10" hover={false}>
               <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
                 <Music className="w-6 h-6 mr-3 text-green-400" />
                 Top 3 Músicas Mais Ouvidas
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {topTracks.slice(0, 3).map((track, index) => (
-                  <div key={track.id} className="text-center p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-all duration-200">
+                  <div key={track.id} className="group text-center p-4 bg-black/20 backdrop-blur-sm rounded-xl hover:bg-black/30 transition-all duration-300 border border-white/10 hover:border-green-500/30 hover:shadow-lg hover:shadow-green-500/20">
                     <div className="relative mb-4">
-                      <div className="absolute -top-2 -left-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                      <div className="absolute -top-2 -left-2 w-8 h-8 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg z-10">
                         {index + 1}
                       </div>
                       <img
                         src={track.album?.images?.[0]?.url || '/default-track.jpg'}
                         alt={track.name}
-                        className="w-24 h-24 mx-auto rounded-lg shadow-lg"
+                        className="w-24 h-24 mx-auto rounded-lg shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:brightness-110"
                         onError={(e) => {
                           e.target.src = '/default-track.jpg'
                         }}
                       />
                     </div>
-                    <h4 className="text-white font-semibold mb-2 text-sm line-clamp-2">
+                    <h4 className="text-white font-semibold mb-2 text-sm line-clamp-2 group-hover:text-green-400 transition-colors duration-300">
                       {track.name}
                     </h4>
-                    <p className="text-gray-400 text-xs mb-2">
+                    <p className="text-gray-400 text-xs mb-2 line-clamp-1">
                       {track.artists?.map(artist => artist.name).join(', ')}
                     </p>
                     <div className="flex items-center justify-center space-x-4 text-xs">
-                      <span className="text-green-400">
-                        {track.popularity}% popular
+                      <span className="text-green-400 font-semibold">
+                        {track.popularity}%
                       </span>
-                      <span className="text-blue-400">
+                      <span className="text-blue-400 font-semibold">
                         {formatDuration(track.duration_ms)}
                       </span>
                     </div>
@@ -726,39 +736,44 @@ const Dashboard = () => {
             </Card>
 
             {/* Top 3 Bandas/Artistas Mais Ouvidos */}
-            <Card className="bg-black/20 backdrop-blur-sm border border-white/10">
+            <Card className="bg-black/20 backdrop-blur-sm border border-white/10" hover={false}>
               <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
                 <Users className="w-6 h-6 mr-3 text-blue-400" />
                 Top 3 Artistas Mais Ouvidos
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {topArtists.slice(0, 3).map((artist, index) => (
-                  <div key={artist.id} className="text-center p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-all duration-200">
+                  <div key={artist.id} className="group text-center p-4 bg-black/20 backdrop-blur-sm rounded-xl hover:bg-black/30 transition-all duration-300 border border-white/10 hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/20">
                     <div className="relative mb-4">
-                      <div className="absolute -top-2 -left-2 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                      <div className="absolute -top-2 -left-2 w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg z-10">
                         {index + 1}
                       </div>
                       <img
                         src={artist.images?.[0]?.url || '/default-artist.jpg'}
                         alt={artist.name}
-                        className="w-24 h-24 mx-auto rounded-full shadow-lg"
+                        className="w-24 h-24 mx-auto rounded-full shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:brightness-110"
                         onError={(e) => {
                           e.target.src = '/default-artist.jpg'
                         }}
                       />
                     </div>
-                    <h4 className="text-white font-semibold mb-2 text-sm">
+                    <h4 className="text-white font-semibold mb-2 text-sm group-hover:text-blue-400 transition-colors duration-300">
                       {artist.name}
                     </h4>
-                    <p className="text-gray-400 text-xs mb-2 capitalize">
+                    <p className="text-gray-400 text-xs mb-2 capitalize line-clamp-1">
                       {artist.genres?.slice(0, 2).join(', ') || 'Gênero não disponível'}
                     </p>
                     <div className="flex items-center justify-center space-x-4 text-xs">
-                      <span className="text-blue-400">
-                        {artist.popularity}% popular
+                      <span className="text-blue-400 font-semibold">
+                        {artist.popularity}%
                       </span>
-                      <span className="text-purple-400">
-                        {artist.followers?.total ? `${(artist.followers.total / 1000).toFixed(1)}k seguidores` : 'N/A'}
+                      <span className="text-purple-400 font-semibold">
+                        {artist.followers?.total ? 
+                          artist.followers.total >= 1000000 ? 
+                            `${(artist.followers.total / 1000000).toFixed(1)}M` : 
+                            `${(artist.followers.total / 1000).toFixed(1)}k` : 
+                          'N/A'
+                        }
                       </span>
                     </div>
                   </div>
@@ -835,40 +850,124 @@ const Dashboard = () => {
         {/* Top Músicas */}
         {activeTab === 'tracks' && (
           <div className="space-y-8 tab-content">
-            <Card className="bg-black/20 backdrop-blur-sm border border-white/10">
+            {/* Header da seção */}
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-white mb-4">Suas Músicas Favoritas</h2>
+              <p className="text-gray-300 text-lg">
+                Descubra suas {topTracks.length} músicas mais ouvidas dos últimos {timeRange === 'short_term' ? '4 semanas' : timeRange === 'medium_term' ? '6 meses' : '1 ano'}
+              </p>
+            </div>
+
+            {/* Estatísticas resumidas */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <Card className="bg-gradient-to-br from-green-600 to-green-700 hover:scale-105 transition-transform duration-200">
+                <div className="flex items-center space-x-4">
+                  <div className="p-3 bg-white/20 rounded-xl">
+                    <Music className="w-8 h-8 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-white/70 text-sm font-medium">Total de Músicas</p>
+                    <p className="text-3xl font-bold text-white">{topTracks.length}</p>
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-blue-600 to-blue-700 hover:scale-105 transition-transform duration-200">
+                <div className="flex items-center space-x-4">
+                  <div className="p-3 bg-white/20 rounded-xl">
+                    <Users className="w-8 h-8 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-white/70 text-sm font-medium">Artistas Únicos</p>
+                    <p className="text-3xl font-bold text-white">{new Set(topTracks.flatMap(track => track.artists?.map(artist => artist.id) || [])).size}</p>
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-purple-600 to-purple-700 hover:scale-105 transition-transform duration-200">
+                <div className="flex items-center space-x-4">
+                  <div className="p-3 bg-white/20 rounded-xl">
+                    <Clock className="w-8 h-8 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-white/70 text-sm font-medium">Duração Total</p>
+                    <p className="text-3xl font-bold text-white">{formatDuration(topTracks.reduce((acc, track) => acc + track.duration_ms, 0))}</p>
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            <Card className="bg-black/20 backdrop-blur-sm border border-white/10" hover={false}>
               <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
                 <Music className="w-6 h-6 mr-3 text-green-400" />
-                Suas Músicas Favoritas
+                Top {topTracks.length} Músicas
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {topTracks.map((track, index) => (
-                  <div key={track.id} className="group relative p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-all duration-300 hover:scale-105">
+                  <div key={track.id} className="group relative p-4 bg-black/20 backdrop-blur-sm rounded-xl hover:bg-black/30 transition-all duration-300 border border-white/10 hover:border-green-500/30 hover:shadow-lg hover:shadow-green-500/20">
                     <div className="relative mb-4">
-                      <div className="absolute -top-2 -left-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                      <div className="absolute -top-2 -left-2 w-8 h-8 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg z-10">
                         {index + 1}
                       </div>
                       <img
                         src={track.album?.images?.[0]?.url || '/default-track.jpg'}
                         alt={track.name}
-                        className="w-full h-48 object-cover rounded-lg shadow-lg group-hover:shadow-xl transition-all duration-300"
+                        className="w-full h-48 object-cover rounded-lg shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:brightness-110"
                         onError={(e) => {
                           e.target.src = '/default-track.jpg'
                         }}
                       />
+                      {/* Overlay com controles */}
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg flex items-center justify-center">
+                        <div className="flex space-x-3">
+                          <button className="p-3 bg-green-600 hover:bg-green-700 rounded-full transition-colors shadow-lg">
+                            <Play className="w-6 h-6 text-white" />
+                          </button>
+                          <button className="p-3 bg-white/20 hover:bg-white/30 rounded-full transition-colors shadow-lg">
+                            <Heart className="w-5 h-5 text-white" />
+                          </button>
                     </div>
-                    <h4 className="text-white font-semibold mb-2 line-clamp-2">
+                      </div>
+                    </div>
+                    
+                    {/* Informações da música */}
+                    <div className="space-y-3">
+                      <h4 className="text-white font-semibold text-lg line-clamp-2 group-hover:text-green-400 transition-colors duration-300">
                       {track.name}
                     </h4>
-                    <p className="text-gray-400 text-sm mb-3">
+                      
+                      <div className="flex items-center space-x-2 text-gray-400 text-sm">
+                        <Music className="w-4 h-4" />
+                        <span className="line-clamp-1">
+                          {track.album?.name || 'Álbum não disponível'}
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2 text-gray-400 text-sm">
+                        <Users className="w-4 h-4" />
+                        <span className="line-clamp-1">
                       {track.artists?.map(artist => artist.name).join(', ')}
-                    </p>
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-green-400">
-                        {track.popularity}% popular
                       </span>
-                      <span className="text-blue-400">
-                        {formatDuration(track.duration_ms)}
-                      </span>
+                      </div>
+                      
+                      {/* Métricas */}
+                      <div className="grid grid-cols-2 gap-3 pt-2">
+                        <div className="text-center p-2 bg-white/5 rounded-lg">
+                          <div className="text-green-400 font-bold text-lg">{track.popularity}%</div>
+                          <div className="text-gray-400 text-xs">Popularidade</div>
+                        </div>
+                        <div className="text-center p-2 bg-white/5 rounded-lg">
+                          <div className="text-blue-400 font-bold text-lg">{formatDuration(track.duration_ms)}</div>
+                          <div className="text-gray-400 text-xs">Duração</div>
+                        </div>
+                      </div>
+                      
+                      {/* Data de lançamento */}
+                      {track.album?.release_date && (
+                        <div className="text-center text-gray-400 text-xs pt-2 border-t border-white/10">
+                          Lançado em {new Date(track.album.release_date).getFullYear()}
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -880,40 +979,124 @@ const Dashboard = () => {
         {/* Top Artistas */}
         {activeTab === 'artists' && (
           <div className="space-y-8 tab-content">
-            <Card className="bg-black/20 backdrop-blur-sm border border-white/10">
+            {/* Header da seção */}
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-white mb-4">Seus Artistas Favoritos</h2>
+              <p className="text-gray-300 text-lg">
+                Conheça seus {topArtists.length} artistas mais ouvidos dos últimos {timeRange === 'short_term' ? '4 semanas' : timeRange === 'medium_term' ? '6 meses' : '1 ano'}
+              </p>
+            </div>
+
+            {/* Estatísticas resumidas */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <Card className="bg-gradient-to-br from-blue-600 to-blue-700 hover:scale-105 transition-transform duration-200">
+                <div className="flex items-center space-x-4">
+                  <div className="p-3 bg-white/20 rounded-xl">
+                    <Users className="w-8 h-8 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-white/70 text-sm font-medium">Total de Artistas</p>
+                    <p className="text-3xl font-bold text-white">{topArtists.length}</p>
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-green-600 to-green-700 hover:scale-105 transition-transform duration-200">
+                <div className="flex items-center space-x-4">
+                  <div className="p-3 bg-white/20 rounded-xl">
+                    <Music className="w-8 h-8 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-white/70 text-sm font-medium">Gêneros Únicos</p>
+                    <p className="text-3xl font-bold text-white">{new Set(topArtists.flatMap(artist => artist.genres || [])).size}</p>
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-purple-600 to-purple-700 hover:scale-105 transition-transform duration-200">
+                <div className="flex items-center space-x-4">
+                  <div className="p-3 bg-white/20 rounded-xl">
+                    <Heart className="w-8 h-8 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-white/70 text-sm font-medium">Seguidores Totais</p>
+                    <p className="text-3xl font-bold text-white">{topArtists.reduce((acc, artist) => acc + (artist.followers?.total || 0), 0).toLocaleString()}</p>
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            <Card className="bg-black/20 backdrop-blur-sm border border-white/10" hover={false}>
               <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
                 <Users className="w-6 h-6 mr-3 text-blue-400" />
-                Seus Artistas Favoritos
+                Top {topArtists.length} Artistas
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {topArtists.map((artist, index) => (
-                  <div key={artist.id} className="group relative p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-all duration-300 hover:scale-105">
+                  <div key={artist.id} className="group relative p-4 bg-black/20 backdrop-blur-sm rounded-xl hover:bg-black/30 transition-all duration-300 border border-white/10 hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/20">
                     <div className="relative mb-4">
-                      <div className="absolute -top-2 -left-2 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                      <div className="absolute -top-2 -left-2 w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg z-10">
                         {index + 1}
                       </div>
                       <img
                         src={artist.images?.[0]?.url || '/default-artist.jpg'}
                         alt={artist.name}
-                        className="w-full h-48 object-cover rounded-full shadow-lg group-hover:shadow-xl transition-all duration-300"
+                        className="w-full h-48 object-cover rounded-full shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:brightness-110"
                         onError={(e) => {
                           e.target.src = '/default-artist.jpg'
                         }}
                       />
+                      {/* Overlay com controles */}
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full flex items-center justify-center">
+                        <div className="flex space-x-3">
+                          <button className="p-3 bg-blue-600 hover:bg-blue-700 rounded-full transition-colors shadow-lg">
+                            <Play className="w-6 h-6 text-white" />
+                          </button>
+                          <button className="p-3 bg-white/20 hover:bg-white/30 rounded-full transition-colors shadow-lg">
+                            <Heart className="w-5 h-5 text-white" />
+                          </button>
                     </div>
-                    <h4 className="text-white font-semibold mb-2 text-center">
+                      </div>
+                    </div>
+                    
+                    {/* Informações do artista */}
+                    <div className="space-y-3">
+                      <h4 className="text-white font-semibold text-lg text-center group-hover:text-blue-400 transition-colors duration-300">
                       {artist.name}
                     </h4>
-                    <p className="text-gray-400 text-sm mb-3 text-center capitalize">
-                      {artist.genres?.slice(0, 2).join(', ') || 'Gênero não disponível'}
-                    </p>
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-blue-400">
-                        {artist.popularity}% popular
+                      
+                      {/* Gêneros */}
+                      <div className="flex flex-wrap justify-center gap-2">
+                        {artist.genres?.slice(0, 3).map((genre, idx) => (
+                          <span key={idx} className="px-2 py-1 bg-blue-500/20 text-blue-300 text-xs rounded-full border border-blue-500/30">
+                            {genre}
                       </span>
-                      <span className="text-purple-400">
-                        {artist.followers?.total ? `${(artist.followers.total / 1000).toFixed(1)}k seguidores` : 'N/A'}
-                      </span>
+                        ))}
+                      </div>
+                      
+                      {/* Métricas */}
+                      <div className="grid grid-cols-2 gap-3 pt-2">
+                        <div className="text-center p-2 bg-white/5 rounded-lg">
+                          <div className="text-blue-400 font-bold text-lg">{artist.popularity}%</div>
+                          <div className="text-gray-400 text-xs">Popularidade</div>
+                        </div>
+                        <div className="text-center p-2 bg-white/5 rounded-lg">
+                          <div className="text-purple-400 font-bold text-lg">
+                            {artist.followers?.total ? 
+                              artist.followers.total >= 1000000 ? 
+                                `${(artist.followers.total / 1000000).toFixed(1)}M` : 
+                                `${(artist.followers.total / 1000).toFixed(1)}k` : 
+                              'N/A'
+                            }
+                          </div>
+                          <div className="text-gray-400 text-xs">Seguidores</div>
+                        </div>
+                      </div>
+                      
+                      {/* Estatísticas adicionais */}
+                      <div className="text-center text-gray-400 text-xs pt-2 border-t border-white/10">
+                        {artist.genres?.length > 0 ? `${artist.genres.length} gênero(s)` : 'Gênero não disponível'}
+                      </div>
                     </div>
                   </div>
                 ))}
