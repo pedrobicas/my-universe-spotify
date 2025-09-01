@@ -25,7 +25,9 @@ const PlaylistCard = ({
 
   const handleDelete = (e) => {
     e.stopPropagation()
-    if (confirm('Tem certeza que deseja excluir esta playlist?')) {
+    
+    // Confirmação mais elegante
+    if (window.confirm(`Tem certeza que deseja excluir a playlist "${playlist.name}"?\n\nEsta ação não pode ser desfeita.`)) {
       onDelete?.(playlist.id)
     }
   }
@@ -44,9 +46,16 @@ const PlaylistCard = ({
 
   const getTotalDuration = () => {
     if (!playlist.tracks?.items) return '0m'
-    const totalMs = playlist.tracks.items.reduce((acc, item) => 
-      acc + (item.track?.duration_ms || 0), 0
-    )
+    
+    const totalMs = playlist.tracks.items.reduce((acc, item) => {
+      // Verificar diferentes estruturas possíveis
+      const duration = item.track?.duration_ms || 
+                      item.duration_ms || 
+                      item.duration || 
+                      0
+      return acc + duration
+    }, 0)
+    
     return formatDuration(totalMs)
   }
 

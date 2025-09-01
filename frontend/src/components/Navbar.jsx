@@ -92,59 +92,87 @@ const Navbar = () => {
             <div className="flex items-center space-x-8">
               {/* Logo */}
               <Link to="/dashboard" className="flex items-center space-x-2 group">
-                <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Music className="w-5 h-5 text-white" />
+                <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center group-hover:scale-105 transition-all duration-200">
+                  <Music className="w-4 h-4 text-white" />
                 </div>
                 <span className="text-xl font-bold bg-gradient-to-r from-green-400 to-green-500 bg-clip-text text-transparent">
                   My Universe
                 </span>
               </Link>
 
-              {/* Navegação desktop */}
-              <div className="hidden md:flex items-center space-x-1">
-                {navigation.map((item) => {
-                  const Icon = item.icon
-                  return (
-                    <Link
-                      key={item.name}
-                      to={item.href}
-                      className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                        isActive(item.href)
-                          ? 'bg-green-600 text-white shadow-lg'
-                          : 'text-gray-300 hover:text-white hover:bg-white/10'
-                      }`}
-                    >
-                      <Icon className="w-4 h-4" />
-                      <span>{item.name}</span>
-                    </Link>
-                  )
-                })}
+              {/* Navegação desktop - Estilo Dashboard */}
+              <div className="hidden lg:flex">
+                <div className="flex gap-1 p-1">
+                  {navigation.map((item, index) => {
+                    const Icon = item.icon
+                    const active = isActive(item.href)
+                    return (
+                      <Link
+                        key={item.name}
+                        to={item.href}
+                        className={`group relative flex items-center space-x-3 px-4 py-2.5 rounded-md font-medium transition-all duration-300 ease-out overflow-hidden ${
+                          active ? 'active' : ''
+                        } ${
+                          active
+                            ? 'text-green-400'
+                            : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'
+                        }`}
+                        style={{
+                          animationDelay: `${index * 100}ms`
+                        }}
+                      >
+                        {/* Linha de progresso para item ativo */}
+                        {active && (
+                          <div className="absolute bottom-0 left-0 h-0.5 bg-green-400 rounded-full animate-progress w-full"></div>
+                        )}
+                        
+                        {/* Conteúdo do item */}
+                        <div className="flex items-center space-x-3">
+                          <div className={`icon-container p-1.5 rounded-md transition-all duration-300 ${
+                            active 
+                              ? 'bg-green-400/20 text-green-400' 
+                              : 'bg-gray-600/30 text-gray-500 group-hover:bg-gray-500/30 group-hover:text-gray-300'
+                          }`}>
+                            <Icon className={`w-4 h-4 transition-all duration-300 ${
+                              active ? 'text-green-400' : 'text-gray-500 group-hover:text-gray-300'
+                            }`} />
+                          </div>
+                          <span className={`text-sm font-medium transition-all duration-300 ${
+                            active ? 'text-green-400' : 'text-gray-500 group-hover:text-gray-300'
+                          }`}>
+                            {item.name}
+                          </span>
+                        </div>
+                      </Link>
+                    )
+                  })}
+                </div>
               </div>
             </div>
 
             {/* Ações do usuário */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
               {/* Busca */}
               <div className="relative">
                 <button
                   onClick={() => setIsSearchOpen(!isSearchOpen)}
                   className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
                 >
-                  <Search className="w-5 h-5" />
+                  <Search className="w-4 h-4" />
                 </button>
                 
                 {/* Dropdown de busca */}
                 {isSearchOpen && (
-                  <div className="absolute right-0 top-12 w-80 bg-gray-900 border border-white/10 rounded-xl shadow-2xl backdrop-blur-xl">
+                  <div className="absolute right-0 top-12 w-80 bg-gray-900/95 border border-white/10 rounded-xl shadow-2xl backdrop-blur-xl">
                     <form onSubmit={handleSearch} className="p-4">
                       <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <input
                           type="text"
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
                           placeholder="Buscar músicas, artistas, playlists..."
-                                                     className="w-full pl-10 pr-4 py-3 bg-black/20 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500"
+                          className="w-full pl-10 pr-4 py-2 bg-black/20 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                           autoFocus
                         />
                       </div>
@@ -175,9 +203,9 @@ const Navbar = () => {
                   onClick={() => setShowNotifications(!showNotifications)}
                   className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors relative"
                 >
-                  <Bell className="w-5 h-5" />
+                  <Bell className="w-4 h-4" />
                   {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
                       {unreadCount}
                     </span>
                   )}
@@ -185,7 +213,7 @@ const Navbar = () => {
 
                 {/* Dropdown de notificações */}
                 {showNotifications && (
-                  <div className="absolute right-0 top-12 w-80 bg-gray-900 border border-white/10 rounded-xl shadow-2xl backdrop-blur-xl max-h-96 overflow-y-auto">
+                  <div className="absolute right-0 top-12 w-80 bg-gray-900/95 border border-white/10 rounded-xl shadow-2xl backdrop-blur-xl max-h-96 overflow-y-auto">
                     <div className="p-4 border-b border-white/10">
                       <h3 className="text-lg font-semibold text-white">Notificações</h3>
                     </div>
@@ -218,36 +246,36 @@ const Navbar = () => {
               <div className="relative">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center space-x-3 p-2 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                  className="flex items-center space-x-2 p-2 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
                 >
                   {user?.images?.[0]?.url ? (
                     <img
                       src={user.images[0].url}
                       alt={user.display_name}
-                      className="w-8 h-8 rounded-full border-2 border-green-400"
+                      className="w-7 h-7 rounded-full border border-green-400"
                     />
                   ) : (
-                                          <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
+                    <div className="w-7 h-7 bg-green-600 rounded-full flex items-center justify-center">
                       <User className="w-4 h-4 text-white" />
                     </div>
                   )}
-                  <span className="hidden md:block font-medium">{user?.display_name}</span>
+                  <span className="hidden md:block text-sm font-medium">{user?.display_name}</span>
                 </button>
 
                 {/* Dropdown do usuário */}
                 {isUserMenuOpen && (
-                  <div className="absolute right-0 top-12 w-64 bg-gray-900 border border-white/10 rounded-xl shadow-2xl backdrop-blur-xl">
+                  <div className="absolute right-0 top-12 w-64 bg-gray-900/95 border border-white/10 rounded-xl shadow-2xl backdrop-blur-xl">
                     <div className="p-4 border-b border-white/10">
                       <div className="flex items-center space-x-3">
                         {user?.images?.[0]?.url ? (
                           <img
                             src={user.images[0].url}
                             alt={user.display_name}
-                            className="w-12 h-12 rounded-full border-2 border-green-400"
+                            className="w-10 h-10 rounded-full border border-green-400"
                           />
                         ) : (
-                                                      <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
-                            <User className="w-6 h-6 text-white" />
+                          <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center">
+                            <User className="w-5 h-5 text-white" />
                           </div>
                         )}
                         <div>
@@ -286,39 +314,67 @@ const Navbar = () => {
               {/* Menu mobile */}
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                className="lg:hidden p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
               >
                 {isMobileMenuOpen ? (
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4" />
                 ) : (
-                  <Menu className="w-5 h-5" />
+                  <Menu className="w-4 h-4" />
                 )}
               </button>
             </div>
           </div>
         </div>
 
-        {/* Menu mobile */}
+        {/* Menu mobile - Estilo Dashboard */}
         {isMobileMenuOpen && (
-          <div className="md:hidden bg-gray-900/95 backdrop-blur-xl border-t border-white/10">
-            <div className="px-4 py-2 space-y-1">
-              {navigation.map((item) => {
-                const Icon = item.icon
-                return (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    className={`flex items-center space-x-3 px-3 py-2 rounded-lg font-medium transition-colors ${
-                      isActive(item.href)
-                        ? 'bg-green-600 text-white'
-                        : 'text-gray-300 hover:text-white hover:bg-white/10'
-                    }`}
-                  >
-                    <Icon className="w-5 h-5" />
-                    <span>{item.name}</span>
-                  </Link>
-                )
-              })}
+          <div className="lg:hidden bg-gray-900/95 backdrop-blur-xl border-t border-white/10">
+            <div className="px-4 py-4">
+              <div className="flex flex-wrap justify-center gap-1 p-1">
+                {navigation.map((item, index) => {
+                  const Icon = item.icon
+                  const active = isActive(item.href)
+                  return (
+                    <Link
+                      key={item.name}
+                      to={item.href}
+                      className={`group relative flex items-center space-x-3 px-4 py-2.5 rounded-md font-medium transition-all duration-300 ease-out overflow-hidden ${
+                        active ? 'active' : ''
+                      } ${
+                        active
+                          ? 'text-green-400'
+                          : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'
+                      }`}
+                      style={{
+                        animationDelay: `${index * 100}ms`
+                      }}
+                    >
+                      {/* Linha de progresso para item ativo */}
+                      {active && (
+                        <div className="absolute bottom-0 left-0 h-0.5 bg-green-400 rounded-full animate-progress w-full"></div>
+                      )}
+                      
+                      {/* Conteúdo do item */}
+                      <div className="flex items-center space-x-3">
+                        <div className={`icon-container p-1.5 rounded-md transition-all duration-300 ${
+                          active 
+                            ? 'bg-green-400/20 text-green-400' 
+                            : 'bg-gray-600/30 text-gray-500 group-hover:bg-gray-500/30 group-hover:text-gray-300'
+                        }`}>
+                          <Icon className={`w-4 h-4 transition-all duration-300 ${
+                            active ? 'text-green-400' : 'text-gray-500 group-hover:text-gray-300'
+                          }`} />
+                        </div>
+                        <span className={`text-sm font-medium transition-all duration-300 ${
+                          active ? 'text-green-400' : 'text-gray-500 group-hover:text-gray-300'
+                        }`}>
+                          {item.name}
+                        </span>
+                      </div>
+                    </Link>
+                  )
+                })}
+              </div>
             </div>
           </div>
         )}
@@ -341,7 +397,7 @@ const Navbar = () => {
             </div>
             <button
               onClick={() => setIsPlaying(!isPlaying)}
-                              className="p-2 bg-green-600 hover:bg-green-700 rounded-full transition-colors"
+              className="p-2 bg-green-600 hover:bg-green-700 rounded-full transition-colors"
             >
               {isPlaying ? (
                 <Pause className="w-4 h-4 text-white" />

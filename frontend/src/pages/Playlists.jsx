@@ -13,7 +13,6 @@ import PlaylistCard from '../components/PlaylistCard'
 import PlaylistEditModal from '../components/PlaylistEditModal'
 import PlaylistFilters from '../components/PlaylistFilters'
 import PlaylistDetail from '../components/PlaylistDetail'
-import MusicPlayer from '../components/MusicPlayer'
 import Loading from '../components/Loading'
 import Button from '../components/Button'
 import '../styles/playlists.css'
@@ -68,7 +67,26 @@ const Playlists = () => {
         typeof playlist === 'object'
       ) || []
       
-      setPlaylists(validPlaylists)
+      // Buscar tracks de cada playlist para calcular duração
+      const playlistsWithTracks = await Promise.all(
+        validPlaylists.map(async (playlist) => {
+          try {
+            const tracksResponse = await spotifyAPI.getPlaylistTracks(playlist.id)
+            return {
+              ...playlist,
+              tracks: tracksResponse.data
+            }
+          } catch (error) {
+            console.error(`Error loading tracks for playlist ${playlist.id}:`, error)
+            return {
+              ...playlist,
+              tracks: { items: [], total: 0 }
+            }
+          }
+        })
+      )
+      
+      setPlaylists(playlistsWithTracks)
     } catch (error) {
       console.error('Error loading playlists:', error)
       setPlaylists([])
@@ -122,13 +140,39 @@ const Playlists = () => {
 
   const deletePlaylist = async (playlistId) => {
     try {
-      if (playlistId) {
-        await spotifyAPI.deletePlaylist(playlistId)
+      if (!playlistId) {
+        alert('ID da playlist não encontrado')
+        return
       }
+      
+      console.log('=== INICIANDO EXCLUSÃO ===')
+      console.log('ID da playlist:', playlistId)
+      console.log('Tipo do ID:', typeof playlistId)
+      console.log('API disponível:', !!spotifyAPI)
+      console.log('Método deletePlaylist disponível:', !!spotifyAPI.deletePlaylist)
+      
+      const response = await spotifyAPI.deletePlaylist(playlistId)
+      console.log('Resposta da exclusão:', response)
+      
+      alert('Playlist excluída com sucesso!')
+      
+      // Recarregar a lista
       await loadPlaylists()
     } catch (error) {
-      console.error('Error deleting playlist:', error)
-      alert('Erro ao excluir playlist: ' + error.message)
+      console.error('=== ERRO NA EXCLUSÃO ===')
+      console.error('Error completo:', error)
+      console.error('Error response:', error.response)
+      console.error('Error status:', error.response?.status)
+      console.error('Error data:', error.response?.data)
+      
+      let errorMessage = 'Erro ao excluir playlist'
+      if (error.response?.data?.message) {
+        errorMessage += ': ' + error.response.data.message
+      } else if (error.message) {
+        errorMessage += ': ' + error.message
+      }
+      
+      alert(errorMessage)
     }
   }
 
@@ -493,24 +537,7 @@ const Playlists = () => {
         />
       )}
 
-      {/* Player de Música */}
-      {currentTrack && (
-        <MusicPlayer
-          track={currentTrack}
-          isPlaying={isPlaying}
-          onPlay={() => setIsPlaying(true)}
-          onPause={() => setIsPlaying(false)}
-          onNext={handleNext}
-          onPrevious={handlePrevious}
-          onShuffle={handleShuffle}
-          onRepeat={handleRepeat}
-          onVolumeChange={handleVolumeChange}
-          onLike={handleLike}
-          isLiked={false}
-          showQueue={showQueue}
-          onToggleQueue={toggleQueue}
-        />
-      )}
+
     </div>
   )
 }

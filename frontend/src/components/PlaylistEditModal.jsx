@@ -557,7 +557,7 @@ const PlaylistEditModal = ({
           <div className="flex space-x-3">
             {playlist && (
               <Button
-                onClick={onDelete}
+                onClick={() => onDelete?.(playlist.id)}
                 className="px-6 py-3 bg-red-600 hover:bg-red-700"
               >
                 <Trash2 className="w-4 h-4 mr-2" />
