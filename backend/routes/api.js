@@ -30,6 +30,9 @@ router.get('/audio-features', apiController.getAudioFeatures);
 // Recently played
 router.get('/recently-played', apiController.getRecentlyPlayed);
 
+// Currently playing
+router.get('/now-playing', apiController.getNowPlaying);
+
 // Search
 router.get('/search/tracks', apiController.searchTracks);
 router.get('/search/playlists', apiController.searchPlaylists);

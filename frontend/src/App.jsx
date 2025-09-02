@@ -6,6 +6,7 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Playlists from './pages/Playlists'
 import Analytics from './pages/Analytics'
+import Profile from './pages/Profile'
 import Loading from './components/Loading'
 import { Suspense } from 'react'
 
@@ -39,6 +40,14 @@ function App() {
                 element={
                   <PrivateRoute>
                     <Analytics />
+                  </PrivateRoute>
+                } 
+              />
+              <Route 
+                path="/profile" 
+                element={
+                  <PrivateRoute>
+                    <Profile />
                   </PrivateRoute>
                 } 
               />

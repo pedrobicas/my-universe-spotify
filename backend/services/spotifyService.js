@@ -365,6 +365,24 @@ class SpotifyService {
     }
   }
 
+  // Get currently playing track
+  async getNowPlaying(accessToken) {
+    try {
+      const response = await axios.get(`${this.baseURL}/me/player/currently-playing`, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      });
+      return response.data;
+    } catch (error) {
+      // If nothing is playing, Spotify returns 204 No Content, which axios might treat as an error.
+      if (error.response && error.response.status === 204) {
+        return null; // Return null if nothing is playing
+      }
+      throw this.handleSpotifyError(error);
+    }
+  }
+
   // Helper method to format duration
   formatDuration(ms) {
     if (!ms) return '0m';

@@ -31,6 +31,7 @@ import {
 import Card from '../components/Card'
 import Loading from '../components/Loading'
 import ChartWrapper from '../components/ChartWrapper'
+import NowPlaying from '../components/NowPlaying'
 
 const Dashboard = () => {
   const { user } = useAuth()
@@ -581,6 +582,11 @@ const Dashboard = () => {
         {/* Visão Geral */}
         {activeTab === 'overview' && (
           <div className="space-y-8 tab-content">
+            {/* Componente "Ouvindo Agora" */}
+            <div className="mb-8">
+              <NowPlaying />
+            </div>
+
             {/* Botão para mostrar explicação das métricas */}
             <div className="text-center">
               <button

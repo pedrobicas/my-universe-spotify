@@ -407,6 +407,24 @@ class ApiController {
       });
     }
   }
+
+  // Get currently playing track
+  async getNowPlaying(req, res) {
+    try {
+      const nowPlaying = await spotifyService.getNowPlaying(req.accessToken);
+      if (nowPlaying) {
+        res.json(nowPlaying);
+      } else {
+        res.status(204).send();
+      }
+    } catch (error) {
+      console.error('Get now playing error:', error);
+      res.status(500).json({ 
+        error: 'Failed to get currently playing track',
+        message: error.message 
+      });
+    }
+  }
 }
 
 module.exports = new ApiController();
