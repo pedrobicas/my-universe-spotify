@@ -582,11 +582,6 @@ const Dashboard = () => {
         {/* Visão Geral */}
         {activeTab === 'overview' && (
           <div className="space-y-8 tab-content">
-            {/* Componente "Ouvindo Agora" */}
-            <div className="mb-8">
-              <NowPlaying />
-            </div>
-
             {/* Botão para mostrar explicação das métricas */}
             <div className="text-center">
               <button

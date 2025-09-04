@@ -5,9 +5,10 @@ import Navbar from './components/Navbar'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Playlists from './pages/Playlists'
-import Analytics from './pages/Analytics'
+import Discoveries from './pages/Discoveries'
 import Profile from './pages/Profile'
 import Loading from './components/Loading'
+import NowPlaying from './components/NowPlaying'
 import { Suspense } from 'react'
 
 function App() {
@@ -36,10 +37,10 @@ function App() {
                 } 
               />
               <Route 
-                path="/analytics" 
+                path="/discoveries" 
                 element={
                   <PrivateRoute>
-                    <Analytics />
+                    <Discoveries />
                   </PrivateRoute>
                 } 
               />
@@ -55,6 +56,9 @@ function App() {
             </Routes>
           </Suspense>
         </main>
+        
+        {/* Player flutuante global */}
+        <NowPlaying />
       </div>
     </AuthProvider>
   )

@@ -146,6 +146,14 @@ export const spotifyAPI = {
   // Track details
   getTrack: (trackId) => 
     api.get(`/api/tracks/${trackId}`),
+  
+  // Recommendations
+  getRecommendations: (params) => 
+    api.get('/api/recommendations', { params }),
+  
+  // Followed artists
+  getFollowedArtists: (limit = 50) => 
+    api.get(`/api/me/following/artists?limit=${limit}`),
 }
 
 export default api

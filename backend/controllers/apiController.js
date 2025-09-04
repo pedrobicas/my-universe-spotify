@@ -15,6 +15,50 @@ class ApiController {
     }
   }
 
+  // Get user's saved tracks
+  async getSavedTracks(req, res) {
+    try {
+      const { limit = 20, offset = 0 } = req.query;
+      const savedTracks = await spotifyService.getSavedTracks(req.accessToken, parseInt(limit), parseInt(offset));
+      res.json(savedTracks);
+    } catch (error) {
+      console.error('Get saved tracks error:', error);
+      res.status(500).json({ 
+        error: 'Failed to get saved tracks',
+        message: error.message 
+      });
+    }
+  }
+
+  // Get user's followed artists
+  async getFollowedArtists(req, res) {
+    try {
+      const { limit = 20 } = req.query;
+      const followedArtists = await spotifyService.getFollowedArtists(req.accessToken, parseInt(limit));
+      res.json(followedArtists);
+    } catch (error) {
+      console.error('Get followed artists error:', error);
+      res.status(500).json({ 
+        error: 'Failed to get followed artists',
+        message: error.message 
+      });
+    }
+  }
+
+  // Get user statistics
+  async getUserStats(req, res) {
+    try {
+      const stats = await spotifyService.getUserStats(req.accessToken);
+      res.json(stats);
+    } catch (error) {
+      console.error('Get user stats error:', error);
+      res.status(500).json({ 
+        error: 'Failed to get user statistics',
+        message: error.message 
+      });
+    }
+  }
+
   // Get user's top tracks
   async getTopTracks(req, res) {
     try {
@@ -411,9 +455,16 @@ class ApiController {
   // Get currently playing track
   async getNowPlaying(req, res) {
     try {
-      const nowPlaying = await spotifyService.getNowPlaying(req.accessToken);
-      if (nowPlaying) {
-        res.json(nowPlaying);
+      const refreshToken = req.cookies.spotify_refresh_token;
+      const result = await spotifyService.getNowPlaying(req.accessToken, refreshToken);
+      
+      // Update cookies if tokens were refreshed
+      if (result.newTokens) {
+        this.updateTokenCookies(res, result.newTokens);
+      }
+      
+      if (result.data) {
+        res.json(result.data);
       } else {
         res.status(204).send();
       }
@@ -421,6 +472,131 @@ class ApiController {
       console.error('Get now playing error:', error);
       res.status(500).json({ 
         error: 'Failed to get currently playing track',
+        message: error.message 
+      });
+    }
+  }
+
+  // Helper method to update cookies if tokens were refreshed
+  updateTokenCookies(res, newTokens) {
+    if (newTokens) {
+      // Set new access token
+      res.setCookie('spotify_access_token', newTokens.access_token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: newTokens.expires_in * 1000
+      });
+
+      // Set new refresh token if provided
+      if (newTokens.refresh_token) {
+        res.setCookie('spotify_refresh_token', newTokens.refresh_token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+        });
+      }
+    }
+  }
+
+  // Pause playback
+  async pausePlayback(req, res) {
+    try {
+      const refreshToken = req.cookies.spotify_refresh_token;
+      const result = await spotifyService.pausePlayback(req.accessToken, refreshToken);
+      
+      // Update cookies if tokens were refreshed
+      if (result.newTokens) {
+        this.updateTokenCookies(res, result.newTokens);
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Pause playback error:', error);
+      res.status(500).json({ 
+        error: 'Failed to pause playback',
+        message: error.message 
+      });
+    }
+  }
+
+  // Resume playback
+  async resumePlayback(req, res) {
+    try {
+      const refreshToken = req.cookies.spotify_refresh_token;
+      const result = await spotifyService.resumePlayback(req.accessToken, refreshToken);
+      
+      // Update cookies if tokens were refreshed
+      if (result.newTokens) {
+        this.updateTokenCookies(res, result.newTokens);
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Resume playback error:', error);
+      res.status(500).json({ 
+        error: 'Failed to resume playback',
+        message: error.message 
+      });
+    }
+  }
+
+  // Skip to next track
+  async skipToNext(req, res) {
+    try {
+      const refreshToken = req.cookies.spotify_refresh_token;
+      const result = await spotifyService.skipToNext(req.accessToken, refreshToken);
+      
+      // Update cookies if tokens were refreshed
+      if (result.newTokens) {
+        this.updateTokenCookies(res, result.newTokens);
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Skip to next error:', error);
+      res.status(500).json({ 
+        error: 'Failed to skip to next track',
+        message: error.message 
+      });
+    }
+  }
+
+  // Skip to previous track
+  async skipToPrevious(req, res) {
+    try {
+      const refreshToken = req.cookies.spotify_refresh_token;
+      const result = await spotifyService.skipToPrevious(req.accessToken, refreshToken);
+      
+      // Update cookies if tokens were refreshed
+      if (result.newTokens) {
+        this.updateTokenCookies(res, result.newTokens);
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Skip to previous error:', error);
+      res.status(500).json({ 
+        error: 'Failed to skip to previous track',
+        message: error.message 
+      });
+    }
+  }
+
+  // Get recommendations
+  async getRecommendations(req, res) {
+    try {
+  console.log('Incoming recommendations query:', req.query);
+  const recommendations = await spotifyService.getRecommendations(req.accessToken, req.query);
+  console.log('Recommendations returned, tracks:', Array.isArray(recommendations.tracks) ? recommendations.tracks.length : 0);
+  // If the service returned no tracks, include a fallback flag so the frontend can show a message
+  if (!Array.isArray(recommendations.tracks) || recommendations.tracks.length === 0) {
+    return res.json({ ...recommendations, fallback: true });
+  }
+  res.json(recommendations);
+    } catch (error) {
+      console.error('Get recommendations error:', error);
+      res.status(500).json({ 
+        error: 'Failed to get recommendations',
         message: error.message 
       });
     }

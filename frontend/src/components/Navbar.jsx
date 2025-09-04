@@ -41,7 +41,7 @@ const Navbar = () => {
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: Home },
     { name: 'Playlists', href: '/playlists', icon: ListMusic },
-    { name: 'Análises', href: '/analytics', icon: BarChart3 }
+    { name: 'Descobertas', href: '/discoveries', icon: Search }
   ]
 
   const isActive = (path) => location.pathname === path

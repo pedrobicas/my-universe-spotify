@@ -9,6 +9,11 @@ router.use(authenticateToken);
 
 // User profile
 router.get('/me', apiController.getMe);
+router.get('/me/saved-tracks', apiController.getSavedTracks);
+router.get('/me/followed-artists', apiController.getFollowedArtists);
+router.get('/me/stats', apiController.getUserStats);
+router.get('/me/saved-tracks', apiController.getSavedTracks);
+router.get('/me/followed-artists', apiController.getFollowedArtists);
 
 // Top content
 router.get('/top/tracks', apiController.getTopTracks);
@@ -33,6 +38,12 @@ router.get('/recently-played', apiController.getRecentlyPlayed);
 // Currently playing
 router.get('/now-playing', apiController.getNowPlaying);
 
+// Playback controls
+router.put('/player/pause', apiController.pausePlayback);
+router.put('/player/play', apiController.resumePlayback);
+router.post('/player/next', apiController.skipToNext);
+router.post('/player/previous', apiController.skipToPrevious);
+
 // Search
 router.get('/search/tracks', apiController.searchTracks);
 router.get('/search/playlists', apiController.searchPlaylists);
@@ -42,5 +53,8 @@ router.get('/tracks/:trackId', apiController.getTrack);
 
 // Playlist analytics
 router.get('/playlists/:playlistId/analytics', apiController.getPlaylistAnalytics);
+
+// Recommendations
+router.get('/recommendations', apiController.getRecommendations);
 
 module.exports = router;

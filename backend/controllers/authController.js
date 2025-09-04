@@ -13,7 +13,9 @@ class AuthController {
         'playlist-modify-private',
         'user-read-recently-played',
         'user-library-read',
-        'user-read-playback-state'
+        'user-read-playback-state',
+        'user-modify-playback-state',
+        'user-follow-read'
       ].join(' ');
 
       const authUrl = `https://accounts.spotify.com/authorize?${new URLSearchParams({
