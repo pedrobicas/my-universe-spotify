@@ -154,6 +154,13 @@ export const spotifyAPI = {
   // Followed artists
   getFollowedArtists: (limit = 50) => 
     api.get(`/api/me/following/artists?limit=${limit}`),
+
+  // Playback controls
+  startPlayback: (options) => 
+    api.put('/api/player/start', options),
+  
+  getDevices: () => 
+    api.get('/api/player/devices'),
 }
 
 export default api

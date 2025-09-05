@@ -582,6 +582,72 @@ class ApiController {
     }
   }
 
+  // Start playback
+  async startPlayback(req, res) {
+    try {
+      const refreshToken = req.refreshToken;
+      const result = await spotifyService.startPlayback(req.accessToken, refreshToken, req.body);
+      
+      // Update tokens if new ones were issued
+      if (result.newTokens) {
+        res.cookie('accessToken', result.newTokens.access_token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          maxAge: result.newTokens.expires_in * 1000
+        });
+        
+        if (result.newTokens.refresh_token) {
+          res.cookie('refreshToken', result.newTokens.refresh_token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+          });
+        }
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Start playback error:', error);
+      res.status(500).json({ 
+        error: 'Failed to start playback',
+        message: error.message 
+      });
+    }
+  }
+
+  // Get available devices
+  async getDevices(req, res) {
+    try {
+      const refreshToken = req.refreshToken;
+      const result = await spotifyService.getDevices(req.accessToken, refreshToken);
+      
+      // Update tokens if new ones were issued
+      if (result.newTokens) {
+        res.cookie('accessToken', result.newTokens.access_token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          maxAge: result.newTokens.expires_in * 1000
+        });
+        
+        if (result.newTokens.refresh_token) {
+          res.cookie('refreshToken', result.newTokens.refresh_token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+          });
+        }
+      }
+      
+      res.json(result.devices || result);
+    } catch (error) {
+      console.error('Get devices error:', error);
+      res.status(500).json({ 
+        error: 'Failed to get devices',
+        message: error.message 
+      });
+    }
+  }
+
   // Get recommendations
   async getRecommendations(req, res) {
     try {

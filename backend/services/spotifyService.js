@@ -640,6 +640,74 @@ class SpotifyService {
     }
   }
 
+  // Start playback with specific tracks
+  async startPlayback(accessToken, refreshToken, options = {}) {
+    try {
+      const body = {};
+      
+      // Play specific tracks
+      if (options.trackUris && options.trackUris.length > 0) {
+        body.uris = options.trackUris;
+        if (options.offset !== undefined) {
+          body.offset = { position: options.offset };
+        }
+      }
+      
+      // Play specific playlist
+      if (options.contextUri) {
+        body.context_uri = options.contextUri;
+        if (options.offset !== undefined) {
+          body.offset = { position: options.offset };
+        }
+      }
+      
+      // Specify device (optional)
+      let url = `${this.baseURL}/me/player/play`;
+      if (options.deviceId) {
+        url += `?device_id=${options.deviceId}`;
+      }
+
+      const result = await this.makeAuthenticatedRequest(
+        'PUT',
+        url,
+        body,
+        accessToken,
+        refreshToken
+      );
+      
+      // If we got new tokens, return them with the result
+      if (result.newTokens) {
+        return { success: true, newTokens: result.newTokens };
+      }
+      
+      return { success: true };
+    } catch (error) {
+      throw this.handleSpotifyError(error);
+    }
+  }
+
+  // Get available devices
+  async getDevices(accessToken, refreshToken) {
+    try {
+      const result = await this.makeAuthenticatedRequest(
+        'GET',
+        `${this.baseURL}/me/player/devices`,
+        {},
+        accessToken,
+        refreshToken
+      );
+      
+      // If we got new tokens, return them with the result
+      if (result.newTokens) {
+        return { devices: result.data.devices, newTokens: result.newTokens };
+      }
+      
+      return result.data;
+    } catch (error) {
+      throw this.handleSpotifyError(error);
+    }
+  }
+
   // Helper method to format duration
   formatDuration(ms) {
     if (!ms) return '0m';

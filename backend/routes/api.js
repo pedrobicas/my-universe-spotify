@@ -41,8 +41,10 @@ router.get('/now-playing', apiController.getNowPlaying);
 // Playback controls
 router.put('/player/pause', apiController.pausePlayback);
 router.put('/player/play', apiController.resumePlayback);
+router.put('/player/start', apiController.startPlayback);
 router.post('/player/next', apiController.skipToNext);
 router.post('/player/previous', apiController.skipToPrevious);
+router.get('/player/devices', apiController.getDevices);
 
 // Search
 router.get('/search/tracks', apiController.searchTracks);
