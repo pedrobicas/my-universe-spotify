@@ -374,32 +374,38 @@ const Playlists = () => {
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white">
       {/* Header */}
       <div className="bg-black/20 backdrop-blur-sm border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-green-400 to-green-500 bg-clip-text text-transparent">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex-1">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-green-400 to-green-500 bg-clip-text text-transparent">
                 Suas Playlists
               </h1>
-              <p className="text-gray-300 text-lg mt-3">
+              <p className="text-gray-300 text-base sm:text-lg mt-2 sm:mt-3">
                 Gerencie e descubra suas coleções musicais
               </p>
             </div>
             
-            <div className="flex items-center space-x-4">
+            <div className="flex flex-col xs:flex-row items-stretch xs:items-center gap-3 xs:gap-4">
               <Button
                 onClick={loadPlaylists}
-                className="bg-white/10 hover:bg-white/20 text-white border border-white/20"
+                className="group relative px-4 sm:px-6 py-2.5 sm:py-3 bg-slate-800/50 hover:bg-slate-700/60 text-white border-2 border-slate-600/30 hover:border-slate-500/50 rounded-xl backdrop-blur-md transition-all duration-300 shadow-lg hover:shadow-2xl hover:shadow-slate-500/20 overflow-hidden"
               >
-                <RefreshCw className="w-5 h-5 mr-2" />
-                Atualizar
+                <div className="absolute inset-0 bg-gradient-to-r from-slate-600/20 to-slate-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="relative flex items-center justify-center">
+                  <RefreshCw className="w-4 h-4 mr-2 group-hover:rotate-180 transition-transform duration-500" />
+                  <span className="font-medium text-sm sm:text-base">Atualizar</span>
+                </div>
               </Button>
               
             <Button
               onClick={() => setShowCreateModal(true)}
-                             className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800"
+              className="group relative px-6 sm:px-8 py-2.5 sm:py-3 bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 hover:from-emerald-600 hover:via-green-600 hover:to-teal-600 text-white rounded-xl shadow-xl hover:shadow-2xl hover:shadow-green-500/40 transition-all duration-300 border-2 border-green-400/30 hover:border-green-300/50 overflow-hidden font-semibold"
             >
-              <Plus className="w-5 h-5 mr-2" />
-              Nova Playlist
+              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative flex items-center justify-center">
+                <Plus className="w-4 sm:w-5 h-4 sm:h-5 mr-2 group-hover:rotate-90 transition-transform duration-300" />
+                <span className="text-sm sm:text-base">Nova Playlist</span>
+              </div>
             </Button>
             </div>
           </div>
@@ -407,7 +413,7 @@ const Playlists = () => {
       </div>
 
       {/* Filtros */}
-      <div className="max-w-7xl mx-auto px-6 py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
         <PlaylistFilters
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
@@ -425,41 +431,44 @@ const Playlists = () => {
             </span>
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center bg-gradient-to-r from-slate-800/80 to-slate-900/80 backdrop-blur-xl border-2 border-slate-600/30 rounded-2xl p-2 shadow-2xl shadow-slate-900/30">
             <button
               onClick={() => setViewMode('grid')}
-              className={`p-2 rounded-lg transition-all duration-200 ${
+              className={`group relative p-3 rounded-xl transition-all duration-300 ${
                 viewMode === 'grid' 
-                  ? 'bg-green-600 text-white' 
-                  : 'text-gray-400 hover:text-white hover:bg-white/10'
+                  ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-lg shadow-green-500/40' 
+                  : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
               }`}
               title="Visualização em grade"
             >
-              <Grid3X3 className="w-5 h-5" />
+              <div className={`absolute inset-0 rounded-xl bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${viewMode === 'grid' ? 'opacity-30' : ''}`}></div>
+              <Grid3X3 className="w-5 h-5 relative z-10" />
             </button>
             
             <button
               onClick={() => setViewMode('list')}
-              className={`p-2 rounded-lg transition-all duration-200 ${
+              className={`group relative p-3 rounded-xl transition-all duration-300 ${
                 viewMode === 'list' 
-                  ? 'bg-green-600 text-white' 
-                  : 'text-gray-400 hover:text-white hover:bg-white/10'
+                  ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-lg shadow-green-500/40' 
+                  : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
               }`}
               title="Visualização em lista"
             >
-              <List className="w-5 h-5" />
+              <div className={`absolute inset-0 rounded-xl bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${viewMode === 'list' ? 'opacity-30' : ''}`}></div>
+              <List className="w-5 h-5 relative z-10" />
             </button>
             
             <button
               onClick={() => setViewMode('compact')}
-              className={`p-2 rounded-lg transition-all duration-200 ${
+              className={`group relative p-3 rounded-xl transition-all duration-300 ${
                 viewMode === 'compact' 
-                  ? 'bg-green-600 text-white' 
-                  : 'text-gray-400 hover:text-white hover:bg-white/10'
+                  ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-lg shadow-green-500/40' 
+                  : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
               }`}
               title="Visualização compacta"
             >
-              <BarChart3 className="w-5 h-5" />
+              <div className={`absolute inset-0 rounded-xl bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${viewMode === 'compact' ? 'opacity-30' : ''}`}></div>
+              <BarChart3 className="w-5 h-5 relative z-10" />
             </button>
           </div>
         </div>
@@ -480,10 +489,14 @@ const Playlists = () => {
             {!searchTerm && Object.values(filters).every(f => f === 'all' || f === '') && (
               <Button
                 onClick={() => setShowCreateModal(true)}
-                className="bg-green-600 hover:bg-green-700 text-lg px-8 py-4"
+                className="group relative px-10 py-5 bg-gradient-to-r from-purple-600 via-pink-600 to-red-500 hover:from-purple-700 hover:via-pink-700 hover:to-red-600 text-white text-lg font-bold rounded-2xl shadow-2xl hover:shadow-3xl hover:shadow-pink-500/50 transition-all duration-500 border-2 border-pink-400/40 hover:border-pink-300/60 overflow-hidden"
               >
-                <Plus className="w-6 h-6 mr-3" />
-                Criar Primeira Playlist
+                <div className="absolute inset-0 bg-gradient-to-r from-white/30 via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="absolute inset-0 bg-gradient-to-45 from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 animate-pulse"></div>
+                <div className="relative flex items-center">
+                  <Plus className="w-6 h-6 mr-3 group-hover:rotate-180 transition-transform duration-500" />
+                  <span>Criar Primeira Playlist</span>
+                </div>
               </Button>
             )}
           </div>

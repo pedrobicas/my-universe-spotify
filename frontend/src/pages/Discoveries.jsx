@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
+import { useMusic } from '../contexts/MusicContext';
 import { spotifyAPI } from '../services/api';
 import { 
   Compass, MapPin, Sun, Moon, CloudRain, Zap, 
@@ -7,13 +8,14 @@ import {
   Globe, Music, Shuffle, Play, Plus, Star,
   Clock, Headphones, Radio, Disc3, Volume2,
   Search, Filter, Download, Share, Sparkles,
-  Mountain, Waves, Wind, Flame, Snowflake
+  Mountain, Waves, Wind, Flame, Snowflake, Pause
 } from 'lucide-react';
 import Card from '../components/Card';
 import Loading from '../components/Loading';
 
 const Discoveries = () => {
   const { user } = useAuth();
+  const { playTrack, currentTrack, isPlaying } = useMusic();
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('mood-generator');
   const [recommendations, setRecommendations] = useState([]);
@@ -319,6 +321,28 @@ const Discoveries = () => {
     }
   };
 
+  const handlePlayTrack = async (track, trackList = [], index = 0) => {
+    try {
+      await playTrack(track, trackList, index);
+    } catch (error) {
+      console.error('Erro ao reproduzir música:', error);
+      alert('Erro ao reproduzir música. Verifique se você tem o Spotify aberto e um dispositivo ativo.');
+    }
+  };
+
+  const handlePlayPlaylist = async (playlist) => {
+    try {
+      if (!playlist?.tracks || playlist.tracks.length === 0) {
+        alert('Playlist vazia');
+        return;
+      }
+      await playTrack(playlist.tracks[0], playlist.tracks, 0);
+    } catch (error) {
+      console.error('Erro ao reproduzir playlist:', error);
+      alert('Erro ao reproduzir playlist. Verifique se você tem o Spotify aberto e um dispositivo ativo.');
+    }
+  };
+
   const savePlaylistToSpotify = async (playlist) => {
     try {
       const trackUris = playlist.tracks.map(track => track.uri);
@@ -412,6 +436,17 @@ const Discoveries = () => {
 
         {/* Conteúdo das Tabs */}
         <div className="space-y-8">
+          {/* Mensagem de Fallback Global */}
+          {fallbackMessage && (
+            <div className="bg-yellow-500/20 border border-yellow-500/30 text-yellow-300 p-4 rounded-lg">
+              <div className="flex items-center space-x-2">
+                <Sparkles className="w-5 h-5" />
+                <span className="font-medium">Modo Adaptativo:</span>
+                <span>{fallbackMessage}</span>
+              </div>
+            </div>
+          )}
+
           {/* Gerador por Clima/Mood */}
           {activeTab === 'mood-generator' && (
             <div className="space-y-8">
@@ -474,15 +509,35 @@ const Discoveries = () => {
                       <h3 className="text-xl font-bold">{generatedPlaylist.name}</h3>
                       <p className="text-gray-400">{generatedPlaylist.tracks.length} músicas • {formatDuration(generatedPlaylist.duration)}</p>
                     </div>
-                    <div className="flex space-x-3">
+                    <div className="flex flex-wrap gap-3">
                       <button
-                        onClick={() => savePlaylistToSpotify(generatedPlaylist)}
+                        onClick={() => handlePlayPlaylist(generatedPlaylist)}
                         className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
                       >
-                        <Plus className="w-4 h-4" />
-                        <span>Salvar no Spotify</span>
+                        <Play className="w-4 h-4" />
+                        <span>Reproduzir</span>
                       </button>
-                      <button className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                      
+                      <button
+                        onClick={() => {
+                          const shuffledTracks = [...generatedPlaylist.tracks].sort(() => Math.random() - 0.5);
+                          handlePlayTrack(shuffledTracks[0], shuffledTracks, 0);
+                        }}
+                        className="flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors"
+                      >
+                        <Shuffle className="w-4 h-4" />
+                        <span>Shuffle</span>
+                      </button>
+                      
+                      <button
+                        onClick={() => savePlaylistToSpotify(generatedPlaylist)}
+                        className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>Salvar</span>
+                      </button>
+                      
+                      <button className="flex items-center space-x-2 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors">
                         <Share className="w-4 h-4" />
                         <span>Compartilhar</span>
                       </button>
@@ -504,8 +559,15 @@ const Discoveries = () => {
                             {track.artists.map(artist => artist.name).join(', ')}
                           </p>
                         </div>
-                        <button className="p-2 text-gray-400 hover:text-white transition-colors">
-                          <Play className="w-4 h-4" />
+                        <button 
+                          onClick={() => handlePlayTrack(track, generatedPlaylist.tracks, index)}
+                          className="p-2 text-gray-400 hover:text-white transition-colors"
+                        >
+                          {currentTrack?.id === track.id && isPlaying ? (
+                            <Pause className="w-4 h-4" />
+                          ) : (
+                            <Play className="w-4 h-4" />
+                          )}
                         </button>
                       </div>
                     ))}
@@ -538,6 +600,26 @@ const Discoveries = () => {
                 </div>
               </div>
 
+              {timeBasedRecs.length > 0 && (
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-gray-400">{timeBasedRecs.length} recomendações para agora</span>
+                  <button
+                    onClick={() => handlePlayTrack(timeBasedRecs[0], timeBasedRecs, 0)}
+                    className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
+                  >
+                    <Play className="w-4 h-4" />
+                    <span>Reproduzir Playlist do Horário</span>
+                  </button>
+                </div>
+              )}
+
+              {timeBasedRecs.length === 0 && !loading && (
+                <div className="text-center py-8 text-gray-400">
+                  <Clock className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                  <p>Carregando recomendações para este horário...</p>
+                </div>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {timeBasedRecs.map((track, index) => (
                   <div key={track.id} className="flex items-center space-x-4 p-4 bg-black/20 rounded-lg hover:bg-black/30 transition-colors">
@@ -553,8 +635,15 @@ const Discoveries = () => {
                       </p>
                       <p className="text-gray-500 text-xs">{track.album.name}</p>
                     </div>
-                    <button className="p-2 text-gray-400 hover:text-white transition-colors">
-                      <Play className="w-5 h-5" />
+                    <button 
+                      onClick={() => handlePlayTrack(track, timeBasedRecs, index)}
+                      className="p-2 text-gray-400 hover:text-white transition-colors"
+                    >
+                      {currentTrack?.id === track.id && isPlaying ? (
+                        <Pause className="w-5 h-5" />
+                      ) : (
+                        <Play className="w-5 h-5" />
+                      )}
                     </button>
                   </div>
                 ))}
@@ -594,9 +683,18 @@ const Discoveries = () => {
               {/* Resultado da exploração */}
               {similarTracks.length > 0 && (
                 <Card>
-                  <h3 className="text-xl font-bold mb-4">
-                    Explorando: {selectedGenreMix[0]?.name}
-                  </h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-bold">
+                      Explorando: {selectedGenreMix[0]?.name}
+                    </h3>
+                    <button
+                      onClick={() => handlePlayTrack(similarTracks[0], similarTracks, 0)}
+                      className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
+                    >
+                      <Play className="w-4 h-4" />
+                      <span>Reproduzir Mix</span>
+                    </button>
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {similarTracks.map((track) => (
                       <div key={track.id} className="flex items-center space-x-4 p-4 bg-black/20 rounded-lg hover:bg-black/30 transition-colors">
@@ -611,8 +709,15 @@ const Discoveries = () => {
                             {track.artists.map(artist => artist.name).join(', ')}
                           </p>
                         </div>
-                        <button className="p-2 text-gray-400 hover:text-white transition-colors">
-                          <Play className="w-5 h-5" />
+                        <button 
+                          onClick={() => handlePlayTrack(track, similarTracks, similarTracks.indexOf(track))}
+                          className="p-2 text-gray-400 hover:text-white transition-colors"
+                        >
+                          {currentTrack?.id === track.id && isPlaying ? (
+                            <Pause className="w-5 h-5" />
+                          ) : (
+                            <Play className="w-5 h-5" />
+                          )}
                         </button>
                       </div>
                     ))}
@@ -651,7 +756,16 @@ const Discoveries = () => {
               {/* Música mundial encontrada */}
               {worldMusic.length > 0 && (
                 <Card>
-                  <h3 className="text-xl font-bold mb-4">Descobertas Musicais</h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-bold">Descobertas Musicais</h3>
+                    <button
+                      onClick={() => handlePlayTrack(worldMusic[0], worldMusic, 0)}
+                      className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
+                    >
+                      <Play className="w-4 h-4" />
+                      <span>Reproduzir Todos</span>
+                    </button>
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {worldMusic.map((track) => (
                       <div key={track.id} className="flex items-center space-x-4 p-4 bg-black/20 rounded-lg hover:bg-black/30 transition-colors">
@@ -666,8 +780,15 @@ const Discoveries = () => {
                             {track.artists.map(artist => artist.name).join(', ')}
                           </p>
                         </div>
-                        <button className="p-2 text-gray-400 hover:text-white transition-colors">
-                          <Play className="w-5 h-5" />
+                        <button 
+                          onClick={() => handlePlayTrack(track, worldMusic, worldMusic.indexOf(track))}
+                          className="p-2 text-gray-400 hover:text-white transition-colors"
+                        >
+                          {currentTrack?.id === track.id && isPlaying ? (
+                            <Pause className="w-5 h-5" />
+                          ) : (
+                            <Play className="w-5 h-5" />
+                          )}
                         </button>
                       </div>
                     ))}
@@ -695,6 +816,26 @@ const Discoveries = () => {
                 </div>
               </div>
 
+              {emergingArtists.length > 0 && (
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-gray-400">{emergingArtists.length} artistas encontrados</span>
+                  <button
+                    onClick={() => handlePlayTrack(emergingArtists[0], emergingArtists, 0)}
+                    className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
+                  >
+                    <Play className="w-4 h-4" />
+                    <span>Reproduzir Todos</span>
+                  </button>
+                </div>
+              )}
+
+              {emergingArtists.length === 0 && !loading && (
+                <div className="text-center py-8 text-gray-400">
+                  <TrendingUp className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                  <p>Carregando artistas emergentes...</p>
+                </div>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {emergingArtists.map((track) => (
                   <div key={track.id} className="flex items-center space-x-4 p-4 bg-black/20 rounded-lg hover:bg-black/30 transition-colors">
@@ -717,8 +858,15 @@ const Discoveries = () => {
                         </span>
                       </div>
                     </div>
-                    <button className="p-2 text-gray-400 hover:text-white transition-colors">
-                      <Play className="w-5 h-5" />
+                    <button 
+                      onClick={() => handlePlayTrack(track, emergingArtists, emergingArtists.indexOf(track))}
+                      className="p-2 text-gray-400 hover:text-white transition-colors"
+                    >
+                      {currentTrack?.id === track.id && isPlaying ? (
+                        <Pause className="w-5 h-5" />
+                      ) : (
+                        <Play className="w-5 h-5" />
+                      )}
                     </button>
                   </div>
                 ))}

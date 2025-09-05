@@ -272,9 +272,10 @@ const PlaylistEditModal = ({
           </h2>
           <button
             onClick={onClose}
-            className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+            className="group relative p-3 text-gray-400 hover:text-white bg-slate-800/50 hover:bg-slate-700/60 rounded-xl transition-all duration-300 border-2 border-slate-600/30 hover:border-slate-500/50 shadow-lg hover:shadow-xl hover:shadow-slate-500/30"
           >
-            <X className="w-6 h-6" />
+            <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-slate-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <X className="w-5 h-5 relative z-10 group-hover:rotate-90 transition-transform duration-300" />
           </button>
         </div>
 
@@ -288,14 +289,15 @@ const PlaylistEditModal = ({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center space-x-2 px-6 py-4 text-sm font-medium transition-colors ${
+              className={`group relative flex items-center space-x-2 px-8 py-4 text-sm font-semibold transition-all duration-300 overflow-hidden ${
                 activeTab === tab.id
-                  ? 'text-green-400 border-b-2 border-green-400'
-                  : 'text-gray-400 hover:text-white'
+                  ? 'text-emerald-300 border-b-3 border-emerald-400 bg-gradient-to-r from-emerald-500/20 to-green-500/20 shadow-lg shadow-emerald-500/20' 
+                  : 'text-gray-400 hover:text-white hover:bg-gradient-to-r hover:from-slate-700/30 hover:to-slate-600/30'
               }`}
             >
-              <tab.icon className="w-4 h-4" />
-              <span>{tab.label}</span>
+              <div className={`absolute inset-0 bg-gradient-to-r from-emerald-400/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${activeTab === tab.id ? 'opacity-50' : ''}`}></div>
+              <tab.icon className={`w-4 h-4 relative z-10 transition-transform duration-300 ${activeTab === tab.id ? 'scale-110' : 'group-hover:scale-105'}`} />
+              <span className="relative z-10">{tab.label}</span>
             </button>
           ))}
         </div>
@@ -385,9 +387,10 @@ const PlaylistEditModal = ({
                   <Button
                     onClick={handleSearch}
                     disabled={!searchQuery.trim() || isSearching}
-                    className="px-6 py-3 bg-green-600 hover:bg-green-700 disabled:opacity-50"
+                    className="group relative px-8 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 disabled:from-gray-600 disabled:to-gray-700 text-white font-semibold rounded-xl shadow-xl hover:shadow-2xl hover:shadow-cyan-500/40 disabled:shadow-none transition-all duration-300 border-2 border-cyan-400/40 hover:border-cyan-300/60 disabled:border-gray-500/30 overflow-hidden"
                   >
-                    {isSearching ? 'Buscando...' : 'Buscar'}
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <span className="relative z-10">{isSearching ? 'Buscando...' : 'Buscar'}</span>
                   </Button>
                 </div>
 
@@ -421,10 +424,13 @@ const PlaylistEditModal = ({
                         </div>
                         <Button
                           onClick={() => handleAddTrack(track)}
-                          className="px-3 py-1 bg-green-600 hover:bg-green-700 text-sm transition-colors"
+                          className="group relative px-4 py-2 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white text-sm font-semibold rounded-lg shadow-lg hover:shadow-xl hover:shadow-green-500/40 transition-all duration-300 border border-green-400/30 hover:border-green-300/50 overflow-hidden"
                         >
-                          <Plus className="w-4 h-4 mr-1" />
-                          Adicionar
+                          <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                          <div className="relative flex items-center">
+                            <Plus className="w-3 h-3 mr-1 group-hover:rotate-90 transition-transform duration-300" />
+                            <span>Adicionar</span>
+                          </div>
                         </Button>
                       </div>
                     ))}
@@ -558,10 +564,13 @@ const PlaylistEditModal = ({
             {playlist && (
               <Button
                 onClick={() => onDelete?.(playlist.id)}
-                className="px-6 py-3 bg-red-600 hover:bg-red-700"
+                className="group relative px-8 py-3 bg-gradient-to-r from-red-600 via-red-500 to-pink-600 hover:from-red-700 hover:via-red-600 hover:to-pink-700 text-white font-bold rounded-xl shadow-xl hover:shadow-2xl hover:shadow-red-500/50 transition-all duration-300 border-2 border-red-400/40 hover:border-red-300/60 overflow-hidden"
               >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Excluir Playlist
+                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="relative flex items-center">
+                  <Trash2 className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
+                  <span>Excluir Playlist</span>
+                </div>
               </Button>
             )}
           </div>
@@ -569,14 +578,15 @@ const PlaylistEditModal = ({
           <div className="flex space-x-3">
             <Button
               onClick={onClose}
-              className="px-6 py-3 bg-gray-700 hover:bg-gray-600"
+              className="group relative px-8 py-3 bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:shadow-slate-500/30 transition-all duration-300 border-2 border-slate-400/30 hover:border-slate-300/50 overflow-hidden"
             >
-              Cancelar
+              <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <span className="relative z-10">Cancelar</span>
             </Button>
             <Button
               onClick={handleSave}
               disabled={!formData.name.trim()}
-              className="px-6 py-3 bg-green-600 hover:bg-green-700 disabled:opacity-50"
+              className="group relative px-8 py-3 bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 hover:from-emerald-600 hover:via-green-600 hover:to-teal-600 disabled:from-gray-600 disabled:to-gray-700 text-white font-bold rounded-xl shadow-xl hover:shadow-2xl hover:shadow-green-500/50 disabled:shadow-none transition-all duration-300 border-2 border-green-400/40 hover:border-green-300/60 disabled:border-gray-500/30 overflow-hidden disabled:cursor-not-allowed"
             >
               <Save className="w-4 h-4 mr-2" />
               {playlist ? 'Salvar Alterações' : 'Criar Playlist'}

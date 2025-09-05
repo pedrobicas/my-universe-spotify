@@ -499,7 +499,7 @@ const Dashboard = () => {
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-white mb-2">
-                  Olá, {user?.display_name || 'Músico'}! 🎵
+                  Olá, {user?.display_name || 'Músico'}!
                 </h1>
               </div>
             </div>

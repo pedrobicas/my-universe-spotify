@@ -295,7 +295,7 @@ const Profile = () => {
               
               <div>
                 <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">
-                  {user?.display_name || 'Usuário'} 👤
+                  {user?.display_name || 'Usuário'}
                 </h1>
                 <div className="flex flex-wrap items-center gap-3">
                   <span className="bg-green-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
