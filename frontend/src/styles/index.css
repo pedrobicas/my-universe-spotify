@@ -14,6 +14,60 @@
   body {
     @apply bg-gradient-to-br from-black via-gray-900 to-black text-white;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    transition: font-size 0.3s ease, background-color 0.3s ease;
+  }
+
+  /* Configurações de fonte dinâmica */
+  html {
+    font-size: 16px; /* Padrão */
+  }
+
+  /* View compacta */
+  body.compact-view {
+    line-height: 1.3;
+  }
+  
+  body.compact-view .space-y-4 > * + * {
+    margin-top: 0.75rem !important;
+  }
+  
+  body.compact-view .p-4 {
+    padding: 0.75rem !important;
+  }
+  
+  body.compact-view .p-6 {
+    padding: 1rem !important;
+  }
+
+  /* Modo sem animações */
+  body.no-animations *,
+  body.no-animations *::before,
+  body.no-animations *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Modo alto contraste */
+  body.high-contrast {
+    filter: contrast(1.5) saturate(1.2);
+  }
+  
+  body.high-contrast .bg-gray-800 {
+    background-color: #000000 !important;
+  }
+  
+  body.high-contrast .bg-gray-700 {
+    background-color: #1a1a1a !important;
+  }
+  
+  body.high-contrast .text-gray-400 {
+    color: #ffffff !important;
+  }
+  
+  body.high-contrast .border-gray-600 {
+    border-color: #ffffff !important;
   }
 
   /* Scrollbar personalizada */
