@@ -7,9 +7,6 @@
 
 /* Estilos base personalizados */
 @layer base {
-  * {
-    /* Removido @apply border-border; pois a classe não existe */
-  }
   
   body {
     @apply bg-gradient-to-br from-black via-gray-900 to-black text-white;
