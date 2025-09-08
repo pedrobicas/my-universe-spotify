@@ -133,12 +133,10 @@ const Settings = () => {
         setError('Erro ao importar configurações');
       }
     }
-    // Limpar o input
     event.target.value = '';
   };
 
   const handleDeleteAccount = () => {
-    // Implementar lógica de exclusão de conta
     alert('Funcionalidade de exclusão de conta não implementada nesta demo');
     setShowDeleteConfirm(false);
   };

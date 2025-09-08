@@ -41,7 +41,6 @@ const PlaylistDetail = ({ playlist, onBack, onEdit, onDelete }) => {
   const loadPlaylistTracks = async () => {
     try {
       setLoading(true)
-      // Buscar tracks da playlist
       const response = await spotifyAPI.getPlaylistTracks(playlist.id)
       setTracks(response.data.items || [])
     } catch (error) {
@@ -71,9 +70,7 @@ const PlaylistDetail = ({ playlist, onBack, onEdit, onDelete }) => {
   const handleAddTrack = async (track) => {
     try {
       await spotifyAPI.addTracksToPlaylist(playlist.id, [`spotify:track:${track.id}`])
-      // Recarregar tracks da playlist
       await loadPlaylistTracks()
-      // Limpar busca
       setSearchResults([])
       setAddTrackQuery('')
       setShowAddTracks(false)
@@ -86,7 +83,6 @@ const PlaylistDetail = ({ playlist, onBack, onEdit, onDelete }) => {
   const handleRemoveTrack = async (trackId) => {
     try {
       await spotifyAPI.removeTracksFromPlaylist(playlist.id, [`spotify:track:${trackId}`])
-      // Recarregar tracks da playlist
       await loadPlaylistTracks()
     } catch (error) {
       console.error('Erro ao remover track:', error)

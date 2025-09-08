@@ -1,7 +1,6 @@
 const axios = require('axios');
 
 class AuthController {
-  // Redirect to Spotify OAuth
   async login(req, res) {
     try {
       const scopes = [
@@ -36,7 +35,6 @@ class AuthController {
     }
   }
 
-  // Handle OAuth callback
   async callback(req, res) {
     try {
       const { code } = req.query;
@@ -48,7 +46,6 @@ class AuthController {
         });
       }
 
-      // Exchange code for tokens
               const tokenResponse = await axios.post('https://accounts.spotify.com/api/token', 
           new URLSearchParams({
             grant_type: 'authorization_code',
@@ -64,7 +61,6 @@ class AuthController {
       );
 
       const { access_token, refresh_token, expires_in } = tokenResponse.data;
-      // Logar os scopes retornados pelo Spotify para depuração
       if (tokenResponse.data.scope) {
         console.log('Scopes retornados pelo Spotify:', tokenResponse.data.scope);
       } else {
@@ -73,22 +69,18 @@ class AuthController {
 
       console.log('Setting cookies with tokens...');
       
-      // Set tokens in httpOnly cookies
       res.setCookie('spotify_access_token', access_token, {
         httpOnly: true,
-        secure: false, // Force false for development
-        maxAge: expires_in * 1000 // Convert seconds to milliseconds
+        secure: false,
+        maxAge: expires_in * 1000
       });
 
       res.setCookie('spotify_refresh_token', refresh_token, {
         httpOnly: true,
-        secure: false, // Force false for development
-        maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+        secure: false,
+        maxAge: 30 * 24 * 60 * 60 * 1000
       });
       
-      console.log('Cookies set successfully');
-
-      // Redirect to frontend dashboard
       res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
     } catch (error) {
       console.error('Callback error:', error);
@@ -97,12 +89,10 @@ class AuthController {
         console.error('Spotify error response:', error.response.data);
       }
 
-      // Redirect to frontend with error
       res.redirect(`${process.env.FRONTEND_URL}/login?error=auth_failed`);
     }
   }
 
-  // Refresh access token
   async refreshToken(req, res) {
     try {
       const refreshToken = req.cookies.spotify_refresh_token;
@@ -129,7 +119,6 @@ class AuthController {
 
       const { access_token, refresh_token, expires_in } = tokenResponse.data;
 
-      // Set new tokens in cookies
       res.setCookie('spotify_access_token', access_token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -151,7 +140,6 @@ class AuthController {
     } catch (error) {
       console.error('Token refresh error:', error);
       
-      // Clear invalid tokens
       res.clearCookie('spotify_access_token');
       res.clearCookie('spotify_refresh_token');
       
@@ -162,10 +150,8 @@ class AuthController {
     }
   }
 
-  // Logout user
   async logout(req, res) {
     try {
-      // Clear all cookies
       res.clearCookie('spotify_access_token');
       res.clearCookie('spotify_refresh_token');
       
@@ -179,7 +165,6 @@ class AuthController {
     }
   }
 
-  // Check authentication status
   async checkAuth(req, res) {
     try {
       console.log('Checking auth... Cookies:', Object.keys(req.cookies));
@@ -195,7 +180,6 @@ class AuthController {
       
       console.log('Access token found, length:', accessToken.length);
 
-      // Verify token with Spotify
       const userResponse = await axios.get('https://api.spotify.com/v1/me', {
         headers: {
           'Authorization': `Bearer ${accessToken}`
@@ -210,7 +194,6 @@ class AuthController {
       console.error('Auth check error:', error);
       
       if (error.response && error.response.status === 401) {
-        // Token is invalid, clear cookies
         res.clearCookie('spotify_access_token');
         res.clearCookie('spotify_refresh_token');
         

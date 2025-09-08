@@ -87,7 +87,7 @@ const Profile = () => {
   };
 
   const calculateAccountInsights = (user, savedTracks, followedArtists) => {
-    const joinDate = new Date(2020, 0, 1); // Placeholder - Spotify doesn't provide join date
+    const joinDate = new Date(2020, 0, 1);
     const daysSinceJoin = Math.floor((new Date() - joinDate) / (1000 * 60 * 60 * 24));
     
     return {

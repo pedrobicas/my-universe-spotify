@@ -45,7 +45,6 @@ const NowPlaying = () => {
       } else {
         await api.put('/api/player/play');
       }
-      // Refresh track info after control action
       setTimeout(fetchNowPlaying, 500);
     } catch (error) {
       console.error('Error controlling playback:', error);
@@ -81,7 +80,7 @@ const NowPlaying = () => {
   useEffect(() => {
     if (user) {
       fetchNowPlaying();
-      fetchDevices(); // Fetch available devices
+      fetchDevices();
       const interval = setInterval(fetchNowPlaying, 3000);
       return () => clearInterval(interval);
     }
@@ -111,7 +110,6 @@ const NowPlaying = () => {
     setShowDevices(false);
   };
 
-  // Quando não há música tocando
   if (!track) {
     return (
       <>

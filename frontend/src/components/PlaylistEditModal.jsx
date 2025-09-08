@@ -35,7 +35,7 @@ const PlaylistEditModal = ({
   const [searchResults, setSearchResults] = useState([])
   const [isSearching, setIsSearching] = useState(false)
   const [selectedTracks, setSelectedTracks] = useState([])
-  const [activeTab, setActiveTab] = useState('details') // details, tracks, settings
+  const [activeTab, setActiveTab] = useState('details') 
 
   useEffect(() => {
     if (playlist && isOpen) {
@@ -46,12 +46,10 @@ const PlaylistEditModal = ({
         collaborative: playlist.collaborative || false
       })
       
-      // Carregar tracks da playlist se existir
       if (playlist.id) {
         loadPlaylistTracks(playlist.id)
       }
     } else if (!playlist && isOpen) {
-      // Resetar dados para nova playlist
       setFormData({
         name: '',
         description: '',
@@ -61,7 +59,6 @@ const PlaylistEditModal = ({
       setSelectedTracks([])
     }
     
-    // Limpar estados de busca quando abrir/fechar modal
     if (isOpen) {
       setSearchQuery('')
       setSearchResults([])
@@ -73,7 +70,6 @@ const PlaylistEditModal = ({
     try {
       console.log('Carregando tracks para playlist:', playlistId)
       
-      // Primeiro tentar usar os dados da playlist que já temos
       if (playlist.tracks?.items && playlist.tracks.items.length > 0) {
         console.log('Usando tracks existentes:', playlist.tracks.items.length)
         const tracks = playlist.tracks.items.map(item => item.track).filter(Boolean) || []
@@ -81,7 +77,6 @@ const PlaylistEditModal = ({
         return
       }
       
-      // Se não temos tracks na playlist, buscar via API
       console.log('Buscando tracks via API...')
       try {
         const response = await spotifyAPI.getPlaylistTracks(playlistId)
@@ -92,7 +87,6 @@ const PlaylistEditModal = ({
       } catch (error) {
         console.error('Erro ao buscar tracks via getPlaylistTracks:', error)
         
-        // Fallback: tentar buscar via getPlaylists
         console.log('Tentando fallback via getPlaylists...')
         try {
           const response = await spotifyAPI.getPlaylists(50)
@@ -130,11 +124,8 @@ const PlaylistEditModal = ({
     }
     
     try {
-      // Se playlist é null, estamos criando uma nova
-      // Se playlist existe, estamos editando
       const playlistId = playlist?.id || null
       
-      // Incluir tracks no dados a serem salvos
       const dataToSave = {
         ...formData,
         tracks: selectedTracks
@@ -174,14 +165,11 @@ const PlaylistEditModal = ({
     if (!selectedTracks.find(t => t.id === track.id)) {
       console.log('Track não encontrada na playlist, adicionando...')
       
-      // Adicionar ao estado local primeiro
       setSelectedTracks(prev => [...prev, track])
       
-      // Limpar resultados da busca após adicionar
       setSearchResults([])
       setSearchQuery('')
       
-      // Se estamos editando uma playlist existente, adicionar a track via API
       if (playlist?.id) {
         try {
           console.log('Adicionando track via API para playlist:', playlist.id)
@@ -190,7 +178,6 @@ const PlaylistEditModal = ({
           alert(`"${track.name}" adicionada à playlist com sucesso!`)
         } catch (error) {
           console.error('Erro ao adicionar track à playlist:', error)
-          // Remover a track do estado local se falhar na API
           setSelectedTracks(prev => prev.filter(t => t.id !== track.id))
           alert(`Erro ao adicionar "${track.name}" à playlist: ${error.message}`)
         }
@@ -206,12 +193,10 @@ const PlaylistEditModal = ({
 
   const handleRemoveTrack = async (trackId) => {
     try {
-      // Se estamos editando uma playlist existente, remover a track via API
       if (playlist?.id) {
         await spotifyAPI.removeTracksFromPlaylist(playlist.id, [`spotify:track:${trackId}`])
       }
       
-      // Remover do estado local
       setSelectedTracks(prev => prev.filter(t => t.id !== trackId))
     } catch (error) {
       console.error('Erro ao remover track da playlist:', error)
@@ -236,8 +221,6 @@ const PlaylistEditModal = ({
         const newTracks = [...selectedTracks]
         const [draggedTrack] = newTracks.splice(dragIndex, 1)
         newTracks.splice(dropIndex, 0, draggedTrack)
-        
-        // Se estamos editando uma playlist existente, reordenar via API
         if (playlist?.id) {
           await spotifyAPI.reorderPlaylistTracks(playlist.id, dragIndex, dropIndex)
         }

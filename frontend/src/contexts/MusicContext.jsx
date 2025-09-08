@@ -18,13 +18,11 @@ export const MusicProvider = ({ children }) => {
   const [devices, setDevices] = useState([]);
   const [selectedDevice, setSelectedDevice] = useState(null);
 
-  // Get available devices
   const fetchDevices = useCallback(async () => {
     try {
       const response = await spotifyAPI.getDevices();
       setDevices(response.data?.devices || []);
       
-      // Auto-select the active device if any
       const activeDevice = response.data?.devices?.find(device => device.is_active);
       if (activeDevice && !selectedDevice) {
         setSelectedDevice(activeDevice.id);
@@ -34,7 +32,6 @@ export const MusicProvider = ({ children }) => {
     }
   }, [selectedDevice]);
 
-  // Play a single track
   const playTrack = useCallback(async (track, queue = [track], startIndex = 0) => {
     try {
       const trackUris = queue.map(t => `spotify:track:${t.id}`);
@@ -61,16 +58,13 @@ export const MusicProvider = ({ children }) => {
     }
   }, [selectedDevice]);
 
-  // Play a playlist
   const playPlaylist = useCallback(async (playlist, startIndex = 0) => {
     try {
       let tracks = [];
       
-      // Get tracks from playlist
       if (playlist.tracks?.items) {
         tracks = playlist.tracks.items.map(item => item.track).filter(Boolean);
       } else {
-        // Fetch tracks if not available
         const response = await spotifyAPI.getPlaylistTracks(playlist.id);
         tracks = response.data.items?.map(item => item.track).filter(Boolean) || [];
       }
@@ -86,7 +80,6 @@ export const MusicProvider = ({ children }) => {
     }
   }, [playTrack]);
 
-  // Play by context URI (playlist/album)
   const playContext = useCallback(async (contextUri, startIndex = 0) => {
     try {
       const options = {
@@ -108,18 +101,14 @@ export const MusicProvider = ({ children }) => {
     }
   }, [selectedDevice]);
 
-  // Add track to queue
   const addToQueue = useCallback((track) => {
     setCurrentQueue(prev => [...prev, track]);
   }, []);
 
-  // Remove track from queue
   const removeFromQueue = useCallback((index) => {
     setCurrentQueue(prev => {
       const newQueue = [...prev];
       newQueue.splice(index, 1);
-      
-      // Adjust current index if needed
       if (index <= currentTrackIndex && currentTrackIndex > 0) {
         setCurrentTrackIndex(prev => prev - 1);
       }
@@ -128,7 +117,6 @@ export const MusicProvider = ({ children }) => {
     });
   }, [currentTrackIndex]);
 
-  // Clear queue
   const clearQueue = useCallback(() => {
     setCurrentQueue([]);
     setCurrentTrackIndex(0);
@@ -136,15 +124,12 @@ export const MusicProvider = ({ children }) => {
   }, []);
 
   const value = {
-    // State
     currentQueue,
     currentTrackIndex,
     currentTrack: currentQueue[currentTrackIndex] || null,
     isPlaying,
     devices,
     selectedDevice,
-    
-    // Actions
     playTrack,
     playPlaylist,
     playContext,

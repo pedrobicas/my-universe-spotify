@@ -18,9 +18,7 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null)
   const navigate = useNavigate()
 
-  // Check authentication status on mount
   useEffect(() => {
-    // Add a small delay to avoid immediate requests
     const timer = setTimeout(() => {
       checkAuth()
     }, 100)
@@ -42,7 +40,6 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('Auth check failed:', error)
-      // Don't set error for 401 responses - user is just not authenticated
       if (error.response?.status !== 401) {
         setError('Authentication check failed')
       }
@@ -73,7 +70,6 @@ export const AuthProvider = ({ children }) => {
       navigate('/login')
     } catch (error) {
       console.error('Logout failed:', error)
-      // Force logout even if API call fails
       setUser(null)
       navigate('/login')
     }
@@ -82,11 +78,9 @@ export const AuthProvider = ({ children }) => {
   const refreshToken = async () => {
     try {
       await api.post('/auth/refresh_token')
-      // Re-check auth status after token refresh
       await checkAuth()
     } catch (error) {
       console.error('Token refresh failed:', error)
-      // If refresh fails, logout user without making another API call
       setUser(null)
       navigate('/login')
     }

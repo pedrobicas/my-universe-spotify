@@ -37,7 +37,7 @@ my-universe-spotify/
 
 ### 1. Clone o repositório
 ```bash
-git clone <seu-repositorio>
+git clone https://github.com/pedrobicas/spotify-project.git
 cd my-universe-spotify
 ```
 

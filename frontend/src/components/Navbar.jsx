@@ -45,7 +45,6 @@ const Navbar = () => {
   }
 
   useEffect(() => {
-    // Fechar menus quando mudar de rota
     setIsMobileMenuOpen(false)
     setIsUserMenuOpen(false)
   }, [location])
@@ -68,7 +67,7 @@ const Navbar = () => {
                 </span>
               </Link>
 
-              {/* Navegação desktop - Estilo Dashboard */}
+              {/* Navegação desktop */}
               <div className="hidden lg:flex">
                 <div className="flex gap-1 p-1">
                   {navigation.map((item, index) => {

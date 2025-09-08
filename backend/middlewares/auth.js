@@ -11,7 +11,6 @@ const authenticateToken = async (req, res, next) => {
       });
     }
 
-    // Verify token by making a request to Spotify API
     try {
       const response = await axios.get('https://api.spotify.com/v1/me', {
         headers: {
@@ -19,13 +18,11 @@ const authenticateToken = async (req, res, next) => {
         }
       });
 
-      // Add user info to request object
       req.user = response.data;
       req.accessToken = accessToken;
       next();
     } catch (spotifyError) {
       if (spotifyError.response && spotifyError.response.status === 401) {
-        // Token expired, try to refresh
         const refreshToken = req.cookies.spotify_refresh_token;
         
         if (!refreshToken) {
@@ -51,12 +48,11 @@ const authenticateToken = async (req, res, next) => {
 
           const { access_token, refresh_token } = refreshResponse.data;
           
-          // Set new tokens in cookies
           res.cookie('spotify_access_token', access_token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
-            maxAge: 3600000 // 1 hour
+            maxAge: 3600000
           });
 
           if (refresh_token) {
@@ -64,14 +60,12 @@ const authenticateToken = async (req, res, next) => {
               httpOnly: true,
               secure: process.env.NODE_ENV === 'production',
               sameSite: 'lax',
-              maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+              maxAge: 30 * 24 * 60 * 60 * 1000
             });
           }
 
-          // Update request with new token
           req.accessToken = access_token;
           
-          // Get user info with new token
           const userResponse = await axios.get('https://api.spotify.com/v1/me', {
             headers: {
               'Authorization': `Bearer ${access_token}`
@@ -81,7 +75,6 @@ const authenticateToken = async (req, res, next) => {
           req.user = userResponse.data;
           next();
         } catch (refreshError) {
-          // Refresh failed, clear cookies and require re-login
           res.clearCookie('spotify_access_token');
           res.clearCookie('spotify_refresh_token');
           

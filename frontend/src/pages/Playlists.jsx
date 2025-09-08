@@ -34,13 +34,12 @@ const Playlists = () => {
     duration: 'all',
     popularity: 'all'
   })
-  const [viewMode, setViewMode] = useState('grid') // grid, list, compact
+  const [viewMode, setViewMode] = useState('grid')
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [editingPlaylist, setEditingPlaylist] = useState(null)
   const [selectedPlaylist, setSelectedPlaylist] = useState(null)
   const [showPlaylistDetail, setShowPlaylistDetail] = useState(false)
   
-  // Player state
   const [currentTrack, setCurrentTrack] = useState(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [queue, setQueue] = useState([])
@@ -59,7 +58,6 @@ const Playlists = () => {
       setLoading(true)
       const response = await spotifyAPI.getPlaylists(50)
       
-      // Validar e filtrar playlists válidas
       const validPlaylists = response.data.items?.filter(playlist => 
         playlist && 
         playlist.id && 
@@ -67,7 +65,6 @@ const Playlists = () => {
         typeof playlist === 'object'
       ) || []
       
-      // Buscar tracks de cada playlist para calcular duração
       const playlistsWithTracks = await Promise.all(
         validPlaylists.map(async (playlist) => {
           try {
@@ -103,7 +100,6 @@ const Playlists = () => {
         public: playlistData.public
       })
       
-      // Se a playlist foi criada e tem tracks, adicionar as tracks
       if (response.data.id && playlistData.tracks && playlistData.tracks.length > 0) {
         const trackUris = playlistData.tracks.map(track => `spotify:track:${track.id}`)
         await spotifyAPI.addTracksToPlaylist(response.data.id, trackUris)
@@ -119,7 +115,6 @@ const Playlists = () => {
 
   const updatePlaylist = async (playlistId, updates) => {
     try {
-      // Atualizar informações básicas da playlist
       if (playlistId) {
         await spotifyAPI.updatePlaylist(playlistId, {
           name: updates.name,
@@ -129,7 +124,6 @@ const Playlists = () => {
         })
       }
       
-      // Recarregar playlists para mostrar as mudanças
       await loadPlaylists()
       setEditingPlaylist(null)
     } catch (error) {
@@ -156,7 +150,6 @@ const Playlists = () => {
       
       alert('Playlist excluída com sucesso!')
       
-      // Recarregar a lista
       await loadPlaylists()
     } catch (error) {
       console.error('=== ERRO NA EXCLUSÃO ===')
@@ -185,7 +178,6 @@ const Playlists = () => {
           url: playlist.external_urls?.spotify || window.location.href
         })
       } else {
-        // Fallback para copiar link
         const url = playlist.external_urls?.spotify || window.location.href
         await navigator.clipboard.writeText(url)
         alert('Link copiado para a área de transferência!')
@@ -199,7 +191,6 @@ const Playlists = () => {
     try {
       console.log('Playing playlist:', playlist.name, 'starting at index:', startIndex)
       
-      // Se temos tracks na playlist, usar elas
       if (playlist.tracks?.items && playlist.tracks.items.length > 0) {
         const tracks = playlist.tracks.items.map(item => item.track).filter(Boolean)
         setQueue(tracks)
@@ -207,7 +198,6 @@ const Playlists = () => {
         setCurrentTrack(tracks[startIndex])
         setIsPlaying(true)
       } else {
-        // Se não temos tracks, buscar via API
         try {
           const response = await spotifyAPI.getPlaylistTracks(playlist.id)
           const tracks = response.data.items?.map(item => item.track).filter(Boolean) || []
@@ -227,79 +217,27 @@ const Playlists = () => {
     }
   }
 
-  const handlePlayPause = () => {
-    setIsPlaying(!isPlaying)
-  }
-
-  const handleNext = () => {
-    if (queue.length > 0) {
-      const nextIndex = (currentTrackIndex + 1) % queue.length
-      setCurrentTrackIndex(nextIndex)
-      setCurrentTrack(queue[nextIndex])
-    }
-  }
-
-  const handlePrevious = () => {
-    if (queue.length > 0) {
-      const prevIndex = currentTrackIndex === 0 ? queue.length - 1 : currentTrackIndex - 1
-      setCurrentTrackIndex(prevIndex)
-      setCurrentTrack(queue[prevIndex])
-    }
-  }
-
-  const handleShuffle = (newShuffle) => {
-    setShuffle(newShuffle)
-    if (newShuffle && queue.length > 0) {
-      const shuffledQueue = [...queue].sort(() => Math.random() - 0.5)
-      setQueue(shuffledQueue)
-      setCurrentTrackIndex(0)
-      setCurrentTrack(shuffledQueue[0])
-    }
-  }
-
-  const handleRepeat = (newRepeat) => {
-    setRepeat(newRepeat)
-  }
-
-  const handleVolumeChange = (newVolume) => {
-    setVolume(newVolume)
-  }
-
-  const handleLike = () => {
-    // Implementar like/unlike
-    console.log('Toggling like for track:', currentTrack?.name)
-  }
-
-  const toggleQueue = () => {
-    setShowQueue(!showQueue)
-  }
-
   const handleBackFromDetail = () => {
     setShowPlaylistDetail(false)
     setSelectedPlaylist(null)
   }
 
-  // Filtros e ordenação
   const filteredPlaylists = playlists.filter(playlist => {
     if (!playlist || !playlist.id || !playlist.name) return false
     
-    // Busca por texto
     const matchesSearch = searchTerm === '' || 
       playlist.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (playlist.description && playlist.description.toLowerCase().includes(searchTerm.toLowerCase()))
     
     if (!matchesSearch) return false
     
-    // Filtro por tipo
     if (filters.type === 'public' && !playlist.public) return false
     if (filters.type === 'private' && playlist.public) return false
     if (filters.type === 'collaborative' && !playlist.collaborative) return false
     
-    // Filtro por número de tracks
     if (filters.minTracks && playlist.tracks?.total < parseInt(filters.minTracks)) return false
     if (filters.maxTracks && playlist.tracks?.total > parseInt(filters.maxTracks)) return false
     
-    // Filtro por colaboração
     if (filters.collaborative === 'true' && !playlist.collaborative) return false
     if (filters.collaborative === 'false' && playlist.collaborative) return false
     
@@ -350,7 +288,6 @@ const Playlists = () => {
 
   if (loading) return <Loading />
 
-  // Se estamos mostrando os detalhes de uma playlist
   if (showPlaylistDetail && selectedPlaylist) {
     return (
       <PlaylistDetail
@@ -521,7 +458,7 @@ const Playlists = () => {
                     setShowPlaylistDetail(true)
                   }}
                   isPlaying={currentTrack && queue.length > 0 && currentTrackIndex < queue.length && queue[currentTrackIndex]?.id === playlist.id}
-                  isLiked={false} // Implementar verificação de like
+                  isLiked={false}
                 />
                 </div>
             ))}

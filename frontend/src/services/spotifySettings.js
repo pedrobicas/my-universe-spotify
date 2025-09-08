@@ -1,12 +1,7 @@
-// Serviço para integrar com configurações reais do Spotify via API
 import { api } from './api';
 
 class SpotifySettingsService {
-  // ✅ FUNCIONALIDADES POSSÍVEIS via Spotify API:
-  
-  /**
-   * Controlar reprodução (play/pause/skip)
-   */
+
   async controlPlayback(action, deviceId = null) {
     try {
       const endpoint = `/api/spotify/player/${action}`;
@@ -18,9 +13,6 @@ class SpotifySettingsService {
     }
   }
 
-  /**
-   * Ajustar volume (0-100)
-   */
   async setVolume(volumePercent, deviceId = null) {
     try {
       const params = new URLSearchParams({
@@ -35,9 +27,6 @@ class SpotifySettingsService {
     }
   }
 
-  /**
-   * Ativar/Desativar shuffle
-   */
   async setShuffle(state, deviceId = null) {
     try {
       const params = new URLSearchParams({ state: state.toString() });
@@ -50,9 +39,6 @@ class SpotifySettingsService {
     }
   }
 
-  /**
-   * Definir modo de repetição (off, track, context)
-   */
   async setRepeat(state, deviceId = null) {
     try {
       const params = new URLSearchParams({ state });
@@ -65,9 +51,6 @@ class SpotifySettingsService {
     }
   }
 
-  /**
-   * Transferir reprodução para outro dispositivo
-   */
   async transferPlayback(deviceId, play = false) {
     try {
       return await api.put('/api/spotify/player', {
@@ -80,9 +63,6 @@ class SpotifySettingsService {
     }
   }
 
-  /**
-   * Obter dispositivos disponíveis
-   */
   async getDevices() {
     try {
       const response = await api.get('/api/spotify/player/devices');
@@ -93,9 +73,6 @@ class SpotifySettingsService {
     }
   }
 
-  /**
-   * Seguir/Deixar de seguir artista
-   */
   async followArtist(artistId, follow = true) {
     try {
       const method = follow ? 'PUT' : 'DELETE';
@@ -110,20 +87,6 @@ class SpotifySettingsService {
     }
   }
 
-  // ❌ FUNCIONALIDADES NÃO DISPONÍVEIS via API:
-  /*
-   * - Qualidade de áudio (controlada pelo app Spotify)
-   * - Crossfade (apenas no app desktop)
-   * - Downloads offline (apenas apps móveis/desktop)
-   * - Configurações de notificação (internas do Spotify)
-   * - Configurações de privacidade (apenas no site/app oficial)
-   */
-
-  // ✅ FUNCIONALIDADES LOCAIS (apenas para sua aplicação):
-  
-  /**
-   * Salvar preferências locais
-   */
   saveLocalPreferences(preferences) {
     try {
       localStorage.setItem('spotify_local_preferences', JSON.stringify(preferences));
@@ -134,9 +97,6 @@ class SpotifySettingsService {
     }
   }
 
-  /**
-   * Carregar preferências locais
-   */
   loadLocalPreferences() {
     try {
       const preferences = localStorage.getItem('spotify_local_preferences');
@@ -147,21 +107,15 @@ class SpotifySettingsService {
     }
   }
 
-  /**
-   * Configurações de interface da aplicação
-   */
   applyInterfaceSettings(settings) {
-    // Aplicar tema
     if (settings.darkMode !== undefined) {
       document.documentElement.classList.toggle('dark', settings.darkMode);
     }
 
-    // Aplicar idioma
     if (settings.language) {
       document.documentElement.lang = settings.language.split('-')[0];
     }
 
-    // Aplicar fonte/tamanho (se configurado)
     if (settings.fontSize) {
       document.documentElement.style.fontSize = `${settings.fontSize}px`;
     }

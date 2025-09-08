@@ -1,11 +1,9 @@
-/* Importar animações personalizadas */
 @import './animations.css';
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Estilos base personalizados */
 @layer base {
   
   body {
@@ -14,12 +12,10 @@
     transition: font-size 0.3s ease, background-color 0.3s ease;
   }
 
-  /* Configurações de fonte dinâmica */
   html {
-    font-size: 16px; /* Padrão */
+    font-size: 16px; 
   }
 
-  /* View compacta */
   body.compact-view {
     line-height: 1.3;
   }
@@ -36,7 +32,6 @@
     padding: 1rem !important;
   }
 
-  /* Modo sem animações */
   body.no-animations *,
   body.no-animations *::before,
   body.no-animations *::after {
@@ -46,7 +41,6 @@
     scroll-behavior: auto !important;
   }
 
-  /* Modo alto contraste */
   body.high-contrast {
     filter: contrast(1.5) saturate(1.2);
   }
@@ -67,7 +61,6 @@
     border-color: #ffffff !important;
   }
 
-  /* Scrollbar personalizada */
   ::-webkit-scrollbar {
     width: 8px;
   }
@@ -84,7 +77,6 @@
     @apply bg-gradient-to-b from-green-400 to-green-500;
   }
 
-  /* Seleção de texto personalizada */
   ::selection {
     @apply bg-green-500/30 text-white;
   }
@@ -94,9 +86,7 @@
   }
 }
 
-/* Componentes personalizados */
 @layer components {
-  /* Gradientes de texto - Spotify theme */
   .text-gradient {
     @apply bg-gradient-to-r from-green-400 to-green-500 bg-clip-text text-transparent;
   }
@@ -117,7 +107,6 @@
     @apply bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent;
   }
 
-  /* Efeitos de glassmorphism */
   .glass {
     @apply backdrop-blur-xl bg-black/20 border border-white/10;
   }
@@ -130,7 +119,6 @@
     @apply backdrop-blur-2xl bg-black/40 border border-white/20;
   }
 
-  /* Cards com gradientes - Spotify theme */
   .card-gradient-spotify {
     @apply bg-gradient-to-br from-green-600 to-green-700;
   }
@@ -151,7 +139,6 @@
     @apply bg-gradient-to-br from-green-600 to-green-700;
   }
 
-  /* Botões com gradientes - Spotify theme */
   .btn-gradient-primary {
     @apply bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700;
   }
@@ -172,7 +159,6 @@
     @apply bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700;
   }
 
-  /* Efeitos de hover */
   .hover-lift {
     @apply transition-all duration-300 hover:transform hover:scale-105 hover:shadow-2xl;
   }
@@ -185,7 +171,6 @@
     @apply transition-all duration-300 hover:border-green-500/50 hover:shadow-lg hover:shadow-green-500/25;
   }
 
-  /* Animações personalizadas */
   .animate-float {
     animation: float 6s ease-in-out infinite;
   }
@@ -207,7 +192,6 @@
     animation: spin 8s linear infinite;
   }
 
-  /* Efeitos de partículas - Spotify theme */
   .particle {
     @apply absolute w-1 h-1 bg-green-400/40 rounded-full;
   }
@@ -224,7 +208,6 @@
     @apply bg-green-400/40;
   }
 
-  /* Efeitos de brilho */
   .shine {
     @apply relative overflow-hidden;
   }
@@ -235,7 +218,6 @@
     animation: shine 3s infinite;
   }
 
-  /* Efeitos de ondas - Spotify theme */
   .wave {
     @apply relative overflow-hidden;
   }
@@ -247,9 +229,7 @@
   }
 }
 
-/* Utilitários personalizados */
 @layer utilities {
-  /* Sombras com cores - Spotify theme */
   .shadow-spotify {
     box-shadow: 0 10px 25px -3px rgba(29, 185, 84, 0.3);
   }
@@ -270,7 +250,6 @@
     box-shadow: 0 10px 25px -3px rgba(29, 185, 84, 0.3);
   }
 
-  /* Gradientes de fundo */
   .bg-gradient-music {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   }
@@ -287,7 +266,6 @@
     background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
   }
 
-  /* Efeitos de texto */
   .text-shadow {
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   }
@@ -300,7 +278,6 @@
     text-shadow: 0 0 20px rgba(29, 185, 84, 0.5);
   }
 
-  /* Efeitos de borda - Spotify theme */
   .border-gradient {
     border-image: linear-gradient(45deg, #1DB954, #1ed760) 1;
   }
@@ -310,7 +287,6 @@
   }
 }
 
-/* Animações keyframes */
 @keyframes float {
   0%, 100% {
     transform: translateY(0px);
@@ -413,7 +389,6 @@
   }
 }
 
-/* Classes de animação */
 .animate-slide-in-left {
   animation: slideInFromLeft 0.6s ease-out;
 }
@@ -442,7 +417,6 @@
   animation: rotateIn 0.8s ease-out;
 }
 
-/* Responsividade para animações */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -453,12 +427,10 @@
   }
 }
 
-/* Efeitos de foco para acessibilidade - Spotify theme */
 .focus-visible:focus {
   @apply outline-none ring-2 ring-green-500 ring-offset-2 ring-offset-black;
 }
 
-/* Estados de loading */
 .loading-skeleton {
   @apply animate-pulse bg-gray-700 rounded;
 }

@@ -33,7 +33,6 @@ const Profile = () => {
   const fetchProfileData = async () => {
     setLoading(true);
     try {
-      // Fetch data individually to handle permission errors gracefully
       let recentData = [];
       let savedTracksData = { total: 0 };
       let followedArtistsData = { artists: { total: 0 } };
@@ -57,7 +56,6 @@ const Profile = () => {
         followedArtistsData = followed.data;
       } catch (error) {
         console.warn('Could not fetch followed artists (permission issue):', error.message);
-        // Set to empty data instead of failing
         followedArtistsData = { artists: { total: 0 } };
       }
 
@@ -110,7 +108,7 @@ const Profile = () => {
   };
 
   const calculateAccountInsights = (user, savedTracks, followedArtists) => {
-    const joinDate = new Date(2020, 0, 1); // Placeholder - Spotify doesn't provide join date
+    const joinDate = new Date(2020, 0, 1);
     const daysSinceJoin = Math.floor((new Date() - joinDate) / (1000 * 60 * 60 * 24));
     
     const totalSavedTracks = savedTracks?.total || 0;

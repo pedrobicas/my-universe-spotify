@@ -14,29 +14,23 @@ export const useSettings = () => {
 export const SettingsProvider = ({ children }) => {
   const { user } = useAuth();
   
-  // Estados para configurações com valores padrão (apenas funcionalidades reais)
   const [settings, setSettings] = useState({
-    // Conta (apenas visualização)
     displayName: '',
     email: '',
     
-    // Interface (funciona)
     darkMode: true,
     compactView: false,
     language: 'pt-BR',
     fontSize: 16,
     
-    // Aplicação (funciona)
     autoSave: true,
     showMiniPlayer: true,
     animationsEnabled: true,
     highContrastMode: false,
     
-    // Notificações locais (funciona)
     browserNotifications: true,
     soundNotifications: false,
     
-    // Privacidade local (funciona)
     saveHistory: true,
     shareActivity: false
   });
@@ -44,7 +38,6 @@ export const SettingsProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Carregar configurações do localStorage na inicialização
   useEffect(() => {
     const loadSettings = () => {
       try {
@@ -54,12 +47,10 @@ export const SettingsProvider = ({ children }) => {
           setSettings(prevSettings => ({
             ...prevSettings,
             ...parsed,
-            // Sempre usar dados mais recentes do usuário
             displayName: user?.display_name || parsed.displayName || '',
             email: user?.email || parsed.email || ''
           }));
         } else if (user) {
-          // Se não há configurações salvas, usar dados do usuário
           setSettings(prevSettings => ({
             ...prevSettings,
             displayName: user.display_name || '',
@@ -75,7 +66,6 @@ export const SettingsProvider = ({ children }) => {
     loadSettings();
   }, [user]);
 
-  // Salvar configurações no localStorage sempre que mudarem
   useEffect(() => {
     if (settings.displayName || settings.email) {
       try {
@@ -86,7 +76,6 @@ export const SettingsProvider = ({ children }) => {
     }
   }, [settings]);
 
-  // Aplicar configurações de tema
   useEffect(() => {
     if (settings.darkMode) {
       document.documentElement.classList.add('dark');
@@ -97,17 +86,14 @@ export const SettingsProvider = ({ children }) => {
     }
   }, [settings.darkMode]);
 
-  // Aplicar configurações de idioma
   useEffect(() => {
     document.documentElement.lang = settings.language.split('-')[0];
   }, [settings.language]);
 
-  // Aplicar configurações de fonte
   useEffect(() => {
     document.documentElement.style.fontSize = `${settings.fontSize}px`;
   }, [settings.fontSize]);
 
-  // Aplicar configurações de view compacta
   useEffect(() => {
     if (settings.compactView) {
       document.body.classList.add('compact-view');
@@ -116,7 +102,6 @@ export const SettingsProvider = ({ children }) => {
     }
   }, [settings.compactView]);
 
-  // Aplicar configurações de animações
   useEffect(() => {
     if (settings.animationsEnabled) {
       document.body.classList.remove('no-animations');
@@ -125,7 +110,6 @@ export const SettingsProvider = ({ children }) => {
     }
   }, [settings.animationsEnabled]);
 
-  // Aplicar modo de alto contraste
   useEffect(() => {
     if (settings.highContrastMode) {
       document.body.classList.add('high-contrast');
@@ -153,14 +137,10 @@ export const SettingsProvider = ({ children }) => {
     setError(null);
     
     try {
-      // Simular chamada para API
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Salvar no localStorage
       localStorage.setItem('myUniverse_settings', JSON.stringify(settings));
-      
-      // Aqui você pode adicionar uma chamada real para a API
-      // await api.post('/settings', settings);
+    
       
       return { success: true, message: 'Configurações salvas com sucesso!' };
     } catch (error) {
@@ -198,7 +178,6 @@ export const SettingsProvider = ({ children }) => {
   const clearCache = async () => {
     setIsLoading(true);
     try {
-      // Limpar cache do localStorage
       const keysToRemove = [];
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
@@ -208,8 +187,7 @@ export const SettingsProvider = ({ children }) => {
       }
       
       keysToRemove.forEach(key => localStorage.removeItem(key));
-      
-      // Simular limpeza de cache
+  
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       return { success: true, message: 'Cache limpo com sucesso!' };
@@ -230,7 +208,6 @@ export const SettingsProvider = ({ children }) => {
         }
       }
       
-      // Converter para MB (aproximado)
       const sizeMB = (totalSize / 1024 / 1024).toFixed(2);
       return {
         totalSizeMB: sizeMB,
@@ -269,7 +246,6 @@ export const SettingsProvider = ({ children }) => {
         try {
           const importedSettings = JSON.parse(e.target.result);
           
-          // Validar se as configurações são válidas
           const validKeys = Object.keys(settings);
           const filteredSettings = {};
           
@@ -279,7 +255,6 @@ export const SettingsProvider = ({ children }) => {
             }
           }
           
-          // Manter dados do usuário atual
           filteredSettings.displayName = user?.display_name || settings.displayName;
           filteredSettings.email = user?.email || settings.email;
           

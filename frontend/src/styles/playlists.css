@@ -1,6 +1,3 @@
-/* Estilos específicos para a página de playlists */
-
-/* Animações de entrada suaves */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -34,7 +31,6 @@
   }
 }
 
-/* Aplicação das animações com delays escalonados */
 .playlist-card {
   animation: fadeInScale 0.5s ease-out;
 }
@@ -46,7 +42,6 @@
 .playlist-card:nth-child(5) { animation-delay: 0.25s; }
 .playlist-card:nth-child(6) { animation-delay: 0.3s; }
 
-/* Efeitos de hover suaves e elegantes */
 .playlist-card {
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -58,7 +53,6 @@
     0 0 0 1px rgba(34, 197, 94, 0.15);
 }
 
-/* Efeitos de glass morphism modernos */
 .glass-effect {
   backdrop-filter: blur(20px);
   background: rgba(255, 255, 255, 0.03);
@@ -71,7 +65,6 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-/* Inputs modernos com efeitos sutis */
 .input-modern {
   background: rgba(255, 255, 255, 0.03);
   border: 2px solid transparent;
@@ -91,7 +84,6 @@
   border-color: rgba(255, 255, 255, 0.15);
 }
 
-/* Cards com efeitos de profundidade sutis */
 .card-3d {
   transform-style: preserve-3d;
   perspective: 1000px;
@@ -105,7 +97,6 @@
   transition: transform 0.4s ease;
 }
 
-/* Estados de loading elegantes */
 .skeleton {
   background: linear-gradient(90deg, 
     rgba(255, 255, 255, 0.05) 25%, 
@@ -124,7 +115,6 @@
   }
 }
 
-/* Scrollbar personalizada minimalista */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
 }
@@ -144,7 +134,6 @@
   background: rgba(34, 197, 94, 0.5);
 }
 
-/* Efeitos de partículas sutis */
 .particles {
   position: absolute;
   top: 0;
@@ -193,7 +182,6 @@
   }
 }
 
-/* Responsividade aprimorada */
 @media (max-width: 768px) {
   .playlist-grid {
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -211,7 +199,6 @@
 }
 
 @media (max-width: 640px) {
-  /* Modal específico para tablet/mobile */
   .playlist-edit-modal {
     margin: 0;
     height: 100vh;
@@ -240,10 +227,9 @@
   }
   
   .input-modern {
-    font-size: 16px; /* Evita zoom no iOS */
+    font-size: 16px;
   }
   
-  /* Modal em tela cheia no mobile */
   .playlist-edit-modal {
     padding: 0;
     border-radius: 0;
@@ -269,7 +255,6 @@
   }
 }
 
-/* Estados de carregamento elegantes */
 .loading-overlay {
   position: absolute;
   top: 0;
@@ -298,7 +283,6 @@
   100% { transform: rotate(360deg); }
 }
 
-/* Melhorias para dispositivos touch */
 .playlist-touch-friendly {
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
@@ -308,7 +292,6 @@
   user-select: none;
 }
 
-/* Botões maiores para touch */
 @media (max-width: 768px) {
   .touch-button {
     min-height: 44px;
@@ -319,11 +302,10 @@
   .touch-input {
     min-height: 44px;
     padding: 12px 16px;
-    font-size: 16px; /* Evita zoom no iOS */
+    font-size: 16px; 
   }
 }
 
-/* Scrollbars customizadas para modal */
 .playlist-scrollable {
   scrollbar-width: thin;
   scrollbar-color: rgba(34, 197, 94, 0.3) transparent;
@@ -346,12 +328,10 @@
   background: rgba(34, 197, 94, 0.5);
 }
 
-/* Transições suaves para mudanças de layout */
 .playlist-responsive-transition {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Safe area para dispositivos com notch */
 @supports (padding: max(0px)) {
   .playlist-modal-safe {
     padding-top: max(1rem, env(safe-area-inset-top));
@@ -361,7 +341,6 @@
   }
 }
 
-/* Efeitos de transição suaves */
 .transition-all {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -374,7 +353,6 @@
   transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Efeitos de destaque sutis */
 .highlight {
   position: relative;
 }
@@ -394,7 +372,6 @@
   width: 100%;
 }
 
-/* Efeitos de sombra dinâmica */
 .shadow-dynamic {
   box-shadow: 
     0 2px 4px rgba(0, 0, 0, 0.08),
@@ -408,7 +385,6 @@
     0 3px 8px rgba(0, 0, 0, 0.08);
 }
 
-/* Efeitos de borda brilhante */
 .border-glow {
   position: relative;
 }
@@ -427,7 +403,6 @@
   opacity: 1;
 }
 
-/* Efeitos de texto com gradiente */
 .text-gradient {
   background: linear-gradient(135deg, #22c55e, #16a34a);
   -webkit-background-clip: text;
@@ -435,7 +410,6 @@
   background-clip: text;
 }
 
-/* Efeitos de botão com ripple */
 .btn-ripple {
   position: relative;
   overflow: hidden;

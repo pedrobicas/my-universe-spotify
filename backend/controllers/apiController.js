@@ -1,7 +1,6 @@
 const spotifyService = require('../services/spotifyService');
 
 class ApiController {
-  // Get user profile
   async getMe(req, res) {
     try {
       const userProfile = await spotifyService.getUserProfile(req.accessToken);
@@ -15,7 +14,6 @@ class ApiController {
     }
   }
 
-  // Get user's saved tracks
   async getSavedTracks(req, res) {
     try {
       const { limit = 20, offset = 0 } = req.query;
@@ -30,7 +28,6 @@ class ApiController {
     }
   }
 
-  // Get user's followed artists
   async getFollowedArtists(req, res) {
     try {
       const { limit = 20 } = req.query;
@@ -45,7 +42,6 @@ class ApiController {
     }
   }
 
-  // Get user statistics
   async getUserStats(req, res) {
     try {
       const stats = await spotifyService.getUserStats(req.accessToken);
@@ -59,7 +55,6 @@ class ApiController {
     }
   }
 
-  // Get user's top tracks
   async getTopTracks(req, res) {
     try {
       const { time_range = 'short_term', limit = 20 } = req.query;
@@ -74,7 +69,6 @@ class ApiController {
     }
   }
 
-  // Get user's top artists
   async getTopArtists(req, res) {
     try {
       const { time_range = 'short_term', limit = 20 } = req.query;
@@ -89,7 +83,21 @@ class ApiController {
     }
   }
 
-  // Get user's playlists
+  async getArtistTopTracks(req, res) {
+    try {
+      const { artistId } = req.params;
+      const { market = 'US' } = req.query;
+      const topTracks = await spotifyService.getArtistTopTracks(req.accessToken, artistId, market);
+      res.json(topTracks);
+    } catch (error) {
+      console.error('Get artist top tracks error:', error);
+      res.status(500).json({ 
+        error: 'Failed to get artist top tracks',
+        message: error.message 
+      });
+    }
+  }
+
   async getPlaylists(req, res) {
     try {
       const { limit = 50 } = req.query;
@@ -104,7 +112,6 @@ class ApiController {
     }
   }
 
-  // Get playlist tracks
   async getPlaylistTracks(req, res) {
     try {
       const { playlistId } = req.params;
@@ -119,7 +126,6 @@ class ApiController {
     }
   }
 
-  // Create new playlist
   async createPlaylist(req, res) {
     try {
       const { name, description = '', isPublic = false } = req.body;
@@ -149,7 +155,6 @@ class ApiController {
     }
   }
 
-  // Update playlist
   async updatePlaylist(req, res) {
     try {
       const { playlistId } = req.params;
@@ -178,7 +183,6 @@ class ApiController {
     }
   }
 
-  // Delete playlist
   async deletePlaylist(req, res) {
     try {
       const { playlistId } = req.params;
@@ -195,7 +199,6 @@ class ApiController {
     }
   }
 
-  // Add tracks to playlist
   async addTracksToPlaylist(req, res) {
     try {
       const { playlistId } = req.params;
@@ -224,7 +227,6 @@ class ApiController {
     }
   }
 
-  // Remove tracks from playlist
   async removeTracksFromPlaylist(req, res) {
     try {
       const { playlistId } = req.params;
@@ -253,7 +255,6 @@ class ApiController {
     }
   }
 
-  // Reorder playlist tracks
   async reorderPlaylistTracks(req, res) {
     try {
       const { playlistId } = req.params;
@@ -284,7 +285,6 @@ class ApiController {
     }
   }
 
-  // Get audio features for tracks
   async getAudioFeatures(req, res) {
     try {
       const { trackIds } = req.query;
@@ -315,7 +315,6 @@ class ApiController {
     } catch (error) {
       console.error('Get audio features error:', error);
       
-      // If it's a permissions error, return a more specific message
       if (error.message.includes('Insufficient permissions') || error.message.includes('Forbidden')) {
         return res.status(403).json({ 
           error: 'Insufficient permissions',
@@ -331,7 +330,6 @@ class ApiController {
     }
   }
 
-  // Get recently played tracks
   async getRecentlyPlayed(req, res) {
     try {
       const { limit = 20 } = req.query;
@@ -346,7 +344,6 @@ class ApiController {
     }
   }
 
-  // Search tracks
   async searchTracks(req, res) {
     try {
       const { q, limit = 20 } = req.query;
@@ -374,7 +371,6 @@ class ApiController {
     }
   }
 
-  // Search playlists
   async searchPlaylists(req, res) {
     try {
       const { q, limit = 20 } = req.query;
@@ -402,7 +398,6 @@ class ApiController {
     }
   }
 
-  // Get track details
   async getTrack(req, res) {
     try {
       const { trackId } = req.params;
@@ -425,7 +420,6 @@ class ApiController {
     }
   }
 
-  // Get playlist analytics
   async getPlaylistAnalytics(req, res) {
     try {
       const { playlistId } = req.params;
@@ -452,13 +446,11 @@ class ApiController {
     }
   }
 
-  // Get currently playing track
   async getNowPlaying(req, res) {
     try {
       const refreshToken = req.cookies.spotify_refresh_token;
       const result = await spotifyService.getNowPlaying(req.accessToken, refreshToken);
       
-      // Update cookies if tokens were refreshed
       if (result.newTokens) {
         this.updateTokenCookies(res, result.newTokens);
       }
@@ -477,34 +469,29 @@ class ApiController {
     }
   }
 
-  // Helper method to update cookies if tokens were refreshed
   updateTokenCookies(res, newTokens) {
     if (newTokens) {
-      // Set new access token
       res.setCookie('spotify_access_token', newTokens.access_token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         maxAge: newTokens.expires_in * 1000
       });
 
-      // Set new refresh token if provided
       if (newTokens.refresh_token) {
         res.setCookie('spotify_refresh_token', newTokens.refresh_token, {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',
-          maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+          maxAge: 30 * 24 * 60 * 60 * 1000 
         });
       }
     }
   }
 
-  // Pause playback
   async pausePlayback(req, res) {
     try {
       const refreshToken = req.cookies.spotify_refresh_token;
       const result = await spotifyService.pausePlayback(req.accessToken, refreshToken);
       
-      // Update cookies if tokens were refreshed
       if (result.newTokens) {
         this.updateTokenCookies(res, result.newTokens);
       }
@@ -519,13 +506,11 @@ class ApiController {
     }
   }
 
-  // Resume playback
   async resumePlayback(req, res) {
     try {
       const refreshToken = req.cookies.spotify_refresh_token;
       const result = await spotifyService.resumePlayback(req.accessToken, refreshToken);
       
-      // Update cookies if tokens were refreshed
       if (result.newTokens) {
         this.updateTokenCookies(res, result.newTokens);
       }
@@ -540,13 +525,11 @@ class ApiController {
     }
   }
 
-  // Skip to next track
   async skipToNext(req, res) {
     try {
       const refreshToken = req.cookies.spotify_refresh_token;
       const result = await spotifyService.skipToNext(req.accessToken, refreshToken);
       
-      // Update cookies if tokens were refreshed
       if (result.newTokens) {
         this.updateTokenCookies(res, result.newTokens);
       }
@@ -561,13 +544,11 @@ class ApiController {
     }
   }
 
-  // Skip to previous track
   async skipToPrevious(req, res) {
     try {
       const refreshToken = req.cookies.spotify_refresh_token;
       const result = await spotifyService.skipToPrevious(req.accessToken, refreshToken);
       
-      // Update cookies if tokens were refreshed
       if (result.newTokens) {
         this.updateTokenCookies(res, result.newTokens);
       }
@@ -582,13 +563,11 @@ class ApiController {
     }
   }
 
-  // Start playback
   async startPlayback(req, res) {
     try {
       const refreshToken = req.refreshToken;
       const result = await spotifyService.startPlayback(req.accessToken, refreshToken, req.body);
       
-      // Update tokens if new ones were issued
       if (result.newTokens) {
         res.cookie('accessToken', result.newTokens.access_token, {
           httpOnly: true,
@@ -600,7 +579,7 @@ class ApiController {
           res.cookie('refreshToken', result.newTokens.refresh_token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+            maxAge: 30 * 24 * 60 * 60 * 1000
           });
         }
       }
@@ -615,13 +594,11 @@ class ApiController {
     }
   }
 
-  // Get available devices
   async getDevices(req, res) {
     try {
       const refreshToken = req.refreshToken;
       const result = await spotifyService.getDevices(req.accessToken, refreshToken);
       
-      // Update tokens if new ones were issued
       if (result.newTokens) {
         res.cookie('accessToken', result.newTokens.access_token, {
           httpOnly: true,
@@ -633,28 +610,22 @@ class ApiController {
           res.cookie('refreshToken', result.newTokens.refresh_token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+            maxAge: 30 * 24 * 60 * 60 * 1000 
           });
         }
       }
       
       res.json(result.devices || result);
     } catch (error) {
-      console.error('Get devices error:', error);
       res.status(500).json({ 
         error: 'Failed to get devices',
         message: error.message 
       });
     }
   }
-
-  // Get recommendations
   async getRecommendations(req, res) {
     try {
-  console.log('Incoming recommendations query:', req.query);
   const recommendations = await spotifyService.getRecommendations(req.accessToken, req.query);
-  console.log('Recommendations returned, tracks:', Array.isArray(recommendations.tracks) ? recommendations.tracks.length : 0);
-  // If the service returned no tracks, include a fallback flag so the frontend can show a message
   if (!Array.isArray(recommendations.tracks) || recommendations.tracks.length === 0) {
     return res.json({ ...recommendations, fallback: true });
   }

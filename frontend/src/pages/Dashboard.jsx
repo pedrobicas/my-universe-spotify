@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
+import { useMusic } from '../contexts/MusicContext'
 import { spotifyAPI } from '../services/api'
 import { 
   TrendingUp, 
@@ -35,6 +36,7 @@ import NowPlaying from '../components/NowPlaying'
 
 const Dashboard = () => {
   const { user } = useAuth()
+  const { playTrack, currentTrack: musicCurrentTrack, isPlaying: musicIsPlaying } = useMusic()
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('overview')
   const [timeRange, setTimeRange] = useState('short_term')
@@ -65,15 +67,11 @@ const Dashboard = () => {
     loadDashboardData()
   }, [timeRange])
 
-  // Função para determinar quantas músicas buscar baseado no período
   const getOptimalTrackCount = (timeRange) => {
-    // A API do Spotify retorna máximo de 50 para todas as requisições
     return 50
   }
 
-  // Função para buscar músicas recentes baseado no período
   const getRecentTracksCount = (timeRange) => {
-    // A API do Spotify também tem limite de 50 para recently played
     return 50
   }
 
@@ -81,41 +79,32 @@ const Dashboard = () => {
     try {
       setLoading(true)
       
-      // Determinar quantidade ótima de músicas baseado no período
       const optimalCount = getOptimalTrackCount(timeRange)
       const recentCount = getRecentTracksCount(timeRange)
       
-      // Buscar top tracks e artistas (limitado pela API do Spotify)
       const [tracksRes, artistsRes] = await Promise.all([
         spotifyAPI.getTopTracks(timeRange, optimalCount),
         spotifyAPI.getTopArtists(timeRange, optimalCount)
       ])
 
-      // Buscar músicas recentes (também limitado a 50 pela API)
       const recentRes = await spotifyAPI.getRecentlyPlayed(recentCount)
 
       setTopTracks(tracksRes.data.items)
       setTopArtists(artistsRes.data.items)
       setRecentTracks(recentRes.data.items)
 
-      // Combinar top tracks com músicas recentes para análise mais completa
       const allTracksForAnalysis = [...tracksRes.data.items]
       
-      // Adicionar músicas recentes únicas (que não estão nas top tracks)
       recentRes.data.items.forEach(recentItem => {
         if (recentItem.track && !allTracksForAnalysis.find(track => track.id === recentItem.track.id)) {
           allTracksForAnalysis.push(recentItem.track)
         }
       })
 
-      // Tentar obter mais dados fazendo múltiplas requisições com offsets
       try {
-        // Para top tracks, tentar obter mais dados se disponível
         if (timeRange === 'long_term') {
-          // Para período longo, tentar buscar mais dados
-          const additionalTracksRes = await spotifyAPI.getTopTracks(timeRange, 50, 50) // offset 50
+          const additionalTracksRes = await spotifyAPI.getTopTracks(timeRange, 50, 50)
           if (additionalTracksRes.data.items && additionalTracksRes.data.items.length > 0) {
-            // Adicionar tracks adicionais únicas
             additionalTracksRes.data.items.forEach(track => {
               if (!allTracksForAnalysis.find(existingTrack => existingTrack.id === track.id)) {
                 allTracksForAnalysis.push(track)
@@ -127,15 +116,12 @@ const Dashboard = () => {
         console.log('Não foi possível obter tracks adicionais:', error.message)
       }
 
-      // Get audio features for analysis (limitado a 100 por vez pela API do Spotify)
       if (allTracksForAnalysis.length > 0) {
         try {
           const trackIds = allTracksForAnalysis.map(track => track.id)
-          // A API do Spotify permite no máximo 100 IDs por requisição
           const maxIdsPerRequest = 100
           let allAudioFeatures = []
           
-          // Fazer múltiplas requisições se necessário
           for (let i = 0; i < trackIds.length; i += maxIdsPerRequest) {
             const batch = trackIds.slice(i, i + maxIdsPerRequest)
             const featuresRes = await spotifyAPI.getAudioFeatures(batch)
@@ -151,7 +137,6 @@ const Dashboard = () => {
         }
       }
 
-      // Generate insights com dataset combinado
       generateInsights(allTracksForAnalysis, artistsRes.data.items, recentRes.data.items)
     } catch (error) {
       console.error('Error loading dashboard data:', error)
@@ -162,24 +147,15 @@ const Dashboard = () => {
 
   const generateInsights = (tracks, artists, recent) => {
     const insights = {
-      // Tempo total das top tracks (não tempo total de escuta real)
-      topTracksDuration: tracks.reduce((acc, track) => acc + track.duration_ms, 0),
-      // Popularidade média das top tracks
-      averagePopularity: tracks.reduce((acc, track) => acc + track.popularity, 0) / tracks.length,
-      // Gêneros mais ouvidos
-      topGenres: getTopGenres(artists),
-      // Perfil de humor baseado nas top tracks
+    topTracksDuration: tracks.reduce((acc, track) => acc + (track.duration_ms || 0), 0),
+    averagePopularity: tracks.length > 0 ? tracks.reduce((acc, track) => acc + (track.popularity || 0), 0) / tracks.length : 0,
+    topGenres: getTopGenres(artists) || [],
       moodProfile: analyzeMood(tracks),
-      // Padrões de escuta baseados nas músicas recentes
       listeningHabits: analyzeListeningHabits(recent),
-      // Score de diversidade musical
       diversityScore: calculateDiversityScore(artists),
-      // Estatísticas adicionais para clareza
       totalTracks: tracks.length,
       totalArtists: artists.length,
-      // Tempo médio por música
-      averageTrackDuration: tracks.length > 0 ? tracks.reduce((acc, track) => acc + track.duration_ms, 0) / tracks.length : 0,
-      // Gênero mais popular
+    averageTrackDuration: tracks.length > 0 ? tracks.reduce((acc, track) => acc + (track.duration_ms || 0), 0) / tracks.length : 0,
       topGenre: getTopGenres(artists)[0]?.genre || 'N/A'
     }
     setInsights(insights)
@@ -201,20 +177,15 @@ const Dashboard = () => {
   }
 
   const analyzeMood = (tracks) => {
-    // Se não há audioFeatures, criar dados de fallback baseados em informações disponíveis
     if (!audioFeatures || audioFeatures.length === 0) {
-      // Criar perfil de humor baseado em dados disponíveis das tracks
       const fallbackData = {
         labels: ['Positividade', 'Energia', 'Dançabilidade'],
         datasets: [{
           label: 'Perfil de Humor (Estimado)',
           data: [
-            // Positividade baseada na popularidade (músicas populares tendem a ser mais positivas)
-            tracks.length > 0 ? Math.min(0.9, Math.max(0.3, tracks.reduce((acc, track) => acc + track.popularity, 0) / (tracks.length * 100))) : 0.6,
-            // Energia baseada na duração (músicas mais longas tendem a ser mais energéticas)
-            tracks.length > 0 ? Math.min(0.9, Math.max(0.3, tracks.reduce((acc, track) => acc + (track.duration_ms > 240000 ? 0.8 : 0.5), 0) / tracks.length)) : 0.6,
-            // Dançabilidade baseada na popularidade (músicas populares tendem a ser mais dançantes)
-            tracks.length > 0 ? Math.min(0.9, Math.max(0.3, tracks.reduce((acc, track) => acc + track.popularity, 0) / (tracks.length * 100))) : 0.6
+              tracks.length > 0 ? Math.min(0.9, Math.max(0.3, tracks.reduce((acc, track) => acc + (track.popularity || 0), 0) / (tracks.length * 100))) : 0.6,
+              tracks.length > 0 ? Math.min(0.9, Math.max(0.3, tracks.reduce((acc, track) => acc + (track.duration_ms > 240000 ? 0.8 : 0.5), 0) / tracks.length)) : 0.6,
+              tracks.length > 0 ? Math.min(0.9, Math.max(0.3, tracks.reduce((acc, track) => acc + (track.popularity || 0), 0) / (tracks.length * 100))) : 0.6
           ],
           backgroundColor: [
             'rgba(34, 197, 94, 0.8)',
@@ -239,14 +210,12 @@ const Dashboard = () => {
           .filter(track => track && typeof track[feature] === 'number')
           .map(track => track[feature])
         
-        if (values.length === 0) return 0.5 // valor padrão se não houver dados
+        if (values.length === 0) return 0.5 
         
         return values.reduce((a, b) => a + b, 0) / values.length
       })
 
-      // Verificar se todos os valores são válidos
       if (avgValues.some(val => isNaN(val) || !isFinite(val))) {
-        // Se os valores não são válidos, usar dados de fallback
         return {
           labels: ['Positividade', 'Energia', 'Dançabilidade'],
           datasets: [{
@@ -287,7 +256,6 @@ const Dashboard = () => {
       }
     } catch (error) {
       console.warn('Erro ao analisar humor musical:', error)
-      // Retornar dados de fallback em caso de erro
       return {
         labels: ['Positividade', 'Energia', 'Dançabilidade'],
         datasets: [{
@@ -312,17 +280,15 @@ const Dashboard = () => {
   const analyzeListeningHabits = (recent) => {
     try {
       if (!recent || !Array.isArray(recent) || recent.length === 0) {
-        // Retornar dados de fallback se não há dados recentes
         return {
           labels: Array.from({ length: 24 }, (_, i) => `${i}:00`),
           datasets: [{
             label: 'Padrões de Escuta (Estimado)',
             data: Array.from({ length: 24 }, (_, i) => {
-              // Simular padrão típico de escuta (mais ativo durante o dia)
-              if (i >= 8 && i <= 12) return Math.random() * 0.8 + 0.2  // Manhã
-              if (i >= 13 && i <= 17) return Math.random() * 0.6 + 0.3  // Tarde
-              if (i >= 18 && i <= 22) return Math.random() * 0.7 + 0.2  // Noite
-              return Math.random() * 0.3 + 0.1  // Madrugada
+              if (i >= 8 && i <= 12) return Math.random() * 0.8 + 0.2 
+              if (i >= 13 && i <= 17) return Math.random() * 0.6 + 0.3
+              if (i >= 18 && i <= 22) return Math.random() * 0.7 + 0.2
+              return Math.random() * 0.3 + 0.1
             }),
             backgroundColor: 'rgba(59, 130, 246, 0.2)',
             borderColor: 'rgba(59, 130, 246, 1)',
@@ -347,7 +313,6 @@ const Dashboard = () => {
         }
       })
 
-      // Se não há dados válidos, usar dados de fallback
       if (hourlyData.every(count => count === 0)) {
         return {
           labels: Array.from({ length: 24 }, (_, i) => `${i}:00`),
@@ -382,7 +347,6 @@ const Dashboard = () => {
       }
     } catch (error) {
       console.warn('Erro ao analisar padrões de escuta:', error)
-      // Retornar dados de fallback em caso de erro
       return {
         labels: Array.from({ length: 24 }, (_, i) => `${i}:00`),
         datasets: [{
@@ -442,11 +406,33 @@ const Dashboard = () => {
     return 'Calmo'
   }
 
+  const handlePlayTrack = async (track, index) => {
+    try {
+      await playTrack(track, topTracks, index)
+    } catch (error) {
+      console.error('Erro ao reproduzir música:', error)
+    }
+  }
+
+  const handlePlayArtist = async (artist) => {
+    try {
+      const response = await spotifyAPI.getArtistTopTracks(artist.id)
+      const artistTopTracks = response.data.tracks
+      
+      if (artistTopTracks && artistTopTracks.length > 0) {
+        await playTrack(artistTopTracks[0], artistTopTracks, 0)
+      } else {
+        console.warn('Nenhuma música encontrada para este artista')
+      }
+    } catch (error) {
+      console.error('Erro ao reproduzir artista:', error)
+    }
+  }
+
   if (loading) return <Loading />
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white">
-      {/* Estilos CSS personalizados para animações */}
+    <div className="min-h-screen bg-gradient-to-br from-black via-gray900 to-black text-white">
       <style jsx>{`
         @keyframes fadeInUp {
           from {
@@ -921,8 +907,19 @@ const Dashboard = () => {
                       {/* Overlay com controles */}
                       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg flex items-center justify-center">
                         <div className="flex space-x-3">
-                          <button className="p-3 bg-green-600 hover:bg-green-700 rounded-full transition-colors shadow-lg">
-                            <Play className="w-6 h-6 text-white" />
+                          <button 
+                            onClick={() => handlePlayTrack(track, index)}
+                            className={`p-3 rounded-full transition-colors shadow-lg ${
+                              musicCurrentTrack?.id === track.id && musicIsPlaying 
+                                ? 'bg-green-500 hover:bg-green-600' 
+                                : 'bg-green-600 hover:bg-green-700'
+                            }`}
+                          >
+                            {musicCurrentTrack?.id === track.id && musicIsPlaying ? (
+                              <Pause className="w-6 h-6 text-white" />
+                            ) : (
+                              <Play className="w-6 h-6 text-white" />
+                            )}
                           </button>
                           <button className="p-3 bg-white/20 hover:bg-white/30 rounded-full transition-colors shadow-lg">
                             <Heart className="w-5 h-5 text-white" />
@@ -1050,7 +1047,10 @@ const Dashboard = () => {
                       {/* Overlay com controles */}
                       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full flex items-center justify-center">
                         <div className="flex space-x-3">
-                          <button className="p-3 bg-blue-600 hover:bg-blue-700 rounded-full transition-colors shadow-lg">
+                          <button 
+                            onClick={() => handlePlayArtist(artist)}
+                            className="p-3 bg-blue-600 hover:bg-blue-700 rounded-full transition-colors shadow-lg"
+                          >
                             <Play className="w-6 h-6 text-white" />
                           </button>
                           <button className="p-3 bg-white/20 hover:bg-white/30 rounded-full transition-colors shadow-lg">

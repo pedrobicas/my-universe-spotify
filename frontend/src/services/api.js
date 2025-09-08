@@ -1,6 +1,5 @@
 import axios from 'axios'
 
-// Global state to prevent multiple refresh attempts
 let isRefreshing = false
 let failedQueue = []
 
@@ -17,15 +16,13 @@ const processQueue = (error, token = null) => {
 }
 
 const api = axios.create({
-  baseURL: 'http://127.0.0.1:8080', // Use 127.0.0.1 for Spotify compatibility
+  baseURL: 'http://127.0.0.1:8080',
   withCredentials: true,
   timeout: 10000,
 })
 
-// Request interceptor
 api.interceptors.request.use(
   (config) => {
-    // Add loading state if needed
     return config
   },
   (error) => {
@@ -33,7 +30,6 @@ api.interceptors.request.use(
   }
 )
 
-// Response interceptor
 api.interceptors.response.use(
   (response) => {
     return response
@@ -41,14 +37,12 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config
 
-    // Handle 401 errors (unauthorized) - but only for non-auth endpoints
     if (error.response?.status === 401 && 
         !originalRequest._retry && 
         !originalRequest.url?.includes('/auth/') &&
         !originalRequest.url?.includes('/refresh_token')) {
       
       if (isRefreshing) {
-        // If already refreshing, queue this request
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject })
         }).then(() => {
@@ -62,16 +56,13 @@ api.interceptors.response.use(
       isRefreshing = true
 
       try {
-        // Try to refresh token
         await api.post('/auth/refresh_token')
         
         processQueue(null, true)
         isRefreshing = false
         
-        // Retry original request
         return api(originalRequest)
       } catch (refreshError) {
-        // If refresh fails, redirect to login
         console.log('Token refresh failed, redirecting to login')
         processQueue(refreshError, null)
         isRefreshing = false
@@ -84,19 +75,14 @@ api.interceptors.response.use(
   }
 )
 
-// API methods
 export const spotifyAPI = {
-  // User profile
   getMe: () => api.get('/api/me'),
   
-  // Top content
   getTopTracks: (timeRange = 'short_term', limit = 20) => 
     api.get(`/api/top/tracks?time_range=${timeRange}&limit=${limit}`),
   
   getTopArtists: (timeRange = 'short_term', limit = 20) => 
     api.get(`/api/top/artists?time_range=${timeRange}&limit=${limit}`),
-  
-  // Playlists
   getPlaylists: (limit = 50) => 
     api.get(`/api/playlists?limit=${limit}`),
   
@@ -128,34 +114,30 @@ export const spotifyAPI = {
   getPlaylistAnalytics: (playlistId) => 
     api.get(`/api/playlists/${playlistId}/analytics`),
   
-  // Audio features
   getAudioFeatures: (trackIds) => 
     api.get(`/api/audio-features?trackIds=${trackIds.join(',')}`),
   
-  // Recently played
   getRecentlyPlayed: (limit = 20) => 
     api.get(`/api/recently-played?limit=${limit}`),
   
-  // Search
   searchTracks: (query, limit = 20) => 
     api.get(`/api/search/tracks?q=${encodeURIComponent(query)}&limit=${limit}`),
   
   searchPlaylists: (query, limit = 20) => 
     api.get(`/api/search/playlists?q=${encodeURIComponent(query)}&limit=${limit}`),
   
-  // Track details
   getTrack: (trackId) => 
     api.get(`/api/tracks/${trackId}`),
   
-  // Recommendations
   getRecommendations: (params) => 
     api.get('/api/recommendations', { params }),
   
-  // Followed artists
   getFollowedArtists: (limit = 50) => 
     api.get(`/api/me/following/artists?limit=${limit}`),
 
-  // Playback controls
+  getArtistTopTracks: (artistId, market = 'US') => 
+    api.get(`/api/artists/${artistId}/top-tracks?market=${market}`),
+
   startPlayback: (options) => 
     api.put('/api/player/start', options),
   

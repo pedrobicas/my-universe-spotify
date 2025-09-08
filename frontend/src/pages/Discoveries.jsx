@@ -29,7 +29,6 @@ const Discoveries = () => {
   const [worldMusic, setWorldMusic] = useState([]);
   const [fallbackMessage, setFallbackMessage] = useState('');
 
-  // Mapear cada mood para um gênero seguro e coerente
   const moodGenreMap = {
     energetic: 'dance',
     chill: 'chill',
@@ -41,7 +40,6 @@ const Discoveries = () => {
     sleep: 'ambient',
   };
 
-  // Moods/Climas disponíveis
   const moods = [
     { id: 'energetic', name: 'Energético', icon: Zap, color: 'from-yellow-400 to-orange-500', seeds: { target_energy: 0.8, target_valence: 0.7, target_danceability: 0.7 } },
     { id: 'chill', name: 'Relaxante', icon: Waves, color: 'from-blue-400 to-cyan-500', seeds: { target_energy: 0.3, target_valence: 0.5, target_acousticness: 0.7 } },
@@ -53,7 +51,6 @@ const Discoveries = () => {
     { id: 'sleep', name: 'Dormir', icon: Moon, color: 'from-indigo-400 to-purple-600', seeds: { target_energy: 0.1, target_valence: 0.3, target_acousticness: 0.9 } }
   ];
 
-  // Atividades
   const activities = [
     { id: 'commute', name: 'Viagem/Trânsito', icon: Car, duration: 30 },
     { id: 'work', name: 'Trabalho', icon: Coffee, duration: 120 },
@@ -63,7 +60,6 @@ const Discoveries = () => {
     { id: 'relaxing', name: 'Relaxar', icon: Waves, duration: 60 }
   ];
 
-  // Países e regiões para música mundial
   const regions = [
     { id: 'BR', name: 'Brasil', flag: '🇧🇷', genres: ['latin', 'brazil'] },
     { id: 'JP', name: 'Japão', flag: '🇯🇵', genres: ['j-pop', 'j-rock'] },
@@ -75,7 +71,6 @@ const Discoveries = () => {
     { id: 'NG', name: 'Nigéria', flag: '🇳🇬', genres: ['afrobeat'] }
   ];
 
-  // Combinações de gêneros interessantes
   const genreMixes = [
     { id: 'jazz-electronic', name: 'Jazz + Eletrônico', genres: ['jazz', 'electronic'], icon: Disc3 },
     { id: 'classical-ambient', name: 'Clássico + Ambiente', genres: ['classical', 'ambient'], icon: Wind },
@@ -94,16 +89,13 @@ const Discoveries = () => {
   const loadDiscoveryData = async () => {
     setLoading(true);
     try {
-      // Carregar dados básicos para recomendações
       const [topTracks, topArtists] = await Promise.all([
         spotifyAPI.getTopTracks('medium_term', 20),
         spotifyAPI.getTopArtists('medium_term', 10)
       ]);
 
-      // Buscar recomendações baseadas no horário atual
       await generateTimeBasedRecommendations();
       
-      // Buscar artistas emergentes (baixa popularidade mas com características interessantes)
       await findEmergingArtists();
 
     } catch (error) {
@@ -120,15 +112,13 @@ const Discoveries = () => {
       setSelectedMood(mood);
       setSelectedActivity(activity);
 
-      // Para o Gerador por Clima, vamos usar APENAS o gênero e características do mood
-      // Não incluir seeds do usuário para ter resultados mais puros e variados
       const chosenGenre = moodGenreMap[mood.id] || 'pop';
       const limit = Math.min(100, Math.max(10, activity ? Math.ceil(activity.duration / 3) : 30));
       const params = {
         limit,
         market: 'BR',
-        seed_genres: chosenGenre, // Gênero coerente com o mood
-        ...mood.seeds, // Características de audio (target_energy, target_valence, etc.)
+        seed_genres: chosenGenre,
+        ...mood.seeds,
       };
 
   const response = await spotifyAPI.getRecommendations(params);
@@ -149,14 +139,12 @@ const Discoveries = () => {
     } catch (error) {
       console.error('Error generating mood playlist:', error);
       
-      // Fallback: tentar apenas com gênero e características do mood
       try {
         console.log('Trying fallback with genre only...');
         const fallbackResponse = await spotifyAPI.getRecommendations({
           seed_genres: chosenGenre,
           market: 'BR',
           limit: 20,
-          // Usar as características originais do mood no fallback
           target_valence: mood.seeds.target_valence || 0.5,
           target_energy: mood.seeds.target_energy || 0.5,
         });
@@ -189,23 +177,19 @@ const Discoveries = () => {
     let timeParams = {};
 
     if (hour >= 6 && hour < 12) {
-      // Manhã: energético e positivo
       timeParams = { target_valence: 0.7, target_energy: 0.6, target_danceability: 0.6 };
     } else if (hour >= 12 && hour < 18) {
-      // Tarde: equilibrado
       timeParams = { target_valence: 0.6, target_energy: 0.5, target_acousticness: 0.4 };
     } else if (hour >= 18 && hour < 22) {
-      // Noite: mais relaxante
       timeParams = { target_valence: 0.5, target_energy: 0.4, target_acousticness: 0.6 };
     } else {
-      // Madrugada: calmo e introspectivo
       timeParams = { target_valence: 0.3, target_energy: 0.2, target_acousticness: 0.8 };
     }
 
     try {
       setFallbackMessage('');
       const response = await spotifyAPI.getRecommendations({
-        seed_genres: 'pop', // Usar apenas um gênero seguro
+        seed_genres: 'pop',
         limit: 20,
         ...timeParams
       });
@@ -213,7 +197,6 @@ const Discoveries = () => {
       setTimeBasedRecs(response.data.tracks);
     } catch (error) {
       console.error('Error getting time-based recommendations:', error);
-      // Fallback simples
       try {
         setFallbackMessage('');
         const fallback = await spotifyAPI.getRecommendations({
@@ -231,11 +214,10 @@ const Discoveries = () => {
   const findEmergingArtists = async () => {
     try {
   setFallbackMessage('');
-      // Buscar recomendações com artistas de baixa popularidade
       const response = await spotifyAPI.getRecommendations({
-        seed_genres: 'indie', // Usar apenas um gênero válido
+        seed_genres: 'indie', 
         limit: 20,
-        max_popularity: 30, // Artistas menos conhecidos
+        max_popularity: 30, 
         target_energy: 0.4
       });
 
@@ -257,7 +239,6 @@ const Discoveries = () => {
   setSelectedGenreMix([genreMix]);
   setFallbackMessage('');
 
-      // Usar apenas o primeiro gênero para garantir que seja válido
       const genre = genreMix.genres[0];
 
   const response = await spotifyAPI.getRecommendations({
@@ -271,7 +252,6 @@ const Discoveries = () => {
   setSimilarTracks(response.data.tracks);
     } catch (error) {
       console.error('Error exploring genre mix:', error);
-      // Fallback com pop
       try {
         setFallbackMessage('');
         const fallback = await spotifyAPI.getRecommendations({
@@ -292,7 +272,6 @@ const Discoveries = () => {
       setLoading(true);
   setFallbackMessage('');
 
-      // Usar apenas o primeiro gênero da região
       const genre = region.genres[0];
 
       const response = await spotifyAPI.getRecommendations({
@@ -305,7 +284,6 @@ const Discoveries = () => {
   setWorldMusic(response.data.tracks);
     } catch (error) {
       console.error('Error exploring world music:', error);
-      // Fallback com pop
       try {
         setFallbackMessage('');
         const fallback = await spotifyAPI.getRecommendations({

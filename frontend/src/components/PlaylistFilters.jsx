@@ -56,7 +56,6 @@ const PlaylistFilters = ({
     filters.collaborative !== 'all' ||
     filters.liked !== 'all'
 
-  // Componente de Select customizado
   const CustomSelect = ({ value, onChange, options, placeholder, icon: Icon, className = '' }) => (
     <div className={`relative group ${className}`}>
       <select

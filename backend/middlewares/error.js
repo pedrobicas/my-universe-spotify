@@ -1,12 +1,10 @@
 const errorHandler = (err, req, res, next) => {
   console.error('Error:', err);
 
-  // Default error
   let statusCode = 500;
   let message = 'Internal Server Error';
   let error = 'Server Error';
 
-  // Handle specific error types
   if (err.name === 'ValidationError') {
     statusCode = 400;
     message = 'Validation Error';
@@ -20,18 +18,15 @@ const errorHandler = (err, req, res, next) => {
     message = 'Service Unavailable';
     error = 'External service is not available';
   } else if (err.response) {
-    // Handle axios errors
     statusCode = err.response.status || 500;
     message = err.response.statusText || 'Request failed';
     error = err.response.data?.error || err.message;
   } else if (err.status) {
-    // Handle custom errors
     statusCode = err.status;
     message = err.message || 'Error occurred';
     error = err.error || err.message;
   }
 
-  // Log error details in development
   if (process.env.NODE_ENV === 'development') {
     console.error('Error details:', {
       message: err.message,
