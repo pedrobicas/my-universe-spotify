@@ -57,9 +57,9 @@ app.use((req, res, next) => {
     const cookieOptions = {
       ...options,
       path: '/',
-      sameSite: 'lax',
       httpOnly: options.httpOnly !== false,
-      secure: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       domain: undefined
     };
     

@@ -71,13 +71,15 @@ class AuthController {
       
       res.setCookie('spotify_access_token', access_token, {
         httpOnly: true,
-        secure: false,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         maxAge: expires_in * 1000
       });
 
       res.setCookie('spotify_refresh_token', refresh_token, {
         httpOnly: true,
-        secure: false,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         maxAge: 30 * 24 * 60 * 60 * 1000
       });
       
