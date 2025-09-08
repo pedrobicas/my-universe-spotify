@@ -56,3 +56,4 @@ backend/.env.local
 /INSTALLATION.md
 /PROJECT_SUMMARY.md
 /SPOTIFY_PERMISSIONS.md
+.vercel
