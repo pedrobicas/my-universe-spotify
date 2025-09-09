@@ -10,6 +10,7 @@ import Playlists from './pages/Playlists'
 import Discoveries from './pages/Discoveries'
 import Profile from './pages/Profile'
 import Settings from './pages/Settings'
+import AuthSuccess from './pages/AuthSuccess'
 import Loading from './components/Loading'
 import NowPlaying from './components/NowPlaying'
 import { Suspense } from 'react'
@@ -25,6 +26,7 @@ function App() {
             <Suspense fallback={<Loading />}>
               <Routes>
                 <Route path="/login" element={<Login />} />
+                <Route path="/auth/success" element={<AuthSuccess />} />
                 <Route 
                   path="/dashboard" 
                   element={

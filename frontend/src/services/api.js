@@ -23,10 +23,14 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    return config
+    const token = localStorage.getItem('spotify_access_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
   },
   (error) => {
-    return Promise.reject(error)
+    return Promise.reject(error);
   }
 )
 
@@ -56,7 +60,23 @@ api.interceptors.response.use(
       isRefreshing = true
 
       try {
-        await api.post('/auth/refresh_token')
+        const refreshToken = localStorage.getItem('spotify_refresh_token');
+        if (!refreshToken) {
+          throw new Error('No refresh token available');
+        }
+
+        const response = await api.post('/auth/refresh_token', {
+          refresh_token: refreshToken
+        });
+        
+        const { access_token, refresh_token: new_refresh_token, expires_in } = response.data;
+        
+        // Atualizar tokens no localStorage
+        localStorage.setItem('spotify_access_token', access_token);
+        if (new_refresh_token) {
+          localStorage.setItem('spotify_refresh_token', new_refresh_token);
+        }
+        localStorage.setItem('spotify_expires_at', Date.now() + (expires_in * 1000));
         
         processQueue(null, true)
         isRefreshing = false
@@ -64,6 +84,10 @@ api.interceptors.response.use(
         return api(originalRequest)
       } catch (refreshError) {
         console.log('Token refresh failed, redirecting to login')
+        localStorage.removeItem('spotify_access_token');
+        localStorage.removeItem('spotify_refresh_token');
+        localStorage.removeItem('spotify_expires_at');
+        
         processQueue(refreshError, null)
         isRefreshing = false
         window.location.href = '/login'

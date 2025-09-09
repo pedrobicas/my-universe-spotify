@@ -54,6 +54,15 @@ export const AuthProvider = ({ children }) => {
       setLoading(true)
       setError(null)
       
+      // Se já temos tokens válidos, apenas verificar auth
+      const accessToken = localStorage.getItem('spotify_access_token');
+      const expiresAt = localStorage.getItem('spotify_expires_at');
+      
+      if (accessToken && expiresAt && Date.now() < parseInt(expiresAt)) {
+        await checkAuth();
+        return;
+      }
+      
       const response = await api.get('/auth/login')
       window.location.href = response.data.authUrl
     } catch (error) {
@@ -66,10 +75,14 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       await api.post('/auth/logout')
-      setUser(null)
-      navigate('/login')
     } catch (error) {
       console.error('Logout failed:', error)
+    } finally {
+      // Limpar tokens do localStorage
+      localStorage.removeItem('spotify_access_token');
+      localStorage.removeItem('spotify_refresh_token');
+      localStorage.removeItem('spotify_expires_at');
+      
       setUser(null)
       navigate('/login')
     }
