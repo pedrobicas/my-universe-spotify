@@ -2,7 +2,13 @@ const axios = require('axios');
 
 const authenticateToken = async (req, res, next) => {
   try {
-    const accessToken = req.cookies.spotify_access_token;
+    let accessToken = null;
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      accessToken = authHeader.substring(7);
+    } else {
+      accessToken = req.cookies.spotify_access_token;
+    }
     
     if (!accessToken) {
       return res.status(401).json({ 
@@ -23,6 +29,13 @@ const authenticateToken = async (req, res, next) => {
       next();
     } catch (spotifyError) {
       if (spotifyError.response && spotifyError.response.status === 401) {
+        if (authHeader) {
+          return res.status(401).json({ 
+            error: 'Token expired',
+            message: 'Token needs refresh' 
+          });
+        }
+        
         const refreshToken = req.cookies.spotify_refresh_token;
         
         if (!refreshToken) {

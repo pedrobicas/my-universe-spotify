@@ -24,6 +24,11 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('spotify_access_token');
+    console.log('API Request:', {
+      url: config.url,
+      hasToken: !!token,
+      tokenLength: token?.length
+    });
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

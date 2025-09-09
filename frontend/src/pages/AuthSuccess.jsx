@@ -14,20 +14,25 @@ const AuthSuccess = () => {
       const refreshToken = searchParams.get('refresh_token');
       const expiresIn = searchParams.get('expires_in');
 
+      console.log('AuthSuccess - Tokens received:', {
+        hasAccessToken: !!accessToken,
+        hasRefreshToken: !!refreshToken,
+        expiresIn,
+        accessTokenLength: accessToken?.length
+      });
+
       if (accessToken && refreshToken) {
-        // Salvar tokens no localStorage
         localStorage.setItem('spotify_access_token', accessToken);
         localStorage.setItem('spotify_refresh_token', refreshToken);
         localStorage.setItem('spotify_expires_at', 
           Date.now() + (parseInt(expiresIn) * 1000)
         );
 
-        // Atualizar o contexto de autenticação
+        console.log('AuthSuccess - Tokens saved to localStorage');
         await login();
-
-        // Limpar a URL e redirecionar
         navigate('/dashboard', { replace: true });
       } else {
+        console.error('AuthSuccess - Missing tokens in URL');
         navigate('/login?error=auth_failed', { replace: true });
       }
     };
