@@ -40,8 +40,12 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('Auth check failed:', error)
-      if (error.response?.status !== 401) {
-        setError('Authentication check failed')
+      
+      if (error.response?.status === 403) {
+        setError('Usuário não autorizado para esta aplicação')
+        navigate('/login?error=user_not_authorized')
+      } else if (error.response?.status !== 401) {
+        setError('Falha na verificação de autenticação')
       }
       setUser(null)
     } finally {

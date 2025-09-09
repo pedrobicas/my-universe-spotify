@@ -76,6 +76,10 @@ class AuthController {
       
       if (error.response) {
         console.error('Spotify error response:', error.response.data);
+        
+        if (error.response.status === 403) {
+          return res.redirect(`${process.env.FRONTEND_URL}/login?error=user_not_authorized&message=User not authorized to access this app`);
+        }
       }
 
       res.redirect(`${process.env.FRONTEND_URL}/login?error=auth_failed`);
@@ -84,10 +88,8 @@ class AuthController {
 
   async refreshToken(req, res) {
     try {
-      // Primeiro tenta pegar do body da requisição
       let refreshToken = req.body.refresh_token;
       
-      // Fallback para cookies
       if (!refreshToken) {
         refreshToken = req.cookies.spotify_refresh_token;
       }
@@ -114,7 +116,6 @@ class AuthController {
 
       const { access_token, refresh_token: new_refresh_token, expires_in } = tokenResponse.data;
 
-      // Retorna os tokens como JSON
       res.json({ 
         access_token,
         refresh_token: new_refresh_token || refreshToken,
@@ -149,14 +150,12 @@ class AuthController {
     try {
       console.log('Checking auth... Cookies:', Object.keys(req.cookies));
       
-      // Primeiro tenta pegar do header Authorization
       let accessToken = null;
       const authHeader = req.headers.authorization;
       if (authHeader && authHeader.startsWith('Bearer ')) {
         accessToken = authHeader.substring(7);
         console.log('Access token found in Authorization header');
       } else {
-        // Fallback para cookies (para compatibilidade)
         accessToken = req.cookies.spotify_access_token;
         if (accessToken) {
           console.log('Access token found in cookies');
@@ -190,6 +189,14 @@ class AuthController {
         return res.status(401).json({ 
           authenticated: false,
           message: 'Invalid token' 
+        });
+      }
+
+      if (error.response && error.response.status === 403) {
+        return res.status(403).json({ 
+          authenticated: false,
+          message: 'Access forbidden. This user is not authorized to use this app. Please add the user in Spotify Developer Dashboard or contact the app administrator.',
+          code: 'USER_NOT_AUTHORIZED'
         });
       }
 

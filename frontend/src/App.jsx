@@ -11,6 +11,8 @@ import Discoveries from './pages/Discoveries'
 import Profile from './pages/Profile'
 import Settings from './pages/Settings'
 import AuthSuccess from './pages/AuthSuccess'
+import Privacy from './pages/Privacy'
+import Terms from './pages/Terms'
 import Loading from './components/Loading'
 import NowPlaying from './components/NowPlaying'
 import { Suspense } from 'react'
@@ -67,6 +69,8 @@ function App() {
                   </PrivateRoute>
                 } 
               />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
             </Routes>
           </Suspense>

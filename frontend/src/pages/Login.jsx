@@ -1,16 +1,30 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
-import { Music2, Waves, Headphones, Disc, Radio, Mic, Guitar } from 'lucide-react'
+import { Music2, Waves, Headphones, Disc, Radio, Mic, Guitar, AlertCircle } from 'lucide-react'
 import Button from '../components/Button'
 
 const Login = () => {
   const { login, loading, error } = useAuth()
   const [animate, setAnimate] = useState(false)
   const [particles, setParticles] = useState([])
+  const [urlError, setUrlError] = useState('')
 
   useEffect(() => {
     setAnimate(true)
     generateParticles()
+    
+    // Verificar se há erro na URL
+    const urlParams = new URLSearchParams(window.location.search)
+    const errorParam = urlParams.get('error')
+    const messageParam = urlParams.get('message')
+    
+    if (errorParam === 'user_not_authorized') {
+      setUrlError('Usuário não autorizado. Esta conta não tem permissão para acessar esta aplicação.')
+    } else if (errorParam === 'auth_failed') {
+      setUrlError('Falha na autenticação. Tente novamente.')
+    } else if (messageParam) {
+      setUrlError(decodeURIComponent(messageParam))
+    }
   }, [])
 
   const generateParticles = () => {
@@ -117,9 +131,29 @@ const Login = () => {
             </Button>
 
             {/* Mensagem de erro */}
-            {error && (
-              <div className="mt-4 p-3 bg-red-500/20 border border-red-500/30 rounded-lg">
-                <p className="text-red-400 text-sm">{error}</p>
+            {(error || urlError) && (
+              <div className="mt-4 p-4 bg-red-500/20 border border-red-500/30 rounded-lg">
+                <div className="flex items-start space-x-3">
+                  <AlertCircle className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-red-400 text-sm font-medium">
+                      {urlError || error}
+                    </p>
+                    {urlError === 'Usuário não autorizado. Esta conta não tem permissão para acessar esta aplicação.' && (
+                      <div className="mt-2 text-red-300 text-xs">
+                        <p>Esta aplicação está em modo de desenvolvimento.</p>
+                        <p>Para acessar, você precisa:</p>
+                        <ul className="mt-1 ml-4 list-disc">
+                          <li>Ser adicionado como usuário autorizado no Spotify Developer Dashboard</li>
+                          <li>Ou aguardar a aplicação ser aprovada para uso público</li>
+                        </ul>
+                        <p className="mt-2">
+                          Entre em contato com o administrador da aplicação se precisar de acesso.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
 
@@ -127,8 +161,12 @@ const Login = () => {
             <div className="mt-6 text-center">
               <p className="text-gray-400 text-sm">
                 Ao fazer login, você concorda com nossos{' '}
-                <a href="#" className="text-green-400 hover:text-green-300 underline">
+                <a href="/terms" className="text-green-400 hover:text-green-300 underline">
                   Termos de Serviço
+                </a>
+                {' '}e{' '}
+                <a href="/privacy" className="text-green-400 hover:text-green-300 underline">
+                  Política de Privacidade
                 </a>
               </p>
             </div>
