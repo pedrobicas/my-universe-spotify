@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
+import { useDemo } from '../contexts/DemoContext'
 import { spotifyAPI } from '../services/api'
+import demoAPI from '../services/demoAPI'
 import { 
   Plus, 
   Music, 
@@ -19,6 +21,7 @@ import '../styles/playlists.css'
 
 const Playlists = () => {
   const { user } = useAuth()
+  const { isDemoMode } = useDemo()
   const [playlists, setPlaylists] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -49,14 +52,20 @@ const Playlists = () => {
   const [shuffle, setShuffle] = useState(false)
   const [repeat, setRepeat] = useState('none')
 
+  // Função para obter a API correta baseada no modo
+  const getAPI = () => {
+    return isDemoMode ? demoAPI : spotifyAPI;
+  };
+
   useEffect(() => {
     loadPlaylists()
-  }, [])
+  }, [isDemoMode])
 
   const loadPlaylists = async () => {
     try {
       setLoading(true)
-      const response = await spotifyAPI.getPlaylists(50)
+      const api = getAPI();
+      const response = await api.getPlaylists(50)
       
       const validPlaylists = response.data.items?.filter(playlist => 
         playlist && 
@@ -68,7 +77,8 @@ const Playlists = () => {
       const playlistsWithTracks = await Promise.all(
         validPlaylists.map(async (playlist) => {
           try {
-            const tracksResponse = await spotifyAPI.getPlaylistTracks(playlist.id)
+            const api = getAPI();
+            const tracksResponse = await api.getPlaylistTracks(playlist.id)
             return {
               ...playlist,
               tracks: tracksResponse.data
@@ -199,7 +209,8 @@ const Playlists = () => {
         setIsPlaying(true)
       } else {
         try {
-          const response = await spotifyAPI.getPlaylistTracks(playlist.id)
+          const api = getAPI();
+          const response = await api.getPlaylistTracks(playlist.id)
           const tracks = response.data.items?.map(item => item.track).filter(Boolean) || []
           if (tracks.length > 0) {
             setQueue(tracks)

@@ -395,7 +395,7 @@ const PlaylistEditModal = ({
                       <div key={track.id} className="flex items-center justify-between p-2 sm:p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors gap-2 sm:gap-3">
                         <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
                           <img
-                            src={track.album?.images?.[0]?.url || '/default-track.jpg'}
+                            src={track.album?.images?.[0]?.url || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDMwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjMUQxRDFEIi8+CjxwYXRoIGQ9Ik0xNTAgMTAwQzEyMi4zODYgMTAwIDEwMCAxMjIuMzg2IDEwMCAxNTBDMTAwIDE3Ny42MTQgMTIyLjM4NiAyMDAgMTUwIDIwMEMxNzcuNjE0IDIwMCAyMDAgMTc3LjYxNCAyMDAgMTUwQzIwMCAxMjIuMzg2IDE3Ny42MTQgMTAwIDE1MCAxMDBaTTE1MCAxODBDMTMzLjQzMSAxODAgMTIwIDE2Ni41NjkgMTIwIDE1MEMxMjAgMTMzLjQzMSAxMzMuNDMxIDEyMCAxNTAgMTIwQzE2Ni41NjkgMTIwIDE4MCAxMzMuNDMxIDE4MCAxNTBDMTgwIDE2Ni41NjkgMTY2LjU2OSAxODAgMTUwIDE4MFoiIGZpbGw9IiMxREI5NTQiLz4KPHN2Zz4K'}
                             alt={track.album?.name || 'Track'}
                             className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex-shrink-0"
                           />
@@ -460,7 +460,7 @@ const PlaylistEditModal = ({
                         </div>
                         
                         <img
-                          src={track.album?.images?.[0]?.url || '/default-track.jpg'}
+                          src={track.album?.images?.[0]?.url || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDMwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjMUQxRDFEIi8+CjxwYXRoIGQ9Ik0xNTAgMTAwQzEyMi4zODYgMTAwIDEwMCAxMjIuMzg2IDEwMCAxNTBDMTAwIDE3Ny42MTQgMTIyLjM4NiAyMDAgMTUwIDIwMEMxNzcuNjE0IDIwMCAyMDAgMTc3LjYxNCAyMDAgMTUwQzIwMCAxMjIuMzg2IDE3Ny42MTQgMTAwIDE1MCAxMDBaTTE1MCAxODBDMTMzLjQzMSAxODAgMTIwIDE2Ni41NjkgMTIwIDE1MEMxMjAgMTMzLjQzMSAxMzMuNDMxIDEyMCAxNTAgMTIwQzE2Ni41NjkgMTIwIDE4MCAxMzMuNDMxIDE4MCAxNTBDMTgwIDE2Ni41NjkgMTY2LjU2OSAxODAgMTUwIDE4MFoiIGZpbGw9IiMxREI5NTQiLz4KPHN2Zz4K'}
                           alt={track.album?.name || 'Track'}
                           className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex-shrink-0"
                         />

@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { spotifyAPI } from '../services/api';
+import { useDemo } from './DemoContext';
+import demoAPI from '../services/demoAPI';
 
 const MusicContext = createContext();
 
@@ -12,15 +14,22 @@ export const useMusic = () => {
 };
 
 export const MusicProvider = ({ children }) => {
+  const { isDemoMode } = useDemo();
   const [currentQueue, setCurrentQueue] = useState([]);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [devices, setDevices] = useState([]);
   const [selectedDevice, setSelectedDevice] = useState(null);
 
+  // Função para obter a API correta baseada no modo
+  const getAPI = () => {
+    return isDemoMode ? demoAPI : spotifyAPI;
+  };
+
   const fetchDevices = useCallback(async () => {
     try {
-      const response = await spotifyAPI.getDevices();
+      const api = getAPI();
+      const response = await api.getDevices();
       setDevices(response.data?.devices || []);
       
       const activeDevice = response.data?.devices?.find(device => device.is_active);
@@ -30,10 +39,11 @@ export const MusicProvider = ({ children }) => {
     } catch (error) {
       console.error('Error fetching devices:', error);
     }
-  }, [selectedDevice]);
+  }, [selectedDevice, isDemoMode]);
 
   const playTrack = useCallback(async (track, queue = [track], startIndex = 0) => {
     try {
+      const api = getAPI();
       const trackUris = queue.map(t => `spotify:track:${t.id}`);
       
       const options = {
@@ -45,7 +55,7 @@ export const MusicProvider = ({ children }) => {
         options.deviceId = selectedDevice;
       }
 
-      await spotifyAPI.startPlayback(options);
+      await api.startPlayback(options);
       
       setCurrentQueue(queue);
       setCurrentTrackIndex(startIndex);
@@ -56,16 +66,17 @@ export const MusicProvider = ({ children }) => {
       console.error('Error playing track:', error);
       throw error;
     }
-  }, [selectedDevice]);
+  }, [selectedDevice, isDemoMode]);
 
   const playPlaylist = useCallback(async (playlist, startIndex = 0) => {
     try {
+      const api = getAPI();
       let tracks = [];
       
       if (playlist.tracks?.items) {
         tracks = playlist.tracks.items.map(item => item.track).filter(Boolean);
       } else {
-        const response = await spotifyAPI.getPlaylistTracks(playlist.id);
+        const response = await api.getPlaylistTracks(playlist.id);
         tracks = response.data.items?.map(item => item.track).filter(Boolean) || [];
       }
 
@@ -78,10 +89,11 @@ export const MusicProvider = ({ children }) => {
       console.error('Error playing playlist:', error);
       throw error;
     }
-  }, [playTrack]);
+  }, [playTrack, isDemoMode]);
 
   const playContext = useCallback(async (contextUri, startIndex = 0) => {
     try {
+      const api = getAPI();
       const options = {
         contextUri,
         offset: startIndex
@@ -91,7 +103,7 @@ export const MusicProvider = ({ children }) => {
         options.deviceId = selectedDevice;
       }
 
-      await spotifyAPI.startPlayback(options);
+      await api.startPlayback(options);
       setIsPlaying(true);
       
       return true;
@@ -99,7 +111,7 @@ export const MusicProvider = ({ children }) => {
       console.error('Error playing context:', error);
       throw error;
     }
-  }, [selectedDevice]);
+  }, [selectedDevice, isDemoMode]);
 
   const addToQueue = useCallback((track) => {
     setCurrentQueue(prev => [...prev, track]);

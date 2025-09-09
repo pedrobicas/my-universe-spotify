@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useMusic } from '../contexts/MusicContext';
+import { useDemo } from '../contexts/DemoContext';
 import { spotifyAPI } from '../services/api';
+import demoAPI from '../services/demoAPI';
 import { 
   Compass, MapPin, Sun, Moon, CloudRain, Zap, 
   Coffee, Dumbbell, Car, Home, Heart, TrendingUp,
@@ -16,6 +18,7 @@ import Loading from '../components/Loading';
 const Discoveries = () => {
   const { user } = useAuth();
   const { playTrack, currentTrack, isPlaying } = useMusic();
+  const { isDemoMode } = useDemo();
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('mood-generator');
   const [recommendations, setRecommendations] = useState([]);
@@ -80,18 +83,24 @@ const Discoveries = () => {
     { id: 'indie-pop', name: 'Indie + Pop', genres: ['indie', 'pop'], icon: Sparkles }
   ];
 
+  // Função para obter a API correta baseada no modo
+  const getAPI = () => {
+    return isDemoMode ? demoAPI : spotifyAPI;
+  };
+
   useEffect(() => {
     if (user) {
       loadDiscoveryData();
     }
-  }, [user]);
+  }, [user, isDemoMode]);
 
   const loadDiscoveryData = async () => {
     setLoading(true);
     try {
+      const api = getAPI();
       const [topTracks, topArtists] = await Promise.all([
-        spotifyAPI.getTopTracks('medium_term', 20),
-        spotifyAPI.getTopArtists('medium_term', 10)
+        api.getTopTracks('medium_term', 20),
+        api.getTopArtists('medium_term', 10)
       ]);
 
       await generateTimeBasedRecommendations();
@@ -121,7 +130,7 @@ const Discoveries = () => {
         ...mood.seeds,
       };
 
-  const response = await spotifyAPI.getRecommendations(params);
+  const response = await getAPI().getRecommendations(params);
       if (response?.data?.fallback) {
         setFallbackMessage('As recomendações foram geradas em modo fallback — resultados limitados.');
       }
@@ -141,7 +150,7 @@ const Discoveries = () => {
       
       try {
         console.log('Trying fallback with genre only...');
-        const fallbackResponse = await spotifyAPI.getRecommendations({
+        const fallbackResponse = await getAPI().getRecommendations({
           seed_genres: chosenGenre,
           market: 'BR',
           limit: 20,
@@ -188,7 +197,7 @@ const Discoveries = () => {
 
     try {
       setFallbackMessage('');
-      const response = await spotifyAPI.getRecommendations({
+      const response = await getAPI().getRecommendations({
         seed_genres: 'pop',
         limit: 20,
         ...timeParams
@@ -199,7 +208,7 @@ const Discoveries = () => {
       console.error('Error getting time-based recommendations:', error);
       try {
         setFallbackMessage('');
-        const fallback = await spotifyAPI.getRecommendations({
+        const fallback = await getAPI().getRecommendations({
           seed_genres: 'pop',
           limit: 20
         });
@@ -214,7 +223,7 @@ const Discoveries = () => {
   const findEmergingArtists = async () => {
     try {
   setFallbackMessage('');
-      const response = await spotifyAPI.getRecommendations({
+      const response = await getAPI().getRecommendations({
         seed_genres: 'indie', 
         limit: 20,
         max_popularity: 30, 
@@ -241,7 +250,7 @@ const Discoveries = () => {
 
       const genre = genreMix.genres[0];
 
-  const response = await spotifyAPI.getRecommendations({
+  const response = await getAPI().getRecommendations({
         seed_genres: genre,
         limit: 25,
         target_valence: 0.5,

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
-import { Music2, Waves, Headphones, Disc, Radio, Mic, Guitar, AlertCircle } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Music2, Waves, Headphones, Disc, Radio, Mic, Guitar, AlertCircle, Code, Sparkles } from 'lucide-react'
 import Button from '../components/Button'
 
 const Login = () => {
   const { login, loading, error } = useAuth()
+  const navigate = useNavigate()
   const [animate, setAnimate] = useState(false)
   const [particles, setParticles] = useState([])
   const [urlError, setUrlError] = useState('')
@@ -45,6 +47,10 @@ const Login = () => {
     } catch (error) {
       console.error('Login failed:', error)
     }
+  }
+
+  const handleDemoMode = () => {
+    navigate('/demo-login')
   }
 
   const icons = [Music2, Headphones, Disc, Radio, Mic, Guitar]
@@ -111,7 +117,7 @@ const Login = () => {
             <Button
               onClick={handleSpotifyLogin}
               disabled={loading}
-              className={`w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-4 px-6 rounded-xl text-lg transform transition-all duration-300 hover:scale-105 hover:shadow-2xl ${loading ? 'opacity-75 cursor-not-allowed' : ''}`}
+              className={`w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-4 px-6 rounded-xl text-lg transform transition-all duration-300 hover:scale-105 hover:shadow-2xl mb-4 ${loading ? 'opacity-75 cursor-not-allowed' : ''}`}
             >
               {loading ? (
                 <div className="flex items-center justify-center">
@@ -129,6 +135,35 @@ const Login = () => {
                 </div>
               )}
             </Button>
+
+            {/* Separador */}
+            <div className="flex items-center my-4">
+              <div className="flex-1 border-t border-white/10"></div>
+              <span className="px-4 text-gray-400 text-sm">ou</span>
+              <div className="flex-1 border-t border-white/10"></div>
+            </div>
+
+            {/* Botão do Modo Demo */}
+            <Button
+              onClick={handleDemoMode}
+              className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-4 px-6 rounded-xl text-lg transform transition-all duration-300 hover:scale-105 hover:shadow-2xl shadow-purple-500/30"
+            >
+              <div className="flex items-center justify-center">
+                <Code className="w-6 h-6 mr-3" />
+                Experimentar Demo
+              </div>
+            </Button>
+
+            {/* Info sobre demo */}
+            <div className="mt-3 p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg">
+              <div className="flex items-center space-x-2 mb-1">
+                <Sparkles className="w-4 h-4 text-purple-400" />
+                <span className="text-purple-400 text-sm font-medium">Modo Demonstração</span>
+              </div>
+              <p className="text-purple-200 text-xs">
+                Explore todas as funcionalidades com dados simulados, sem precisar de conta do Spotify
+              </p>
+            </div>
 
             {/* Mensagem de erro */}
             {(error || urlError) && (

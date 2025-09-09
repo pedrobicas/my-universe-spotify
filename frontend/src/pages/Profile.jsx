@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useDemo } from '../contexts/DemoContext';
 import { 
   Mail, MapPin, User, Music, Calendar, Clock, Heart, Users, 
   History, Settings, Shield, Globe, Trophy, Headphones,
@@ -8,11 +9,13 @@ import {
   Volume2, Mic, Radio, Disc3, Timer, Zap, Info
 } from 'lucide-react';
 import api from '../services/api';
+import demoAPI from '../services/demoAPI';
 import Card from '../components/Card';
 import Loading from '../components/Loading';
 
 const Profile = () => {
   const { user } = useAuth();
+  const { isDemoMode } = useDemo();
   const [activeTab, setActiveTab] = useState('listening-history');
   const [recentTracks, setRecentTracks] = useState([]);
   const [listeningHistory, setListeningHistory] = useState([]);
@@ -24,35 +27,41 @@ const Profile = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [dateRange, setDateRange] = useState('week');
 
+  // Função para obter a API correta baseada no modo
+  const getAPI = () => {
+    return isDemoMode ? demoAPI : api;
+  };
+
   useEffect(() => {
     if (user) {
       fetchProfileData();
     }
-  }, [user, dateRange]);
+  }, [user, dateRange, isDemoMode]);
 
   const fetchProfileData = async () => {
     setLoading(true);
     try {
+      const currentAPI = getAPI();
       let recentData = [];
       let savedTracksData = { total: 0 };
       let followedArtistsData = { artists: { total: 0 } };
 
       try {
-        const recent = await api.get('/api/recently-played?limit=50');
+        const recent = await currentAPI.get('/api/recently-played?limit=50');
         recentData = recent.data.items || [];
       } catch (error) {
         console.warn('Could not fetch recent tracks:', error.message);
       }
 
       try {
-        const savedTracks = await api.get('/api/me/saved-tracks?limit=50');
+        const savedTracks = await currentAPI.get('/api/me/saved-tracks?limit=50');
         savedTracksData = savedTracks.data;
       } catch (error) {
         console.warn('Could not fetch saved tracks:', error.message);
       }
 
       try {
-        const followed = await api.get('/api/me/followed-artists?limit=50');
+        const followed = await currentAPI.get('/api/me/followed-artists?limit=50');
         followedArtistsData = followed.data;
       } catch (error) {
         console.warn('Could not fetch followed artists (permission issue):', error.message);

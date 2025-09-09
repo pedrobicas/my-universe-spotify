@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useMusic } from '../contexts/MusicContext';
 import { useSettings } from '../contexts/SettingsContext';
+import { useDemo } from '../contexts/DemoContext';
 import api from '../services/api';
+import demoAPI from '../services/demoAPI';
 import { Music, Pause, Play, SkipBack, SkipForward, Volume2, X, Maximize2, Minimize2, Smartphone, Monitor, Speaker } from 'lucide-react';
 
 const NowPlaying = () => {
@@ -15,10 +17,17 @@ const NowPlaying = () => {
   const { user } = useAuth();
   const { devices, selectedDevice, setSelectedDevice, fetchDevices } = useMusic();
   const { settings } = useSettings();
+  const { isDemoMode } = useDemo();
+
+  // Função para obter a API correta
+  const getAPI = () => {
+    return isDemoMode ? demoAPI : api;
+  };
 
   const fetchNowPlaying = async () => {
     try {
-      const { data } = await api.get('/api/now-playing');
+      const currentAPI = getAPI();
+      const { data } = await currentAPI.get('/api/now-playing');
       if (data && data.item) {
         setTrack(data);
         const progressMs = data.progress_ms;
@@ -40,10 +49,11 @@ const NowPlaying = () => {
     
     setIsLoading(true);
     try {
+      const currentAPI = getAPI();
       if (track.is_playing) {
-        await api.put('/api/player/pause');
+        await currentAPI.put('/api/player/pause');
       } else {
-        await api.put('/api/player/play');
+        await currentAPI.put('/api/player/play');
       }
       setTimeout(fetchNowPlaying, 500);
     } catch (error) {
@@ -56,7 +66,8 @@ const NowPlaying = () => {
   const handleNext = async () => {
     setIsLoading(true);
     try {
-      await api.post('/api/player/next');
+      const currentAPI = getAPI();
+      await currentAPI.post('/api/player/next');
       setTimeout(fetchNowPlaying, 500);
     } catch (error) {
       console.error('Error skipping to next:', error);
@@ -68,7 +79,8 @@ const NowPlaying = () => {
   const handlePrevious = async () => {
     setIsLoading(true);
     try {
-      await api.post('/api/player/previous');
+      const currentAPI = getAPI();
+      await currentAPI.post('/api/player/previous');
       setTimeout(fetchNowPlaying, 500);
     } catch (error) {
       console.error('Error skipping to previous:', error);
@@ -84,7 +96,7 @@ const NowPlaying = () => {
       const interval = setInterval(fetchNowPlaying, 3000);
       return () => clearInterval(interval);
     }
-  }, [user, fetchDevices]);
+  }, [user, fetchDevices, isDemoMode]);
 
   const formatTime = (ms) => {
     const minutes = Math.floor(ms / 60000);

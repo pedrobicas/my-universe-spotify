@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { useMusic } from '../contexts/MusicContext'
+import { useDemo } from '../contexts/DemoContext'
 import { spotifyAPI } from '../services/api'
+import demoAPI from '../services/demoAPI'
 import { 
   TrendingUp, 
   Clock, 
@@ -36,6 +38,7 @@ import NowPlaying from '../components/NowPlaying'
 
 const Dashboard = () => {
   const { user } = useAuth()
+  const { isDemoMode } = useDemo()
   const { playTrack, currentTrack: musicCurrentTrack, isPlaying: musicIsPlaying } = useMusic()
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('overview')
@@ -75,19 +78,25 @@ const Dashboard = () => {
     return 50
   }
 
+  // Função para obter a API correta baseada no modo
+  const getAPI = () => {
+    return isDemoMode ? demoAPI : spotifyAPI;
+  };
+
   const loadDashboardData = async () => {
     try {
       setLoading(true)
       
+      const api = getAPI();
       const optimalCount = getOptimalTrackCount(timeRange)
       const recentCount = getRecentTracksCount(timeRange)
       
       const [tracksRes, artistsRes] = await Promise.all([
-        spotifyAPI.getTopTracks(timeRange, optimalCount),
-        spotifyAPI.getTopArtists(timeRange, optimalCount)
+        api.getTopTracks(timeRange, optimalCount),
+        api.getTopArtists(timeRange, optimalCount)
       ])
 
-      const recentRes = await spotifyAPI.getRecentlyPlayed(recentCount)
+      const recentRes = await api.getRecentlyPlayed(recentCount)
 
       setTopTracks(tracksRes.data.items)
       setTopArtists(artistsRes.data.items)
@@ -103,7 +112,7 @@ const Dashboard = () => {
 
       try {
         if (timeRange === 'long_term') {
-          const additionalTracksRes = await spotifyAPI.getTopTracks(timeRange, 50, 50)
+          const additionalTracksRes = await api.getTopTracks(timeRange, 50, 50)
           if (additionalTracksRes.data.items && additionalTracksRes.data.items.length > 0) {
             additionalTracksRes.data.items.forEach(track => {
               if (!allTracksForAnalysis.find(existingTrack => existingTrack.id === track.id)) {
@@ -124,7 +133,7 @@ const Dashboard = () => {
           
           for (let i = 0; i < trackIds.length; i += maxIdsPerRequest) {
             const batch = trackIds.slice(i, i + maxIdsPerRequest)
-            const featuresRes = await spotifyAPI.getAudioFeatures(batch)
+            const featuresRes = await api.getAudioFeatures(batch)
             if (featuresRes.data.audio_features) {
               allAudioFeatures = allAudioFeatures.concat(featuresRes.data.audio_features)
             }
@@ -416,7 +425,8 @@ const Dashboard = () => {
 
   const handlePlayArtist = async (artist) => {
     try {
-      const response = await spotifyAPI.getArtistTopTracks(artist.id)
+      const api = getAPI();
+      const response = await api.getArtistTopTracks(artist.id)
       const artistTopTracks = response.data.tracks
       
       if (artistTopTracks && artistTopTracks.length > 0) {

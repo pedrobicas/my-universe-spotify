@@ -18,7 +18,9 @@ import {
   Pause
 } from 'lucide-react'
 import { spotifyAPI } from '../services/api'
+import demoAPI from '../services/demoAPI'
 import { useMusic } from '../contexts/MusicContext'
+import { useDemo } from '../contexts/DemoContext'
 import Button from './Button'
 import Loading from './Loading'
 
@@ -31,17 +33,24 @@ const PlaylistDetail = ({ playlist, onBack, onEdit, onDelete }) => {
   const [isSearching, setIsSearching] = useState(false)
   const [addTrackQuery, setAddTrackQuery] = useState('')
   const { playTrack, playPlaylist, currentTrack, isPlaying } = useMusic()
+  const { isDemoMode } = useDemo()
+
+  // Função para obter a API correta baseada no modo
+  const getAPI = () => {
+    return isDemoMode ? demoAPI : spotifyAPI;
+  };
 
   useEffect(() => {
     if (playlist) {
       loadPlaylistTracks()
     }
-  }, [playlist])
+  }, [playlist, isDemoMode])
 
   const loadPlaylistTracks = async () => {
     try {
       setLoading(true)
-      const response = await spotifyAPI.getPlaylistTracks(playlist.id)
+      const api = getAPI();
+      const response = await api.getPlaylistTracks(playlist.id)
       setTracks(response.data.items || [])
     } catch (error) {
       console.error('Erro ao carregar tracks:', error)
@@ -56,7 +65,8 @@ const PlaylistDetail = ({ playlist, onBack, onEdit, onDelete }) => {
     
     setIsSearching(true)
     try {
-      const response = await spotifyAPI.searchTracks(addTrackQuery, 20)
+      const api = getAPI();
+      const response = await api.searchTracks(addTrackQuery, 20)
       const tracks = response.data.tracks?.items || []
       setSearchResults(tracks)
     } catch (error) {
@@ -69,7 +79,8 @@ const PlaylistDetail = ({ playlist, onBack, onEdit, onDelete }) => {
 
   const handleAddTrack = async (track) => {
     try {
-      await spotifyAPI.addTracksToPlaylist(playlist.id, [`spotify:track:${track.id}`])
+      const api = getAPI();
+      await api.addTracksToPlaylist(playlist.id, [`spotify:track:${track.id}`])
       await loadPlaylistTracks()
       setSearchResults([])
       setAddTrackQuery('')
@@ -82,7 +93,8 @@ const PlaylistDetail = ({ playlist, onBack, onEdit, onDelete }) => {
 
   const handleRemoveTrack = async (trackId) => {
     try {
-      await spotifyAPI.removeTracksFromPlaylist(playlist.id, [`spotify:track:${trackId}`])
+      const api = getAPI();
+      await api.removeTracksFromPlaylist(playlist.id, [`spotify:track:${trackId}`])
       await loadPlaylistTracks()
     } catch (error) {
       console.error('Erro ao remover track:', error)

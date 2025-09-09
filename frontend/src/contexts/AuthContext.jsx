@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
+import { demoUser } from '../data/demoData'
 
 const AuthContext = createContext()
 
@@ -30,6 +31,15 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true)
       setError(null)
+      
+      // Verificar se está em modo demo
+      const isDemoMode = localStorage.getItem('spotify_demo_mode') === 'true'
+      if (isDemoMode) {
+        // Sempre usar os dados mais atualizados do demoUser
+        setUser(demoUser)
+        localStorage.setItem('spotify_demo_user', JSON.stringify(demoUser))
+        return
+      }
       
       const response = await api.get('/auth/check')
       
@@ -78,14 +88,20 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await api.post('/auth/logout')
+      // Verificar se está em modo demo
+      const isDemoMode = localStorage.getItem('spotify_demo_mode') === 'true'
+      if (!isDemoMode) {
+        await api.post('/auth/logout')
+      }
     } catch (error) {
       console.error('Logout failed:', error)
     } finally {
-      // Limpar tokens do localStorage
+      // Limpar todos os dados
       localStorage.removeItem('spotify_access_token');
       localStorage.removeItem('spotify_refresh_token');
       localStorage.removeItem('spotify_expires_at');
+      localStorage.removeItem('spotify_demo_mode');
+      localStorage.removeItem('spotify_demo_user');
       
       setUser(null)
       navigate('/login')
@@ -110,7 +126,8 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     refreshToken,
-    checkAuth
+    checkAuth,
+    setUser
   }
 
   return (
