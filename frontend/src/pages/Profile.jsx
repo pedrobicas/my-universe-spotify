@@ -284,11 +284,13 @@ const Profile = () => {
             <div className="flex items-center space-x-4">
               <div className="relative group">
                 <img
-                  src={user?.images?.[0]?.url || '/default-avatar.jpg'}
+                  src={user?.images?.[0]?.url || '/default-user.svg'}
                   alt="Avatar"
                   className="w-20 h-20 md:w-32 md:h-32 rounded-full border-4 border-green-500/30 shadow-lg object-cover"
                   onError={(e) => {
-                    e.target.src = '/default-avatar.jpg'
+                    if (e.target.src !== '/default-user.svg') {
+                      e.target.src = '/default-user.svg'
+                    }
                   }}
                 />
                 <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">

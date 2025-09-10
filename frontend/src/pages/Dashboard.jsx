@@ -481,11 +481,13 @@ const Dashboard = () => {
             <div className="flex items-center space-x-4">
               <div className="relative">
                 <img
-                  src={user?.images?.[0]?.url || '/default-avatar.jpg'}
+                  src={user?.images?.[0]?.url || '/default-user.svg'}
                   alt="Avatar"
                   className="w-20 h-20 rounded-full border-4 border-green-500/30 shadow-lg"
                   onError={(e) => {
-                    e.target.src = '/default-avatar.jpg'
+                    if (e.target.src !== '/default-user.svg') {
+                      e.target.src = '/default-user.svg'
+                    }
                   }}
                 />
                 <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
@@ -708,7 +710,9 @@ const Dashboard = () => {
                         alt={track.name}
                         className="w-24 h-24 mx-auto rounded-lg shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:brightness-110"
                         onError={(e) => {
-                          e.target.src = '/default-track.jpg'
+                          if (e.target.src !== '/default-track.jpg') {
+                            e.target.src = '/default-track.jpg'
+                          }
                         }}
                       />
                     </div>
@@ -745,11 +749,13 @@ const Dashboard = () => {
                         {index + 1}
                       </div>
                       <img
-                        src={artist.images?.[0]?.url || '/default-artist.jpg'}
+                        src={artist.images?.[0]?.url || '/default-user.svg'}
                         alt={artist.name}
                         className="w-24 h-24 mx-auto rounded-full shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:brightness-110"
                         onError={(e) => {
-                          e.target.src = '/default-artist.jpg'
+                          if (e.target.src !== '/default-user.svg') {
+                            e.target.src = '/default-user.svg'
+                          }
                         }}
                       />
                     </div>
@@ -1046,11 +1052,13 @@ const Dashboard = () => {
                         {index + 1}
                       </div>
                       <img
-                        src={artist.images?.[0]?.url || '/default-artist.jpg'}
+                        src={artist.images?.[0]?.url || '/default-user.svg'}
                         alt={artist.name}
                         className="w-full h-48 object-cover rounded-full shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:brightness-110"
                         onError={(e) => {
-                          e.target.src = '/default-artist.jpg'
+                          if (e.target.src !== '/default-user.svg') {
+                            e.target.src = '/default-user.svg'
+                          }
                         }}
                       />
                       {/* Overlay com controles */}
