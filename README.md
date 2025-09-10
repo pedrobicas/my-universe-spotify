@@ -18,7 +18,7 @@ my-universe-spotify/
 - OAuth2 com Spotify
 - Middlewares de autenticação
 - CORS configurado
-- Cookies httpOnly para tokens
+- Autentitação
 
 ### Frontend
 - React + Vite
@@ -29,7 +29,7 @@ my-universe-spotify/
 
 ## 📋 Pré-requisitos
 
-- Node.js (versão 16 ou superior)
+- Node.js
 - npm ou yarn
 - Conta no Spotify Developer
 
@@ -46,7 +46,7 @@ cd spotify-project
 **Antes de executar, configure as permissões necessárias:**
 
 1. Acesse [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
-2. Selecione sua aplicação `my-universe-spotify`
+2. Selecione sua aplicação `my-universe-spotify` ou crie uma
 3. Em **App Settings** > **Redirect URIs**, adicione:
    ```
    http://127.0.0.1:8080/auth/callback
