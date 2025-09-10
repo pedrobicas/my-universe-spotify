@@ -148,23 +148,6 @@ const Login = () => {
               </>
             )}
 
-            {/* Aviso quando em modo demo-only */}
-            {demoOnly && (
-              <div className="mb-4 p-4 bg-blue-500/20 border border-blue-500/30 rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <Code className="w-5 h-5 text-blue-400 flex-shrink-0" />
-                  <div>
-                    <p className="text-blue-400 text-sm font-medium">
-                      Modo Demonstração Ativo
-                    </p>
-                    <p className="text-blue-300 text-xs mt-1">
-                      Esta aplicação está configurada para usar apenas o modo demonstração. O login com Spotify está desabilitado.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* Botão do Modo Demo */}
             <Button
               onClick={handleDemoMode}
@@ -178,13 +161,9 @@ const Login = () => {
 
             {/* Info sobre demo */}
             <div className="mt-3 p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg">
-              <div className="flex items-center space-x-2 mb-1">
-                <Sparkles className="w-4 h-4 text-purple-400" />
-                <span className="text-purple-400 text-sm font-medium">Modo Demonstração</span>
-              </div>
               <p className="text-purple-200 text-xs">
                 {demoOnly 
-                  ? 'Explore todas as funcionalidades com dados simulados' 
+                  ? 'Devido às limitações da API do Spotify, o login direto não está disponível. Explore todas as funcionalidades com dados simulados.' 
                   : 'Explore todas as funcionalidades com dados simulados, sem precisar de conta do Spotify'
                 }
               </p>

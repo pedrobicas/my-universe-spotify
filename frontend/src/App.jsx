@@ -5,7 +5,6 @@ import { SettingsProvider } from './contexts/SettingsContext'
 import { DemoProvider } from './contexts/DemoContext'
 import PrivateRoute from './components/PrivateRoute'
 import Navbar from './components/Navbar'
-import DemoToggle from './components/DemoToggle'
 import DemoBanner from './components/DemoBanner'
 import Login from './pages/Login'
 import DemoLogin from './pages/DemoLogin'
@@ -85,9 +84,6 @@ function App() {
           
           {/* Player flutuante global */}
           <NowPlaying />
-          
-          {/* Controle do modo demo */}
-          <DemoToggle />
         </div>
         </MusicProvider>
         </SettingsProvider>
