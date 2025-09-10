@@ -11,11 +11,12 @@ const Login = () => {
   const [particles, setParticles] = useState([])
   const [urlError, setUrlError] = useState('')
 
+  const demoOnly = import.meta.env.VITE_DEMO_ONLY === 'true'
+
   useEffect(() => {
     setAnimate(true)
     generateParticles()
     
-    // Verificar se há erro na URL
     const urlParams = new URLSearchParams(window.location.search)
     const errorParam = urlParams.get('error')
     const messageParam = urlParams.get('message')
@@ -113,35 +114,56 @@ const Login = () => {
               </p>
             </div>
 
-            {/* Botão de login do Spotify */}
-            <Button
-              onClick={handleSpotifyLogin}
-              disabled={loading}
-              className={`w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-4 px-6 rounded-xl text-lg transform transition-all duration-300 hover:scale-105 hover:shadow-2xl mb-4 ${loading ? 'opacity-75 cursor-not-allowed' : ''}`}
-            >
-              {loading ? (
-                <div className="flex items-center justify-center">
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-3" />
-                  Conectando...
-                </div>
-              ) : (
-                <div className="flex items-center justify-center">
-                  {/* SVG do logo do Spotify */}
-                  <svg className="w-6 h-6 mr-3" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="12" fill="#1DB954" />
-                    <path d="M17.25 16.13c-.38 0-.62-.12-.87-.25-2.37-1.37-5.37-1.5-7.5-.87-.37.12-.75.25-1.12.25-.5 0-.87-.37-.87-.87 0-.5.25-.87.75-1 2.62-.75 6.12-.62 8.87.87.37.25.62.5.62.87 0 .5-.37.87-.88.87zm1.12-2.5c-.5 0-.75-.25-1.12-.37-2.75-1.62-7.12-2-10.12-1.12-.5.12-1 .25-1.37.25-.62 0-1-.37-1-.87 0-.5.25-.87.75-1 3.5-.87 8.37-.5 11.62 1.25.37.25.62.5.62.87 0 .5-.37.87-.88.87zm1.13-2.62c-.5 0-.87-.12-1.25-.37-3.12-1.87-8.25-2.12-11.25-1.12-.5.12-1 .25-1.5.25-.62 0-1-.37-1-.87 0-.5.25-.87.75-1 3.62-1 9.12-.75 12.62 1.25.37.25.62.5.62.87 0 .5-.37.87-.88.87z" fill="#fff"/>
-                  </svg>
-                  Conectar com Spotify
-                </div>
-              )}
-            </Button>
+            {/* Botão de login do Spotify - apenas se não estiver em modo demo-only */}
+            {!demoOnly && (
+              <>
+                <Button
+                  onClick={handleSpotifyLogin}
+                  disabled={loading}
+                  className={`w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-4 px-6 rounded-xl text-lg transform transition-all duration-300 hover:scale-105 hover:shadow-2xl mb-4 ${loading ? 'opacity-75 cursor-not-allowed' : ''}`}
+                >
+                  {loading ? (
+                    <div className="flex items-center justify-center">
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-3" />
+                      Conectando...
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center">
+                      {/* SVG do logo do Spotify */}
+                      <svg className="w-6 h-6 mr-3" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="12" fill="#1DB954" />
+                        <path d="M17.25 16.13c-.38 0-.62-.12-.87-.25-2.37-1.37-5.37-1.5-7.5-.87-.37.12-.75.25-1.12.25-.5 0-.87-.37-.87-.87 0-.5.25-.87.75-1 2.62-.75 6.12-.62 8.87.87.37.25.62.5.62.87 0 .5-.37.87-.88.87zm1.12-2.5c-.5 0-.75-.25-1.12-.37-2.75-1.62-7.12-2-10.12-1.12-.5.12-1 .25-1.37.25-.62 0-1-.37-1-.87 0-.5.25-.87.75-1 3.5-.87 8.37-.5 11.62 1.25.37.25.62.5.62.87 0 .5-.37.87-.88.87zm1.13-2.62c-.5 0-.87-.12-1.25-.37-3.12-1.87-8.25-2.12-11.25-1.12-.5.12-1 .25-1.5.25-.62 0-1-.37-1-.87 0-.5.25-.87.75-1 3.62-1 9.12-.75 12.62 1.25.37.25.62.5.62.87 0 .5-.37.87-.88.87z" fill="#fff"/>
+                      </svg>
+                      Conectar com Spotify
+                    </div>
+                  )}
+                </Button>
 
-            {/* Separador */}
-            <div className="flex items-center my-4">
-              <div className="flex-1 border-t border-white/10"></div>
-              <span className="px-4 text-gray-400 text-sm">ou</span>
-              <div className="flex-1 border-t border-white/10"></div>
-            </div>
+                {/* Separador */}
+                <div className="flex items-center my-4">
+                  <div className="flex-1 border-t border-white/10"></div>
+                  <span className="px-4 text-gray-400 text-sm">ou</span>
+                  <div className="flex-1 border-t border-white/10"></div>
+                </div>
+              </>
+            )}
+
+            {/* Aviso quando em modo demo-only */}
+            {demoOnly && (
+              <div className="mb-4 p-4 bg-blue-500/20 border border-blue-500/30 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <Code className="w-5 h-5 text-blue-400 flex-shrink-0" />
+                  <div>
+                    <p className="text-blue-400 text-sm font-medium">
+                      Modo Demonstração Ativo
+                    </p>
+                    <p className="text-blue-300 text-xs mt-1">
+                      Esta aplicação está configurada para usar apenas o modo demonstração. O login com Spotify está desabilitado.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Botão do Modo Demo */}
             <Button
@@ -150,7 +172,7 @@ const Login = () => {
             >
               <div className="flex items-center justify-center">
                 <Code className="w-6 h-6 mr-3" />
-                Experimentar Demo
+                {demoOnly ? 'Entrar na Demonstração' : 'Experimentar Demo'}
               </div>
             </Button>
 
@@ -161,7 +183,10 @@ const Login = () => {
                 <span className="text-purple-400 text-sm font-medium">Modo Demonstração</span>
               </div>
               <p className="text-purple-200 text-xs">
-                Explore todas as funcionalidades com dados simulados, sem precisar de conta do Spotify
+                {demoOnly 
+                  ? 'Explore todas as funcionalidades com dados simulados' 
+                  : 'Explore todas as funcionalidades com dados simulados, sem precisar de conta do Spotify'
+                }
               </p>
             </div>
 

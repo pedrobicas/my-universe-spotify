@@ -15,7 +15,6 @@ class DemoSpotifyAPI {
     this.isDemo = true
   }
 
-  // Simular autenticação
   async login() {
     await simulateApiDelay(500)
     return { authUrl: '/demo-login' }
@@ -31,7 +30,6 @@ class DemoSpotifyAPI {
     }
   }
 
-  // Profile endpoints
   async getUserProfile() {
     await simulateApiDelay(500)
     return { data: demoUser }
@@ -42,7 +40,6 @@ class DemoSpotifyAPI {
     return { data: demoStats }
   }
 
-  // Tracks endpoints
   async getTopTracks(timeRange = 'short_term', limit = 20) {
     await simulateApiDelay(600)
     return { 
@@ -72,7 +69,6 @@ class DemoSpotifyAPI {
     }
   }
 
-  // Artists endpoints
   async getTopArtists(timeRange = 'short_term', limit = 20) {
     await simulateApiDelay(600)
     return { 
@@ -94,7 +90,6 @@ class DemoSpotifyAPI {
     }
   }
 
-  // Playlists endpoints
   async getPlaylists(limit = 50) {
     await simulateApiDelay(800)
     return { 
@@ -132,7 +127,6 @@ class DemoSpotifyAPI {
       external_urls: { spotify: `https://open.spotify.com/playlist/playlist-${Date.now()}` }
     }
     
-    // Simular adição à lista de playlists
     demoPlaylists.push(newPlaylist)
     
     return { data: newPlaylist }
@@ -168,7 +162,6 @@ class DemoSpotifyAPI {
     return { data: { snapshot_id: `snapshot-${Date.now()}` } }
   }
 
-  // Audio features
   async getAudioFeatures(trackIds) {
     await simulateApiDelay(500)
     return { 
@@ -178,10 +171,8 @@ class DemoSpotifyAPI {
     }
   }
 
-  // Search endpoints
   async searchTracks(query, limit = 20) {
     await simulateApiDelay(400)
-    // Simular busca retornando algumas tracks com base na query
     const filteredTracks = demoTopTracks.filter(track => 
       track.name.toLowerCase().includes(query.toLowerCase()) ||
       track.artists[0].name.toLowerCase().includes(query.toLowerCase())
@@ -209,10 +200,8 @@ class DemoSpotifyAPI {
     }
   }
 
-  // Recommendations
   async getRecommendations(params) {
     await simulateApiDelay(1200)
-    // Simular recomendações baseadas nos parâmetros
     const shuffledTracks = [...demoTopTracks].sort(() => Math.random() - 0.5)
     return { 
       data: { 
@@ -222,13 +211,11 @@ class DemoSpotifyAPI {
     }
   }
 
-  // Listening history
   async getListeningHistory() {
     await simulateApiDelay(600)
     return { data: demoListeningHistory }
   }
 
-  // Profile endpoints específicos
   async getProfileInsights() {
     await simulateApiDelay(900)
     return { 
@@ -242,7 +229,6 @@ class DemoSpotifyAPI {
     }
   }
 
-  // Playback control (simulado)
   async playTrack(trackUri, contextUri = null) {
     await simulateApiDelay(300)
     console.log(`Demo: Playing track ${trackUri} in context ${contextUri}`)
@@ -288,7 +274,6 @@ class DemoSpotifyAPI {
     }
   }
 
-  // Métodos para compatibilidade com as chamadas HTTP diretas
   async get(endpoint) {
     switch (endpoint) {
       case '/api/now-playing':

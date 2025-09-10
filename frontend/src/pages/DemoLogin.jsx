@@ -16,10 +16,8 @@ const DemoLogin = () => {
   }, [])
 
   const handleDemoLogin = async () => {
-    // Ativar modo demo
     enableDemoMode()
     
-    // Simular login com usuário demo
     const demoUser = {
       id: 'demo-user-123',
       display_name: 'Pedro Bicas',
@@ -33,11 +31,9 @@ const DemoLogin = () => {
       ]
     }
     
-    // Simular autenticação
     setUser(demoUser)
     localStorage.setItem('spotify_demo_user', JSON.stringify(demoUser))
     
-    // Redirecionar para dashboard
     navigate('/dashboard')
   }
 

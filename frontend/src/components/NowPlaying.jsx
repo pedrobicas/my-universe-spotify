@@ -19,7 +19,6 @@ const NowPlaying = () => {
   const { settings } = useSettings();
   const { isDemoMode } = useDemo();
 
-  // Função para obter a API correta
   const getAPI = () => {
     return isDemoMode ? demoAPI : api;
   };

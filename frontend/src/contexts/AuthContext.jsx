@@ -32,10 +32,8 @@ export const AuthProvider = ({ children }) => {
       setLoading(true)
       setError(null)
       
-      // Verificar se está em modo demo
-      const isDemoMode = localStorage.getItem('spotify_demo_mode') === 'true'
+     const isDemoMode = localStorage.getItem('spotify_demo_mode') === 'true'
       if (isDemoMode) {
-        // Sempre usar os dados mais atualizados do demoUser
         setUser(demoUser)
         localStorage.setItem('spotify_demo_user', JSON.stringify(demoUser))
         return
@@ -68,7 +66,13 @@ export const AuthProvider = ({ children }) => {
       setLoading(true)
       setError(null)
       
-      // Se já temos tokens válidos, apenas verificar auth
+      const demoOnly = import.meta.env.VITE_DEMO_ONLY === 'true'
+      if (demoOnly) {
+        setError('Login com Spotify está desabilitado. Use o modo demonstração.')
+        setLoading(false)
+        return
+      }
+      
       const accessToken = localStorage.getItem('spotify_access_token');
       const expiresAt = localStorage.getItem('spotify_expires_at');
       
@@ -88,7 +92,6 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      // Verificar se está em modo demo
       const isDemoMode = localStorage.getItem('spotify_demo_mode') === 'true'
       if (!isDemoMode) {
         await api.post('/auth/logout')
@@ -96,7 +99,6 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('Logout failed:', error)
     } finally {
-      // Limpar todos os dados
       localStorage.removeItem('spotify_access_token');
       localStorage.removeItem('spotify_refresh_token');
       localStorage.removeItem('spotify_expires_at');

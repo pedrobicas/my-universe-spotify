@@ -83,7 +83,6 @@ const Discoveries = () => {
     { id: 'indie-pop', name: 'Indie + Pop', genres: ['indie', 'pop'], icon: Sparkles }
   ];
 
-  // Função para obter a API correta baseada no modo
   const getAPI = () => {
     return isDemoMode ? demoAPI : spotifyAPI;
   };

@@ -78,7 +78,6 @@ const Dashboard = () => {
     return 50
   }
 
-  // Função para obter a API correta baseada no modo
   const getAPI = () => {
     return isDemoMode ? demoAPI : spotifyAPI;
   };

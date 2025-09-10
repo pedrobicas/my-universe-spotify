@@ -1,4 +1,3 @@
-// Dados simulados para o modo demo
 export const demoUser = {
   id: 'demo-user-123',
   display_name: 'Pedro Bicas',
@@ -246,15 +245,15 @@ export const demoPlaylists = [
 export const demoRecentTracks = [
   {
     track: demoTopTracks[0],
-    played_at: new Date(Date.now() - 1000 * 60 * 30).toISOString() // 30 min atrás
+    played_at: new Date(Date.now() - 1000 * 60 * 30).toISOString()
   },
   {
     track: demoTopTracks[1],
-    played_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString() // 2h atrás
+    played_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString() 
   },
   {
     track: demoTopTracks[2],
-    played_at: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString() // 4h atrás
+    played_at: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString()
   }
 ]
 
@@ -349,7 +348,6 @@ export const demoListeningHistory = [
   }
 ]
 
-// Função para simular delay de API
 export const simulateApiDelay = (ms = 1000) => {
   return new Promise(resolve => setTimeout(resolve, ms))
 }

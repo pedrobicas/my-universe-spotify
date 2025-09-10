@@ -81,6 +81,11 @@ cp .env.example .env.local
 Edite o arquivo `.env.local`:
 ```env
 VITE_API_URL=http://localhost:8080
+VITE_APP_NAME=My Universe Spotify
+VITE_APP_VERSION=1.0.0
+
+# Set to 'true' to disable Spotify login and force demo mode only
+VITE_DEMO_ONLY=false
 ```
 
 ### 4. Instale as dependências
@@ -179,6 +184,7 @@ frontend/
 - ✅ Análise de features de áudio
 - ✅ Design responsivo com TailwindCSS
 - ✅ Gráficos interativos
+- ✅ Modo demonstração com dados simulados
 
 ## 🤝 Contribuindo
 

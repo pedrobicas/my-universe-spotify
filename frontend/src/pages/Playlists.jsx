@@ -52,7 +52,6 @@ const Playlists = () => {
   const [shuffle, setShuffle] = useState(false)
   const [repeat, setRepeat] = useState('none')
 
-  // Função para obter a API correta baseada no modo
   const getAPI = () => {
     return isDemoMode ? demoAPI : spotifyAPI;
   };

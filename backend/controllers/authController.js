@@ -68,7 +68,6 @@ class AuthController {
 
       console.log('Sending tokens to frontend...');
       
-      // Redirecionar para o frontend com tokens como query params (temporariamente)
       const redirectUrl = `${process.env.FRONTEND_URL}/auth/success?access_token=${access_token}&refresh_token=${refresh_token}&expires_in=${expires_in}`;
       res.redirect(redirectUrl);
     } catch (error) {

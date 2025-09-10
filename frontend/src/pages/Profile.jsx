@@ -27,7 +27,6 @@ const Profile = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [dateRange, setDateRange] = useState('week');
 
-  // Função para obter a API correta baseada no modo
   const getAPI = () => {
     return isDemoMode ? demoAPI : api;
   };

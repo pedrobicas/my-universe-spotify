@@ -21,7 +21,6 @@ export const MusicProvider = ({ children }) => {
   const [devices, setDevices] = useState([]);
   const [selectedDevice, setSelectedDevice] = useState(null);
 
-  // Função para obter a API correta baseada no modo
   const getAPI = () => {
     return isDemoMode ? demoAPI : spotifyAPI;
   };

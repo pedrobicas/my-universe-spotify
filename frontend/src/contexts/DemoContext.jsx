@@ -18,7 +18,6 @@ export const DemoProvider = ({ children }) => {
   })
   const [showDemoDialog, setShowDemoDialog] = useState(false)
 
-  // Verificar se deve ativar modo demo automaticamente
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
     const demoParam = urlParams.get('demo')
@@ -32,7 +31,6 @@ export const DemoProvider = ({ children }) => {
     setIsDemoMode(true)
     localStorage.setItem('spotify_demo_mode', 'true')
     
-    // Importar os dados demo e atualizar o localStorage
     import('../data/demoData').then(({ demoUser }) => {
       localStorage.setItem('spotify_demo_user', JSON.stringify(demoUser))
     })
@@ -55,7 +53,6 @@ export const DemoProvider = ({ children }) => {
     }
   }
 
-  // Retornar a API apropriada baseada no modo
   const getAPI = () => {
     return isDemoMode ? demoAPI : api
   }

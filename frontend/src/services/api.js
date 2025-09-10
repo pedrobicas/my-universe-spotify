@@ -76,7 +76,6 @@ api.interceptors.response.use(
         
         const { access_token, refresh_token: new_refresh_token, expires_in } = response.data;
         
-        // Atualizar tokens no localStorage
         localStorage.setItem('spotify_access_token', access_token);
         if (new_refresh_token) {
           localStorage.setItem('spotify_refresh_token', new_refresh_token);

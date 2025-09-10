@@ -35,7 +35,6 @@ const PlaylistDetail = ({ playlist, onBack, onEdit, onDelete }) => {
   const { playTrack, playPlaylist, currentTrack, isPlaying } = useMusic()
   const { isDemoMode } = useDemo()
 
-  // Função para obter a API correta baseada no modo
   const getAPI = () => {
     return isDemoMode ? demoAPI : spotifyAPI;
   };
