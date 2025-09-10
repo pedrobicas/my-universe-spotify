@@ -38,7 +38,7 @@ my-universe-spotify/
 ### 1. Clone o repositório
 ```bash
 git clone https://github.com/pedrobicas/spotify-project.git
-cd my-universe-spotify
+cd spotify-project
 ```
 
 ### 2. Configure as permissões do Spotify (IMPORTANTE!)

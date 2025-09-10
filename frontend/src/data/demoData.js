@@ -1,7 +1,7 @@
 export const demoUser = {
   id: 'demo-user-123',
-  display_name: 'Pedro Bicas',
-  email: 'pedro.bicas@demo.com',
+  display_name: 'Demo User',
+  email: 'demo.user@example.com',
   country: 'BR',
   followers: { total: 847 },
   images: [
@@ -204,7 +204,7 @@ export const demoPlaylists = [
     collaborative: false,
     tracks: { total: 47 },
     images: [{ url: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=300&fit=crop' }],
-    owner: { display_name: 'Pedro Bicas' },
+    owner: { display_name: 'Demo User' },
     external_urls: { spotify: 'https://open.spotify.com/playlist/playlist1' }
   },
   {
@@ -215,7 +215,7 @@ export const demoPlaylists = [
     collaborative: false,
     tracks: { total: 23 },
     images: [{ url: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=300&fit=crop' }],
-    owner: { display_name: 'Pedro Bicas' },
+    owner: { display_name: 'Demo User' },
     external_urls: { spotify: 'https://open.spotify.com/playlist/playlist2' }
   },
   {
@@ -226,7 +226,7 @@ export const demoPlaylists = [
     collaborative: true,
     tracks: { total: 65 },
     images: [{ url: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop' }],
-    owner: { display_name: 'Pedro Bicas' },
+    owner: { display_name: 'Demo User' },
     external_urls: { spotify: 'https://open.spotify.com/playlist/playlist3' }
   },
   {
@@ -237,7 +237,7 @@ export const demoPlaylists = [
     collaborative: false,
     tracks: { total: 31 },
     images: [{ url: 'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=300&h=300&fit=crop' }],
-    owner: { display_name: 'Pedro Bicas' },
+    owner: { display_name: 'Demo User' },
     external_urls: { spotify: 'https://open.spotify.com/playlist/playlist4' }
   }
 ]

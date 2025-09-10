@@ -20,8 +20,8 @@ const DemoLogin = () => {
     
     const demoUser = {
       id: 'demo-user-123',
-      display_name: 'Pedro Bicas',
-      email: 'pedro.bicas@demo.com',
+      display_name: 'Demo User',
+      email: 'demo.user@example.com',
       country: 'BR',
       followers: { total: 847 },
       images: [
