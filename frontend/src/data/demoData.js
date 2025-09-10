@@ -30,7 +30,7 @@ export const demoTopTracks = [
   },
   {
     id: 'track2',
-    name: 'From The Dining Table',
+    name: 'Promise',
     artists: [{ name: 'Laufey', id: 'artist2' }],
     album: {
       name: 'Everything I Know About Love',
