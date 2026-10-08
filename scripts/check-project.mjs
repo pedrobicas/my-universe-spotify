@@ -34,6 +34,19 @@ for (const file of required) {
   if (!existsSync(join(root, file))) throw new Error(`Arquivo obrigatório ausente: ${file}`)
 }
 
+const legacyFiles = [
+  'frontend/src/components/Button.jsx',
+  'frontend/src/components/Card.jsx',
+  'frontend/src/components/ChartWrapper.jsx',
+  'frontend/src/components/DemoToggle.jsx',
+  'frontend/src/components/PlaylistFilters.jsx',
+  'frontend/src/pages/ProfileNew.jsx',
+]
+const presentLegacyFiles = legacyFiles.filter((file) => existsSync(join(root, file)))
+if (presentLegacyFiles.length) {
+  throw new Error(`Arquivos legados ainda presentes no projeto: ${presentLegacyFiles.join(', ')}`)
+}
+
 const demoData = readFileSync(join(frontendRoot, 'src/data/demoData.js'), 'utf8')
 const assetRefs = [...demoData.matchAll(/['"](\/demo\/[^'"]+)['"]/g)].map((match) => match[1])
 for (const ref of new Set(assetRefs)) {

@@ -131,7 +131,6 @@ const Playlists = () => {
         onBack={() => setSelectedPlaylist(null)}
         onEdit={(playlist) => { setEditingPlaylist(playlist); setSelectedPlaylist(null) }}
         onDelete={deletePlaylist}
-        onPlay={handlePlay}
       />
     )
   }
@@ -184,8 +183,8 @@ const Playlists = () => {
         <section className="empty-library"><span>0</span><h2>Nada por aqui.</h2><p>{searchTerm ? 'Nenhuma playlist corresponde à busca.' : 'Crie uma playlist para começar sua biblioteca.'}</p></section>
       )}
 
-      {showCreateModal && <PlaylistEditModal playlist={null} isOpen onClose={() => setShowCreateModal(false)} onSave={(id, data) => createPlaylist(data)} />}
-      {editingPlaylist && <PlaylistEditModal playlist={editingPlaylist} isOpen onClose={() => setEditingPlaylist(null)} onSave={updatePlaylist} onDelete={deletePlaylist} />}
+      {showCreateModal && <PlaylistEditModal playlist={null} isOpen onClose={() => setShowCreateModal(false)} onSave={createPlaylist} />}
+      {editingPlaylist && <PlaylistEditModal playlist={editingPlaylist} isOpen onClose={() => setEditingPlaylist(null)} onSave={updatePlaylist} />}
     </div>
   )
 }

@@ -41,7 +41,12 @@ const PlaylistEditModal = ({ playlist, isOpen, onClose, onSave }) => {
     if (!form.name.trim()) return window.alert('Dê um nome para a playlist.')
     setSaving(true)
     try {
-      await onSave?.(playlist?.id || null, { ...form, name: form.name.trim(), description: form.description.trim(), tracks })
+      const payload = { ...form, name: form.name.trim(), description: form.description.trim(), tracks }
+      if (playlist?.id) {
+        await onSave?.(playlist.id, payload)
+      } else {
+        await onSave?.(payload)
+      }
       onClose()
     } finally {
       setSaving(false)

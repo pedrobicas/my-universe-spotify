@@ -77,8 +77,14 @@ export const AuthProvider = ({ children }) => {
     } catch (logoutError) {
       console.warn('Logout request failed:', logoutError)
     } finally {
-      ;['spotify_access_token', 'spotify_refresh_token', 'spotify_expires_at', 'spotify_demo_mode', 'spotify_demo_user']
-        .forEach((key) => localStorage.removeItem(key))
+      const localSessionKeys = [
+        'spotify_access_token',
+        'spotify_refresh_token',
+        'spotify_expires_at',
+        'spotify_demo_mode',
+        'spotify_demo_user',
+      ]
+      localSessionKeys.forEach((key) => localStorage.removeItem(key))
       setUser(null)
       navigate('/login')
     }
