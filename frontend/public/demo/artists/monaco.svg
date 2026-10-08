@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600">
+<defs><radialGradient id="r" cx="70%" cy="20%"><stop stop-color="#e55b70" stop-opacity=".55"/><stop offset=".7" stop-color="#2a1116"/><stop offset="1" stop-color="#080808"/></radialGradient></defs>
+<rect width="600" height="600" fill="url(#r)"/>
+<circle cx="300" cy="245" r="112" fill="white" opacity=".07"/>
+<path d="M112 600c30-150 95-226 188-226s158 76 188 226" fill="white" opacity=".08"/>
+<text x="300" y="315" text-anchor="middle" fill="white" font-family="Arial,Helvetica,sans-serif" font-size="185" font-weight="700" opacity=".92">M</text>
+<text x="300" y="548" text-anchor="middle" fill="white" opacity=".55" font-family="Arial,Helvetica,sans-serif" font-size="20" letter-spacing="6">MONACO</text>
+</svg>

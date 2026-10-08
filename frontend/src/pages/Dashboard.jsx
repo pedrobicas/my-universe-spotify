@@ -156,7 +156,7 @@ const Dashboard = () => {
       {heroTrack ? (
         <section className="listen-hero">
           <div className="listen-hero-art" aria-hidden="true">
-            <img src={heroTrack.album?.images?.[0]?.url || '/default-track.jpg'} alt="" />
+            <img src={heroTrack.album?.images?.[0]?.url || '/default-track.svg'} alt="" />
           </div>
           <div className="listen-hero-shade" />
           <div className="listen-hero-content">
@@ -207,7 +207,7 @@ const Dashboard = () => {
                 <button key={track.id || index} className={`track-row${active ? ' is-playing' : ''}`} onClick={() => play(track, topTracks, index)}>
                   <span className="track-rank"><i>{index + 1}</i>{active && isPlaying ? <Pause size={14} fill="currentColor" /> : <Play size={14} fill="currentColor" />}</span>
                   <span className="track-title-cell">
-                    <img src={track.album?.images?.[0]?.url || '/default-track.jpg'} alt="" onError={(e) => { e.currentTarget.src = '/default-track.jpg' }} />
+                    <img src={track.album?.images?.[0]?.url || '/default-track.svg'} alt="" onError={(e) => { e.currentTarget.src = '/default-track.svg' }} />
                     <span><strong>{track.name}</strong><small>{track.artists?.map((artist) => artist.name).join(', ')}</small></span>
                   </span>
                   <span className="track-album desktop-only">{track.album?.name || '—'}</span>
@@ -283,7 +283,7 @@ const Dashboard = () => {
               if (!track) return null
               return (
                 <button key={`${track.id}-${index}`} onClick={() => play(track, recentTracks.map((item) => item.track).filter(Boolean), index)}>
-                  <img src={track.album?.images?.[0]?.url || '/default-track.jpg'} alt="" />
+                  <img src={track.album?.images?.[0]?.url || '/default-track.svg'} alt="" />
                   <span><strong>{track.name}</strong><small>{track.artists?.map((artist) => artist.name).join(', ')}</small></span>
                   <time>{entry.played_at ? new Date(entry.played_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '—'}</time>
                 </button>

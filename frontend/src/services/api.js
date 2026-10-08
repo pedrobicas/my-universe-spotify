@@ -70,7 +70,7 @@ export const spotifyAPI = {
   searchPlaylists: (query, limit = 10) => api.get(`/api/search/playlists?q=${encodeURIComponent(query)}&limit=${Math.min(limit, 10)}`),
   getTrack: (trackId) => api.get(`/api/tracks/${trackId}`),
   getRecommendations: (params) => api.get('/api/recommendations', { params }),
-  getFollowedArtists: (limit = 50) => api.get(`/api/me/following/artists?limit=${limit}`),
+  getFollowedArtists: (limit = 50) => api.get(`/api/me/followed-artists?limit=${limit}`),
   getArtistTopTracks: (artistId, market = 'BR') => api.get(`/api/artists/${artistId}/top-tracks?market=${market}`),
   startPlayback: (options) => api.put('/api/player/start', options),
   getDevices: () => api.get('/api/player/devices'),

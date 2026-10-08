@@ -115,7 +115,7 @@ const PlaylistDetail = ({ playlist, onBack, onEdit, onDelete }) => {
       <button className="back-link" onClick={onBack}><ArrowLeft size={16} /> Sua biblioteca</button>
 
       <section className="playlist-detail-hero">
-        <img src={playlist.images?.[0]?.url || '/default-playlist.jpg'} alt="" className="playlist-detail-cover" />
+        <img src={playlist.images?.[0]?.url || '/default-playlist.svg'} alt="" className="playlist-detail-cover" />
         <div className="playlist-detail-copy">
           <span className="eyebrow">{playlist.public === false ? 'PLAYLIST PRIVADA' : 'PLAYLIST'}</span>
           <h1>{playlist.name}</h1>
@@ -156,7 +156,7 @@ const PlaylistDetail = ({ playlist, onBack, onEdit, onDelete }) => {
                     {active && isPlaying ? <Pause size={14} fill="currentColor" /> : <Play size={14} fill="currentColor" />}
                   </button>
                   <button className="playlist-track-title" onClick={() => handlePlay(track)}>
-                    <img src={track.album?.images?.[0]?.url || '/default-track.jpg'} alt="" />
+                    <img src={track.album?.images?.[0]?.url || '/default-track.svg'} alt="" />
                     <span><strong>{track.name}</strong><small>{track.artists?.map((artist) => artist.name).join(', ') || '—'}</small></span>
                   </button>
                   <span className="playlist-track-album desktop-only">{track.album?.name || '—'}</span>
@@ -177,7 +177,7 @@ const PlaylistDetail = ({ playlist, onBack, onEdit, onDelete }) => {
             <div className="modal-heading"><div><span className="eyebrow">BUSCAR NO SPOTIFY</span><h2>Adicionar faixas</h2></div><button className="modal-close" onClick={() => setShowAdd(false)}><X size={18} /></button></div>
             <form className="modal-search" onSubmit={handleSearch}><Search size={17} /><input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Música ou artista" /><button type="submit" disabled={searching}>{searching ? 'Buscando…' : 'Buscar'}</button></form>
             <div className="modal-search-results">
-              {results.map((track) => <button key={track.id} onClick={() => addTrack(track)}><img src={track.album?.images?.[0]?.url || '/default-track.jpg'} alt="" /><span><strong>{track.name}</strong><small>{track.artists?.map((artist) => artist.name).join(', ')}</small></span><Plus size={16} /></button>)}
+              {results.map((track) => <button key={track.id} onClick={() => addTrack(track)}><img src={track.album?.images?.[0]?.url || '/default-track.svg'} alt="" /><span><strong>{track.name}</strong><small>{track.artists?.map((artist) => artist.name).join(', ')}</small></span><Plus size={16} /></button>)}
               {!searching && query && !results.length && <p>Nenhum resultado para esta busca.</p>}
             </div>
           </section>

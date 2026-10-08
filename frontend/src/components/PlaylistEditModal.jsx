@@ -119,7 +119,7 @@ const PlaylistEditModal = ({ playlist, isOpen, onClose, onSave }) => {
         <div className="editor-content">
           {tab === 'details' ? (
             <div className="editor-details-grid">
-              <img src={playlist?.images?.[0]?.url || '/default-playlist.jpg'} alt="" className="editor-cover" />
+              <img src={playlist?.images?.[0]?.url || '/default-playlist.svg'} alt="" className="editor-cover" />
               <div className="editor-form">
                 <label>Nome<input value={form.name} maxLength={100} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} placeholder="Nome da playlist" /></label>
                 <label>Descrição<textarea value={form.description} maxLength={300} rows={4} onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))} placeholder="Uma descrição curta, se quiser" /></label>
@@ -131,11 +131,11 @@ const PlaylistEditModal = ({ playlist, isOpen, onClose, onSave }) => {
           ) : (
             <div className="editor-tracks-panel">
               <form className="modal-search" onSubmit={search}><Search size={17} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar música ou artista" /><button type="submit" disabled={searching}>{searching ? 'Buscando…' : 'Buscar'}</button></form>
-              {results.length > 0 && <div className="editor-search-results">{results.map((track) => <button key={track.id} onClick={() => addTrack(track)} type="button"><img src={track.album?.images?.[0]?.url || '/default-track.jpg'} alt="" /><span><strong>{track.name}</strong><small>{track.artists?.map((artist) => artist.name).join(', ')}</small></span><Plus size={15} /></button>)}</div>}
+              {results.length > 0 && <div className="editor-search-results">{results.map((track) => <button key={track.id} onClick={() => addTrack(track)} type="button"><img src={track.album?.images?.[0]?.url || '/default-track.svg'} alt="" /><span><strong>{track.name}</strong><small>{track.artists?.map((artist) => artist.name).join(', ')}</small></span><Plus size={15} /></button>)}</div>}
               <div className="editor-track-list">
                 {tracks.length ? tracks.map((track, index) => (
                   <div className="editor-track-row" key={track.id} draggable onDragStart={(event) => event.dataTransfer.setData('text/plain', String(index))} onDragOver={(event) => event.preventDefault()} onDrop={(event) => reorder(Number(event.dataTransfer.getData('text/plain')), index)}>
-                    <GripVertical size={15} /><span className="editor-track-index">{index + 1}</span><img src={track.album?.images?.[0]?.url || '/default-track.jpg'} alt="" /><span className="editor-track-copy"><strong>{track.name}</strong><small>{track.artists?.map((artist) => artist.name).join(', ')}</small></span><button onClick={() => removeTrack(track)} type="button"><Trash2 size={15} /></button>
+                    <GripVertical size={15} /><span className="editor-track-index">{index + 1}</span><img src={track.album?.images?.[0]?.url || '/default-track.svg'} alt="" /><span className="editor-track-copy"><strong>{track.name}</strong><small>{track.artists?.map((artist) => artist.name).join(', ')}</small></span><button onClick={() => removeTrack(track)} type="button"><Trash2 size={15} /></button>
                   </div>
                 )) : <div className="editor-empty"><Music2 size={24} /><p>Sem faixas ainda. Busque acima para montar a playlist.</p></div>}
               </div>

@@ -10,7 +10,7 @@ const DemoBanner = () => {
       <FlaskConical size={14} />
       <span>Demo</span>
       <span className="demo-ribbon-separator">•</span>
-      <span>dados simulados</span>
+      <span>biblioteca fictícia local</span>
     </div>
   )
 }

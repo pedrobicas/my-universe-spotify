@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600">
+<rect width="600" height="600" fill="#07110c"/>
+<rect x="38" y="38" width="524" height="524" rx="26" fill="none" stroke="white" stroke-opacity=".10"/>
+<circle cx="450" cy="145" r="180" fill="#1ed760" opacity=".16"/>
+<path d="M54 380h492M54 404h492M54 428h492" stroke="#1ed760" stroke-width="2" opacity=".5"/>
+<text x="64" y="160" fill="#1ed760" font-family="Arial,Helvetica,sans-serif" font-size="94" font-weight="700" letter-spacing="-5">23:47</text>
+<text x="64" y="512" fill="white" font-family="Arial,Helvetica,sans-serif" font-size="38" font-weight="700">depois das 23</text>
+<text x="64" y="548" fill="white" opacity=".42" font-family="Arial,Helvetica,sans-serif" font-size="15" letter-spacing="4">MY UNIVERSE / DEMO</text>
+</svg>

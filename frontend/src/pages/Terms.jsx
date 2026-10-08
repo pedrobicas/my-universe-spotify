@@ -8,7 +8,7 @@ const Terms = () => (
     <section><h2>4. Uso aceitável</h2><p>Não tente contornar limitações técnicas, abusar da API, acessar dados de terceiros sem autorização ou usar o serviço para atividades ilícitas.</p></section>
     <section><h2>5. Propriedade intelectual</h2><p>Marcas, catálogos e metadados de terceiros pertencem aos respectivos titulares. O código e a interface do My Universe permanecem sujeitos à licença e aos direitos definidos pelo projeto.</p></section>
     <section><h2>6. Disponibilidade</h2><p>O serviço depende de APIs e serviços externos e pode ficar indisponível ou ter funcionalidades alteradas sem aviso. Não há garantia de disponibilidade contínua nem de que toda informação retornada por terceiros esteja completa.</p></section>
-    <section><h2>7. Modo demonstração</h2><p>O modo demo usa dados simulados para apresentar a interface. Esses dados não representam um usuário real e podem não reproduzir todas as limitações do Spotify em produção.</p></section>
+    <section><h2>7. Modo demonstração</h2><p>O modo demo usa uma biblioteca fictícia armazenada localmente para apresentar a interface. Esses dados não pertencem a um usuário real e não reproduzem necessariamente todas as limitações da Spotify Web API em produção.</p></section>
     <section><h2>8. Mudanças</h2><p>O produto e estes termos podem mudar conforme novas funcionalidades sejam adicionadas ou integrações sejam atualizadas.</p></section>
   </LegalLayout>
 )

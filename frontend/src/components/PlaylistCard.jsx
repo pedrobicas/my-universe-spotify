@@ -28,9 +28,9 @@ const PlaylistCard = ({ playlist, onPlay, onEdit, onDelete, onShare, onSelect, v
       <div className="playlist-cover-wrap">
         <img
           className="playlist-cover"
-          src={playlist.images?.[0]?.url || '/default-playlist.jpg'}
+          src={playlist.images?.[0]?.url || '/default-playlist.svg'}
           alt=""
-          onError={(e) => { e.currentTarget.src = '/default-playlist.jpg' }}
+          onError={(e) => { e.currentTarget.src = '/default-playlist.svg' }}
         />
         <button className="playlist-play" onClick={prevent(() => onPlay?.(playlist))} aria-label={`Reproduzir ${playlist.name}`}>
           <Play size={20} fill="currentColor" />

@@ -112,9 +112,9 @@ const NowPlaying = () => {
         {item ? (
           <>
             <img
-              src={item.album?.images?.[0]?.url || '/default-track.jpg'}
+              src={item.album?.images?.[0]?.url || '/default-track.svg'}
               alt=""
-              onError={(e) => { e.currentTarget.src = '/default-track.jpg' }}
+              onError={(e) => { e.currentTarget.src = '/default-track.svg' }}
             />
             <div className="player-track-copy">
               <strong title={item.name}>{item.name}</strong>

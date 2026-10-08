@@ -49,7 +49,7 @@ const TrackGrid = ({ tracks, onPlay, currentTrack, isPlaying }) => (
       return (
         <button key={`${track.id}-${index}`} className={`discovery-track${active ? ' is-active' : ''}`} onClick={() => onPlay(track, tracks, index)}>
           <div className="discovery-track-art">
-            <img src={track.album?.images?.[0]?.url || '/default-track.jpg'} alt="" onError={(e) => { e.currentTarget.src = '/default-track.jpg' }} />
+            <img src={track.album?.images?.[0]?.url || '/default-track.svg'} alt="" onError={(e) => { e.currentTarget.src = '/default-track.svg' }} />
             <i>{active && isPlaying ? <Pause size={17} fill="currentColor" /> : <Play size={17} fill="currentColor" />}</i>
           </div>
           <strong>{track.name}</strong>
@@ -199,7 +199,7 @@ const Discoveries = () => {
               {timeBased[0] && <button className="primary-round-button" onClick={() => play(timeBased[0], timeBased, 0)}><Play size={17} fill="currentColor" /> Reproduzir seleção</button>}
             </div>
             <div className="discovery-feature-covers" aria-hidden="true">
-              {timeBased.slice(0, 4).map((track, index) => <img key={`${track.id}-${index}`} src={track.album?.images?.[0]?.url || '/default-track.jpg'} alt="" style={{ '--cover-index': index }} />)}
+              {timeBased.slice(0, 4).map((track, index) => <img key={`${track.id}-${index}`} src={track.album?.images?.[0]?.url || '/default-track.svg'} alt="" style={{ '--cover-index': index }} />)}
             </div>
           </section>
 

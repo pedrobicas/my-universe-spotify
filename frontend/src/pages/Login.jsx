@@ -74,7 +74,7 @@ const Login = () => {
 
           <div className="login-note">
             {demoOnly
-              ? 'O login real está desabilitado nesta implantação. A demonstração mantém a experiência completa com dados simulados.'
+              ? 'O login real está desabilitado nesta implantação. A demonstração usa uma biblioteca fictícia local e não depende de uma conta Spotify.'
               : 'O modo demo não exige conta do Spotify e não envia dados pessoais.'}
           </div>
 

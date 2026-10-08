@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#3764ff"/><stop offset="1" stop-color="#071019"/></linearGradient><filter id="blur"><feGaussianBlur stdDeviation="38"/></filter></defs>
+<rect width="600" height="600" fill="#071019"/>
+<circle cx="470" cy="120" r="185" fill="#3764ff" opacity=".30" filter="url(#blur)"/>
+<circle cx="120" cy="500" r="180" fill="#d7e7ff" opacity=".10" filter="url(#blur)"/>
+<rect x="54" y="54" width="492" height="492" rx="22" fill="url(#g)" opacity=".14" stroke="white" stroke-opacity=".10"/>
+<path d="M70 424 C190 310 264 475 530 164" fill="none" stroke="#d7e7ff" stroke-width="2" opacity=".75"/>
+<path d="M70 452 C210 350 292 500 530 224" fill="none" stroke="white" stroke-width="1" opacity=".22"/>
+<text x="72" y="105" fill="white" opacity=".55" font-family="Arial,Helvetica,sans-serif" font-size="18" letter-spacing="6">MY UNIVERSE / DEMO</text>
+<text x="72" y="470" fill="white" font-family="Arial,Helvetica,sans-serif" font-size="72" font-weight="700" letter-spacing="-3">ENTRE</text>
+<text x="72" y="535" fill="white" opacity=".58" font-family="Arial,Helvetica,sans-serif" font-size="58" font-weight="300" letter-spacing="8">ESTAÇÕES</text>
+</svg>

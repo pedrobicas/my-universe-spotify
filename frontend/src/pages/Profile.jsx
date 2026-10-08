@@ -142,7 +142,7 @@ const Profile = () => {
               <div className="history-tracks">
                 {items.map((item, index) => (
                   <div key={`${item.track?.id}-${item.played_at}-${index}`} className="history-track">
-                    <img src={item.track?.album?.images?.[0]?.url || '/default-track.jpg'} alt="" />
+                    <img src={item.track?.album?.images?.[0]?.url || '/default-track.svg'} alt="" />
                     <span><strong>{item.track?.name || 'Faixa indisponível'}</strong><small>{item.track?.artists?.map((artist) => artist.name).join(', ') || '—'}</small></span>
                     <time>{item.played_at ? new Date(item.played_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '—'}</time>
                   </div>

@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, BarChart3, Compass, Library, Music2 } from 'lucide-react'
+import { ArrowLeft, ArrowRight, BarChart3, Library, Music2, PlayCircle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useDemo } from '../contexts/DemoContext'
 import { useAuth } from '../hooks/useAuth'
@@ -17,9 +17,9 @@ const DemoLogin = () => {
   }
 
   const features = [
-    { icon: BarChart3, title: 'Visão geral', text: 'Rankings, perfil de áudio e hábitos de escuta.' },
-    { icon: Library, title: 'Playlists', text: 'Biblioteca, filtros e gerenciamento de coleções.' },
-    { icon: Compass, title: 'Descoberta', text: 'Recomendações, moods e combinações de gêneros.' },
+    { icon: BarChart3, title: 'Dashboard', text: 'Top faixas, artistas e histórico usando um conjunto de dados coerente.' },
+    { icon: Library, title: 'Biblioteca', text: 'Abra playlists, edite informações e reorganize faixas.' },
+    { icon: PlayCircle, title: 'Player', text: 'Teste fila, play/pause e troca de faixas direto no navegador.' },
   ]
 
   return (
@@ -33,13 +33,13 @@ const DemoLogin = () => {
               <div key={track.id} style={{ '--index': index }}><img src={track.album?.images?.[0]?.url} alt="" /></div>
             ))}
           </div>
-          <div className="demo-preview-copy"><span>DADOS SIMULADOS</span><strong>Veja o produto antes de conectar sua conta.</strong></div>
+          <div className="demo-preview-copy"><span>BIBLIOTECA FICTÍCIA</span><strong>Uma sessão pronta para você mexer no produto.</strong></div>
         </section>
 
         <section className="demo-login-content">
-          <span className="eyebrow">MODO DEMO</span>
-          <h1>A experiência inteira. Sem login.</h1>
-          <p>Entre com um perfil fictício e teste o fluxo completo do My Universe. Nenhuma informação da sua conta é necessária.</p>
+          <span className="eyebrow">DEMONSTRAÇÃO</span>
+          <h1>Entre e mexa no produto.</h1>
+          <p>A demo carrega uma biblioteca fictícia local para testar dashboard, playlists, descoberta e player sem autenticar no Spotify.</p>
 
           <div className="demo-feature-list">
             {features.map(({ icon: Icon, title, text }) => (
@@ -47,8 +47,8 @@ const DemoLogin = () => {
             ))}
           </div>
 
-          <button className="demo-enter" onClick={enterDemo}>Entrar na demonstração <ArrowRight size={17} /></button>
-          <small className="demo-disclaimer">Os dados exibidos são apenas ilustrativos e não representam um usuário real.</small>
+          <button className="demo-enter" onClick={enterDemo}>Abrir demonstração <ArrowRight size={17} /></button>
+          <small className="demo-disclaimer">Nada aqui pertence a uma conta real. Alterações na biblioteca ficam apenas nesta sessão do navegador.</small>
         </section>
       </div>
     </div>
