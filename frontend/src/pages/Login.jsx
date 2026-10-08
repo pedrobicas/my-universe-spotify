@@ -1,289 +1,90 @@
-import React, { useState, useEffect } from 'react'
+import { AlertCircle, ArrowRight, Music2 } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
-import { useNavigate } from 'react-router-dom'
-import { Music2, Waves, Headphones, Disc, Radio, Mic, Guitar, AlertCircle, Code, Sparkles } from 'lucide-react'
-import Button from '../components/Button'
+import { demoTopTracks } from '../data/demoData'
 
 const Login = () => {
   const { login, loading, error } = useAuth()
   const navigate = useNavigate()
-  const [animate, setAnimate] = useState(false)
-  const [particles, setParticles] = useState([])
   const [urlError, setUrlError] = useState('')
-
   const demoOnly = import.meta.env.VITE_DEMO_ONLY === 'true'
 
   useEffect(() => {
-    setAnimate(true)
-    generateParticles()
-    
-    const urlParams = new URLSearchParams(window.location.search)
-    const errorParam = urlParams.get('error')
-    const messageParam = urlParams.get('message')
-    
-    if (errorParam === 'user_not_authorized') {
-      setUrlError('Usuário não autorizado. Esta conta não tem permissão para acessar esta aplicação.')
-    } else if (errorParam === 'auth_failed') {
-      setUrlError('Falha na autenticação. Tente novamente.')
-    } else if (messageParam) {
-      setUrlError(decodeURIComponent(messageParam))
-    }
+    const params = new URLSearchParams(window.location.search)
+    const errorParam = params.get('error')
+    const message = params.get('message')
+    if (errorParam === 'user_not_authorized') setUrlError('Esta conta ainda não foi autorizada para acessar a aplicação.')
+    else if (errorParam === 'invalid_oauth_state') setUrlError('A sessão de login expirou ou não pôde ser validada. Inicie a conexão novamente.')
+    else if (errorParam === 'missing_authorization_code') setUrlError('O Spotify não retornou a autorização necessária. Tente conectar novamente.')
+    else if (errorParam === 'session_expired') setUrlError('Sua sessão expirou. Conecte sua conta novamente.')
+    else if (errorParam === 'access_denied') setUrlError('O acesso ao Spotify foi cancelado.')
+    else if (errorParam === 'auth_failed') setUrlError('Não foi possível concluir a autenticação. Tente novamente.')
+    else if (message) setUrlError(decodeURIComponent(message))
   }, [])
 
-  const generateParticles = () => {
-    const newParticles = Array.from({ length: 20 }, (_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      size: Math.random() * 4 + 2,
-      speed: Math.random() * 2 + 1,
-      opacity: Math.random() * 0.5 + 0.3
-    }))
-    setParticles(newParticles)
-  }
+  const artwork = useMemo(() => {
+    const images = demoTopTracks.map((track) => track.album?.images?.[0]?.url).filter(Boolean)
+    return [...images.slice(0, 6), ...images.slice(0, 3)]
+  }, [])
 
   const handleSpotifyLogin = async () => {
     try {
       await login()
-    } catch (error) {
-      console.error('Login failed:', error)
+    } catch (loginError) {
+      console.error('Login failed:', loginError)
     }
   }
 
-  const handleDemoMode = () => {
-    navigate('/demo-login')
-  }
-
-  const icons = [Music2, Headphones, Disc, Radio, Mic, Guitar]
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black relative overflow-hidden">
-      {/* Partículas flutuantes */}
-      {particles.map((particle) => (
-        <div
-          key={particle.id}
-          className="absolute w-2 h-2 bg-white/20 rounded-full animate-pulse"
-          style={{
-            left: `${particle.x}%`,
-            top: `${particle.y}%`,
-            width: `${particle.size}px`,
-            height: `${particle.size}px`,
-            opacity: particle.opacity,
-            animationDuration: `${particle.speed}s`
-          }}
-        />
-      ))}
-
-      {/* Background com ondas */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-green-500/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-green-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-green-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
-      </div>
-
-      {/* Conteúdo principal */}
-      <div className="relative z-10 flex items-center justify-center min-h-screen px-6">
-        <div className="max-w-md w-full">
-          {/* Logo e título */}
-          <div className="text-center mb-12">
-            <div className={`inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-green-500 to-green-600 rounded-full mb-6 transform transition-all duration-1000 ${animate ? 'scale-100 rotate-0' : 'scale-0 rotate-180'}`}>
-              <Music2 className="w-12 h-12 text-white" />
-            </div>
-            
-            <h1 className={`text-5xl font-bold bg-gradient-to-r from-green-400 via-green-500 to-green-600 bg-clip-text text-transparent mb-4 transform transition-all duration-1000 delay-300 ${animate ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
-              My Universe
-            </h1>
-            
-            <p className={`text-xl text-gray-300 mb-2 transform transition-all duration-1000 delay-500 ${animate ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
-              Descubra seu universo musical
-            </p>
-            
-            <p className={`text-gray-400 transform transition-all duration-1000 delay-700 ${animate ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
-              Conecte-se com o Spotify e explore suas estatísticas
-            </p>
-          </div>
-
-          {/* Card de login */}
-          <div className={`bg-black/20 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl transform transition-all duration-1000 delay-1000 ${animate ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-8 opacity-0 scale-95'}`}>
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-semibold text-white mb-2">
-                Bem-vindo de volta
-              </h2>
-              <p className="text-gray-400">
-                Faça login para continuar sua jornada musical
-              </p>
-            </div>
-
-            {/* Botão de login do Spotify - apenas se não estiver em modo demo-only */}
-            {!demoOnly && (
-              <>
-                <Button
-                  onClick={handleSpotifyLogin}
-                  disabled={loading}
-                  className={`w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-4 px-6 rounded-xl text-lg transform transition-all duration-300 hover:scale-105 hover:shadow-2xl mb-4 ${loading ? 'opacity-75 cursor-not-allowed' : ''}`}
-                >
-                  {loading ? (
-                    <div className="flex items-center justify-center">
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-3" />
-                      Conectando...
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center">
-                      {/* SVG do logo do Spotify */}
-                      <svg className="w-6 h-6 mr-3" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="12" cy="12" r="12" fill="#1DB954" />
-                        <path d="M17.25 16.13c-.38 0-.62-.12-.87-.25-2.37-1.37-5.37-1.5-7.5-.87-.37.12-.75.25-1.12.25-.5 0-.87-.37-.87-.87 0-.5.25-.87.75-1 2.62-.75 6.12-.62 8.87.87.37.25.62.5.62.87 0 .5-.37.87-.88.87zm1.12-2.5c-.5 0-.75-.25-1.12-.37-2.75-1.62-7.12-2-10.12-1.12-.5.12-1 .25-1.37.25-.62 0-1-.37-1-.87 0-.5.25-.87.75-1 3.5-.87 8.37-.5 11.62 1.25.37.25.62.5.62.87 0 .5-.37.87-.88.87zm1.13-2.62c-.5 0-.87-.12-1.25-.37-3.12-1.87-8.25-2.12-11.25-1.12-.5.12-1 .25-1.5.25-.62 0-1-.37-1-.87 0-.5.25-.87.75-1 3.62-1 9.12-.75 12.62 1.25.37.25.62.5.62.87 0 .5-.37.87-.88.87z" fill="#fff"/>
-                      </svg>
-                      Conectar com Spotify
-                    </div>
-                  )}
-                </Button>
-
-                {/* Separador */}
-                <div className="flex items-center my-4">
-                  <div className="flex-1 border-t border-white/10"></div>
-                  <span className="px-4 text-gray-400 text-sm">ou</span>
-                  <div className="flex-1 border-t border-white/10"></div>
-                </div>
-              </>
-            )}
-
-            {/* Botão do Modo Demo */}
-            <Button
-              onClick={handleDemoMode}
-              className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-4 px-6 rounded-xl text-lg transform transition-all duration-300 hover:scale-105 hover:shadow-2xl shadow-purple-500/30"
-            >
-              <div className="flex items-center justify-center">
-                <Code className="w-6 h-6 mr-3" />
-                {demoOnly ? 'Entrar na Demonstração' : 'Experimentar Demo'}
-              </div>
-            </Button>
-
-            {/* Info sobre demo */}
-            <div className="mt-3 p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg">
-              <p className="text-purple-200 text-xs">
-                {demoOnly 
-                  ? 'Devido às limitações da API do Spotify, o login direto não está disponível. Explore todas as funcionalidades com dados simulados.' 
-                  : 'Explore todas as funcionalidades com dados simulados, sem precisar de conta do Spotify'
-                }
-              </p>
-            </div>
-
-            {/* Mensagem de erro */}
-            {(error || urlError) && (
-              <div className="mt-4 p-4 bg-red-500/20 border border-red-500/30 rounded-lg">
-                <div className="flex items-start space-x-3">
-                  <AlertCircle className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="text-red-400 text-sm font-medium">
-                      {urlError || error}
-                    </p>
-                    {urlError === 'Usuário não autorizado. Esta conta não tem permissão para acessar esta aplicação.' && (
-                      <div className="mt-2 text-red-300 text-xs">
-                        <p>Esta aplicação está em modo de desenvolvimento.</p>
-                        <p>Para acessar, você precisa:</p>
-                        <ul className="mt-1 ml-4 list-disc">
-                          <li>Ser adicionado como usuário autorizado no Spotify Developer Dashboard</li>
-                          <li>Ou aguardar a aplicação ser aprovada para uso público</li>
-                        </ul>
-                        <p className="mt-2">
-                          Entre em contato com o administrador da aplicação se precisar de acesso.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Informações adicionais */}
-            <div className="mt-6 text-center">
-              <p className="text-gray-400 text-sm">
-                Ao fazer login, você concorda com nossos{' '}
-                <a href="/terms" className="text-green-400 hover:text-green-300 underline">
-                  Termos de Serviço
-                </a>
-                {' '}e{' '}
-                <a href="/privacy" className="text-green-400 hover:text-green-300 underline">
-                  Política de Privacidade
-                </a>
-              </p>
-            </div>
-          </div>
-
-          {/* Recursos destacados */}
-          <div className={`mt-12 grid grid-cols-2 gap-4 transform transition-all duration-1000 delay-1200 ${animate ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
-            {icons.map((Icon, index) => (
-              <div
-                key={index}
-                className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 text-center hover:bg-white/10 transition-all duration-300 hover:scale-105 group"
-              >
-                                 <Icon className="w-8 h-8 text-green-400 mx-auto mb-2 group-hover:text-green-300 transition-colors" />
-                <p className="text-gray-300 text-sm font-medium">
-                  {['Músicas', 'Playlists', 'Artistas', 'Rádio', 'Podcasts', 'Shows'][index]}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          {/* Footer */}
-          <div className={`mt-12 text-center transform transition-all duration-1000 delay-1400 ${animate ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
-            <p className="text-gray-500 text-sm">
-              © 2024 My Universe Spotify. Todos os direitos reservados.
-            </p>
-          </div>
+    <div className="login-page">
+      <section className="login-visual" aria-hidden="true">
+        <div className="login-collage">
+          {artwork.map((src, index) => <img key={`${src}-${index}`} src={src} alt="" />)}
         </div>
-      </div>
+        <div className="login-brand"><i><Music2 size={18} /></i><span>MY UNIVERSE</span></div>
+        <div className="login-visual-copy">
+          <span>Seu Spotify, lido de outro jeito</span>
+          <h1>O som que você repete diz muito.</h1>
+          <p>Rankings, hábitos, artistas e descoberta musical em uma interface feita para colocar sua biblioteca — não o dashboard — no centro.</p>
+        </div>
+      </section>
 
-      {/* Elementos decorativos flutuantes */}
-      <div className="absolute top-20 left-10 opacity-20 animate-bounce" style={{ animationDelay: '0.5s' }}>
-                       <Waves className="w-8 h-8 text-green-400" />
-      </div>
-      
-      <div className="absolute top-40 right-20 opacity-20 animate-bounce" style={{ animationDelay: '1s' }}>
-                       <Headphones className="w-6 h-6 text-green-400" />
-      </div>
-      
-      <div className="absolute bottom-40 left-20 opacity-20 animate-bounce" style={{ animationDelay: '1.5s' }}>
-                       <Disc className="w-8 h-8 text-green-400" />
-      </div>
-      
-      <div className="absolute bottom-20 right-10 opacity-20 animate-bounce" style={{ animationDelay: '2s' }}>
-                       <Radio className="w-6 h-6 text-green-400" />
-      </div>
+      <section className="login-panel">
+        <div className="login-card">
+          <span>ENTRAR</span>
+          <h2>Conecte sua conta.</h2>
+          <p>Usamos seus dados do Spotify para montar a experiência. Você pode entrar no modo demo sem conectar nada.</p>
 
-      {/* Linhas de conexão */}
-      <svg className="absolute inset-0 w-full h-full pointer-events-none">
-        <defs>
-          <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="rgba(147, 51, 234, 0.3)" />
-            <stop offset="100%" stopColor="rgba(236, 72, 153, 0.3)" />
-          </linearGradient>
-        </defs>
-        
-        {/* Linhas diagonais */}
-        <line
-          x1="0"
-          y1="100"
-          x2="100"
-          y2="0"
-          stroke="url(#lineGradient)"
-          strokeWidth="1"
-          opacity="0.1"
-        />
-        <line
-          x1="100"
-          y1="100"
-          x2="0"
-          y2="0"
-          stroke="url(#lineGradient)"
-          strokeWidth="1"
-          opacity="0.1"
-        />
-      </svg>
+          {!demoOnly && (
+            <>
+              <button className="login-action login-action--spotify" onClick={handleSpotifyLogin} disabled={loading}>
+                <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm4.58 14.42a.62.62 0 0 1-.85.2c-2.34-1.43-5.29-1.75-8.76-.96a.62.62 0 0 1-.28-1.2c3.8-.87 7.06-.5 9.69 1.1.29.18.38.56.2.86Zm1.22-2.72a.77.77 0 0 1-1.06.25c-2.68-1.65-6.77-2.12-9.94-1.16a.77.77 0 1 1-.45-1.48c3.63-1.1 8.13-.57 11.2 1.32.36.22.47.7.25 1.07Zm.1-2.83C14.68 8.96 9.38 8.78 6.3 9.7a.93.93 0 1 1-.53-1.78c3.54-1.06 9.4-.84 13.08 1.34a.93.93 0 0 1-.95 1.6Z" />
+                </svg>
+                {loading ? 'Conectando…' : 'Continuar com Spotify'}
+              </button>
+              <div className="login-divider">ou</div>
+            </>
+          )}
 
-      {/* Efeito de brilho no fundo */}
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-x-12 animate-pulse" style={{ animationDuration: '4s' }} />
+          <button className="login-action login-action--demo" onClick={() => navigate('/demo-login')}>
+            Explorar a demonstração <ArrowRight size={17} />
+          </button>
+
+          <div className="login-note">
+            {demoOnly
+              ? 'O login real está desabilitado nesta implantação. A demonstração mantém a experiência completa com dados simulados.'
+              : 'O modo demo não exige conta do Spotify e não envia dados pessoais.'}
+          </div>
+
+          {(error || urlError) && (
+            <div className="login-error"><AlertCircle size={16} /><span>{urlError || error}</span></div>
+          )}
+
+          <div className="login-links"><Link to="/privacy">Privacidade</Link><Link to="/terms">Termos</Link></div>
+        </div>
+      </section>
     </div>
   )
 }

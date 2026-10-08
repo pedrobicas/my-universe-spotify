@@ -1,15 +1,13 @@
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import api from '../services/api'
+import api, { getSpotifyLoginUrl } from '../services/api'
 import { demoUser } from '../data/demoData'
 
-const AuthContext = createContext()
+const AuthContext = createContext(null)
 
 export const useAuth = () => {
   const context = useContext(AuthContext)
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider')
-  }
+  if (!context) throw new Error('useAuth must be used within an AuthProvider')
   return context
 }
 
@@ -19,109 +17,86 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null)
   const navigate = useNavigate()
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      checkAuth()
-    }, 100)
-    
-    return () => clearTimeout(timer)
-  }, [])
+  const checkAuth = useCallback(async () => {
+    setLoading(true)
+    setError(null)
 
-  const checkAuth = async () => {
     try {
-      setLoading(true)
-      setError(null)
-      
-     const isDemoMode = localStorage.getItem('spotify_demo_mode') === 'true'
-      if (isDemoMode) {
+      if (localStorage.getItem('spotify_demo_mode') === 'true') {
         setUser(demoUser)
         localStorage.setItem('spotify_demo_user', JSON.stringify(demoUser))
-        return
+        return true
       }
-      
+
       const response = await api.get('/auth/check')
-      
-      if (response.data.authenticated) {
-        setUser(response.data.user)
-      } else {
-        setUser(null)
-      }
-    } catch (error) {
-      console.error('Auth check failed:', error)
-      
-      if (error.response?.status === 403) {
-        setError('Usuário não autorizado para esta aplicação')
-        navigate('/login?error=user_not_authorized')
-      } else if (error.response?.status !== 401) {
-        setError('Falha na verificação de autenticação')
-      }
+      const authenticated = Boolean(response.data?.authenticated && response.data?.user)
+      setUser(authenticated ? response.data.user : null)
+      return authenticated
+    } catch (authError) {
       setUser(null)
+      if (authError.response?.status === 403) {
+        setError('Esta conta ainda não está autorizada no aplicativo do Spotify.')
+      } else if (authError.response?.status !== 401) {
+        setError('Não foi possível verificar sua sessão.')
+      }
+      return false
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  const login = async () => {
+  useEffect(() => {
+    checkAuth()
+  }, [checkAuth])
+
+  const login = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
-      
-      const demoOnly = import.meta.env.VITE_DEMO_ONLY === 'true'
-      if (demoOnly) {
-        setError('Login com Spotify está desabilitado. Use o modo demonstração.')
-        setLoading(false)
+
+      if (import.meta.env.VITE_DEMO_ONLY === 'true') {
+        setError('O login com Spotify está desabilitado nesta versão. Use a demonstração.')
         return
       }
-      
-      const accessToken = localStorage.getItem('spotify_access_token');
-      const expiresAt = localStorage.getItem('spotify_expires_at');
-      
-      if (accessToken && expiresAt && Date.now() < parseInt(expiresAt)) {
-        await checkAuth();
-        return;
-      }
-      
-      const response = await api.get('/auth/login')
-      window.location.href = response.data.authUrl
-    } catch (error) {
-      console.error('Login failed:', error)
-      setError('Failed to initiate login')
+
+      localStorage.removeItem('spotify_demo_mode')
+      localStorage.removeItem('spotify_demo_user')
+      window.location.assign(getSpotifyLoginUrl())
+    } catch (loginError) {
+      console.error('Login failed:', loginError)
+      setError('Não foi possível iniciar o login com Spotify.')
       setLoading(false)
     }
-  }
+  }, [])
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
-      const isDemoMode = localStorage.getItem('spotify_demo_mode') === 'true'
-      if (!isDemoMode) {
+      if (localStorage.getItem('spotify_demo_mode') !== 'true') {
         await api.post('/auth/logout')
       }
-    } catch (error) {
-      console.error('Logout failed:', error)
+    } catch (logoutError) {
+      console.warn('Logout request failed:', logoutError)
     } finally {
-      localStorage.removeItem('spotify_access_token');
-      localStorage.removeItem('spotify_refresh_token');
-      localStorage.removeItem('spotify_expires_at');
-      localStorage.removeItem('spotify_demo_mode');
-      localStorage.removeItem('spotify_demo_user');
-      
+      ;['spotify_access_token', 'spotify_refresh_token', 'spotify_expires_at', 'spotify_demo_mode', 'spotify_demo_user']
+        .forEach((key) => localStorage.removeItem(key))
       setUser(null)
       navigate('/login')
     }
-  }
+  }, [navigate])
 
-  const refreshToken = async () => {
+  const refreshToken = useCallback(async () => {
     try {
       await api.post('/auth/refresh_token')
-      await checkAuth()
-    } catch (error) {
-      console.error('Token refresh failed:', error)
+      return checkAuth()
+    } catch (refreshError) {
+      console.warn('Token refresh failed:', refreshError)
       setUser(null)
-      navigate('/login')
+      navigate('/login?error=session_expired')
+      return false
     }
-  }
+  }, [checkAuth, navigate])
 
-  const value = {
+  const value = useMemo(() => ({
     user,
     loading,
     error,
@@ -129,12 +104,8 @@ export const AuthProvider = ({ children }) => {
     logout,
     refreshToken,
     checkAuth,
-    setUser
-  }
+    setUser,
+  }), [user, loading, error, login, logout, refreshToken, checkAuth])
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  )
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

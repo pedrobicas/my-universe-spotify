@@ -1,114 +1,85 @@
 const axios = require('axios');
 
+const REFRESH_COOKIE_MAX_AGE = 180 * 24 * 60 * 60 * 1000;
+
+const cookieOptions = (maxAge) => ({
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  path: '/',
+  ...(maxAge ? { maxAge } : {})
+});
+
+const clearAuthCookies = (res) => {
+  res.clearCookie('spotify_access_token', cookieOptions());
+  res.clearCookie('spotify_refresh_token', cookieOptions());
+};
+
+const fetchProfile = (accessToken) => axios.get('https://api.spotify.com/v1/me', {
+  headers: { Authorization: `Bearer ${accessToken}` }
+});
+
+const refreshAccessToken = async (refreshToken) => {
+  const response = await axios.post(
+    'https://accounts.spotify.com/api/token',
+    new URLSearchParams({
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken,
+      client_id: process.env.SPOTIFY_CLIENT_ID,
+      client_secret: process.env.SPOTIFY_CLIENT_SECRET
+    }),
+    { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+  );
+  return response.data;
+};
+
 const authenticateToken = async (req, res, next) => {
   try {
-    let accessToken = null;
-    const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      accessToken = authHeader.substring(7);
-    } else {
-      accessToken = req.cookies.spotify_access_token;
-    }
-    
+    const bearer = req.headers.authorization?.startsWith('Bearer ')
+      ? req.headers.authorization.slice(7)
+      : null;
+    let accessToken = bearer || req.cookies.spotify_access_token;
+    const refreshToken = req.cookies.spotify_refresh_token;
+
     if (!accessToken) {
-      return res.status(401).json({ 
-        error: 'Access token not found',
-        message: 'Please login with Spotify first' 
-      });
+      return res.status(401).json({ error: 'Authentication required' });
     }
 
     try {
-      const response = await axios.get('https://api.spotify.com/v1/me', {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
-      });
-
-      req.user = response.data;
+      const profile = await fetchProfile(accessToken);
+      req.user = profile.data;
       req.accessToken = accessToken;
-      next();
-    } catch (spotifyError) {
-      if (spotifyError.response && spotifyError.response.status === 401) {
-        if (authHeader) {
-          return res.status(401).json({ 
-            error: 'Token expired',
-            message: 'Token needs refresh' 
-          });
-        }
-        
-        const refreshToken = req.cookies.spotify_refresh_token;
-        
-        if (!refreshToken) {
-          return res.status(401).json({ 
-            error: 'Token expired and no refresh token available',
-            message: 'Please login again' 
-          });
-        }
-
-        try {
-          const refreshResponse = await axios.post('https://accounts.spotify.com/api/token', 
-            new URLSearchParams({
-              grant_type: 'refresh_token',
-              refresh_token: refreshToken,
-              client_id: process.env.SPOTIFY_CLIENT_ID,
-              client_secret: process.env.SPOTIFY_CLIENT_SECRET
-            }), {
-              headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-              }
-            }
-          );
-
-          const { access_token, refresh_token } = refreshResponse.data;
-          
-          res.cookie('spotify_access_token', access_token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 3600000
-          });
-
-          if (refresh_token) {
-            res.cookie('spotify_refresh_token', refresh_token, {
-              httpOnly: true,
-              secure: process.env.NODE_ENV === 'production',
-              sameSite: 'lax',
-              maxAge: 30 * 24 * 60 * 60 * 1000
-            });
-          }
-
-          req.accessToken = access_token;
-          
-          const userResponse = await axios.get('https://api.spotify.com/v1/me', {
-            headers: {
-              'Authorization': `Bearer ${access_token}`
-            }
-          });
-          
-          req.user = userResponse.data;
-          next();
-        } catch (refreshError) {
-          res.clearCookie('spotify_access_token');
-          res.clearCookie('spotify_refresh_token');
-          
-          return res.status(401).json({ 
-            error: 'Token refresh failed',
-            message: 'Please login again' 
-          });
-        }
-      } else {
-        throw spotifyError;
+      req.refreshToken = refreshToken;
+      return next();
+    } catch (error) {
+      if (error.response?.status !== 401 || bearer || !refreshToken) {
+        if (error.response?.status === 401) clearAuthCookies(res);
+        return res.status(error.response?.status === 403 ? 403 : 401).json({ error: 'Spotify session is not valid' });
       }
     }
+
+    try {
+      const refreshed = await refreshAccessToken(refreshToken);
+      accessToken = refreshed.access_token;
+      res.cookie('spotify_access_token', accessToken, cookieOptions((refreshed.expires_in || 3600) * 1000));
+      if (refreshed.refresh_token) {
+        res.cookie('spotify_refresh_token', refreshed.refresh_token, cookieOptions(REFRESH_COOKIE_MAX_AGE));
+      }
+
+      const profile = await fetchProfile(accessToken);
+      req.user = profile.data;
+      req.accessToken = accessToken;
+      req.refreshToken = refreshed.refresh_token || refreshToken;
+      return next();
+    } catch (refreshError) {
+      console.error('Spotify session refresh failed:', refreshError.response?.status || refreshError.message);
+      clearAuthCookies(res);
+      return res.status(401).json({ error: 'Spotify session expired' });
+    }
   } catch (error) {
-    console.error('Authentication error:', error);
-    return res.status(500).json({ 
-      error: 'Authentication failed',
-      message: 'Internal server error' 
-    });
+    console.error('Authentication error:', error.message);
+    return res.status(500).json({ error: 'Authentication failed' });
   }
 };
 
-module.exports = {
-  authenticateToken
-};
+module.exports = { authenticateToken };

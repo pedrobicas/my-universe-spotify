@@ -56,17 +56,26 @@ class SpotifyService {
   }
 
   
-  async getArtistTopTracks(accessToken, artistId, market = 'US') {
+  async getArtistTopTracks(accessToken, artistId, market = 'BR') {
     try {
-      const response = await axios.get(`${this.baseURL}/artists/${artistId}/top-tracks`, {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
-        },
+      // Spotify removed /artists/{id}/top-tracks in February 2026.
+      // Preserve the app feature by resolving the artist name and searching its catalog.
+      const artistResponse = await axios.get(`${this.baseURL}/artists/${artistId}`, {
+        headers: { 'Authorization': `Bearer ${accessToken}` }
+      });
+      const artistName = artistResponse.data?.name;
+      if (!artistName) return { tracks: [] };
+
+      const response = await axios.get(`${this.baseURL}/search`, {
+        headers: { 'Authorization': `Bearer ${accessToken}` },
         params: {
-          market: market
+          q: `artist:"${artistName}"`,
+          type: 'track',
+          market,
+          limit: 10
         }
       });
-      return response.data;
+      return { tracks: response.data?.tracks?.items || [] };
     } catch (error) {
       throw this.handleSpotifyError(error);
     }
@@ -76,14 +85,20 @@ class SpotifyService {
   async getUserPlaylists(accessToken, limit = 50) {
     try {
       const response = await axios.get(`${this.baseURL}/me/playlists`, {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
-        },
-        params: {
-          limit: limit
-        }
+        headers: { 'Authorization': `Bearer ${accessToken}` },
+        params: { limit: Math.min(Math.max(Number(limit) || 20, 1), 50) }
       });
-      return response.data;
+
+      // Spotify renamed playlist.tracks -> playlist.items in 2026. Keep a normalized
+      // `tracks` alias internally so the UI stays compatible with demo data too.
+      const data = response.data || {};
+      return {
+        ...data,
+        items: (data.items || []).map((playlist) => ({
+          ...playlist,
+          tracks: playlist.tracks || playlist.items || { total: 0 }
+        }))
+      };
     } catch (error) {
       throw this.handleSpotifyError(error);
     }
@@ -92,24 +107,31 @@ class SpotifyService {
   
   async getPlaylistTracks(accessToken, playlistId) {
     try {
-      const response = await axios.get(`${this.baseURL}/playlists/${playlistId}/tracks`, {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
+      const response = await axios.get(`${this.baseURL}/playlists/${playlistId}/items`, {
+        headers: { 'Authorization': `Bearer ${accessToken}` },
+        params: { limit: 50 }
       });
-      return response.data;
+      const data = response.data || {};
+      return {
+        ...data,
+        items: (data.items || []).map((entry) => ({
+          ...entry,
+          track: entry.track || entry.item || null
+        }))
+      };
     } catch (error) {
       throw this.handleSpotifyError(error);
     }
   }
 
   
-  async createPlaylist(accessToken, userId, name, description = '', isPublic = false) {
+  async createPlaylist(accessToken, name, description = '', isPublic = false, collaborative = false) {
     try {
-      const response = await axios.post(`${this.baseURL}/users/${userId}/playlists`, {
+      const response = await axios.post(`${this.baseURL}/me/playlists`, {
         name,
         description,
-        public: isPublic
+        public: isPublic,
+        collaborative: isPublic ? false : Boolean(collaborative)
       }, {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -140,42 +162,22 @@ class SpotifyService {
   
   async deletePlaylist(accessToken, playlistId) {
     try {
-      
-      const playlist = await axios.get(`${this.baseURL}/playlists/${playlistId}/tracks`, {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
+      // Spotify has no destructive "delete playlist" endpoint. Removing the playlist
+      // from the current user's library is the safe equivalent and preserves its items.
+      await axios.delete(`${this.baseURL}/me/library`, {
+        headers: { 'Authorization': `Bearer ${accessToken}` },
+        params: { uris: `spotify:playlist:${playlistId}` }
       });
-
-      if (playlist.data.items && playlist.data.items.length > 0) {
-        const trackUris = playlist.data.items.map(item => ({
-          uri: item.track.uri
-        }));
-
-        
-        await axios.delete(`${this.baseURL}/playlists/${playlistId}/tracks`, {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
-          },
-          data: {
-            tracks: trackUris
-          }
-        });
-      }
-
-      
-      return { message: 'Playlist cleared successfully' };
+      return { removed: true };
     } catch (error) {
       throw this.handleSpotifyError(error);
     }
   }
 
-  
   async addTracksToPlaylist(accessToken, playlistId, trackUris) {
     try {
-      const response = await axios.post(`${this.baseURL}/playlists/${playlistId}/tracks`, {
-        uris: trackUris
+      const response = await axios.post(`${this.baseURL}/playlists/${playlistId}/items`, {
+        uris: trackUris.slice(0, 100)
       }, {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -188,16 +190,15 @@ class SpotifyService {
     }
   }
 
-  
   async removeTracksFromPlaylist(accessToken, playlistId, trackUris) {
     try {
-      const response = await axios.delete(`${this.baseURL}/playlists/${playlistId}/tracks`, {
+      const response = await axios.delete(`${this.baseURL}/playlists/${playlistId}/items`, {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json'
         },
         data: {
-          tracks: trackUris.map(uri => ({ uri }))
+          items: trackUris.slice(0, 100).map(uri => ({ uri }))
         }
       });
       return response.data;
@@ -206,10 +207,9 @@ class SpotifyService {
     }
   }
 
-  
   async reorderPlaylistTracks(accessToken, playlistId, rangeStart, insertBefore, rangeLength = 1) {
     try {
-      const response = await axios.put(`${this.baseURL}/playlists/${playlistId}/tracks`, {
+      const response = await axios.put(`${this.baseURL}/playlists/${playlistId}/items`, {
         range_start: rangeStart,
         insert_before: insertBefore,
         range_length: rangeLength
@@ -225,7 +225,6 @@ class SpotifyService {
     }
   }
 
-  
   async getAudioFeatures(accessToken, trackIds) {
     try {
       
@@ -245,7 +244,7 @@ class SpotifyService {
       console.error('Audio features error:', error.response?.data || error.message);
       
       
-      if (error.response?.status === 403) {
+      if ([403, 404].includes(error.response?.status)) {
         console.warn('Insufficient permissions for audio features, returning empty data');
         return { audio_features: [] };
       }
@@ -442,7 +441,7 @@ class SpotifyService {
         params: {
           q: query,
           type: 'track',
-          limit: limit
+          limit: Math.min(Math.max(Number(limit) || 5, 1), 10)
         }
       });
       return response.data;
@@ -461,7 +460,7 @@ class SpotifyService {
         params: {
           q: query,
           type: 'playlist',
-          limit: limit
+          limit: Math.min(Math.max(Number(limit) || 5, 1), 10)
         }
       });
       return response.data;
@@ -497,16 +496,16 @@ class SpotifyService {
       const playlist = playlistResponse.data;
       
       
-      const tracksResponse = await axios.get(`${this.baseURL}/playlists/${playlistId}/tracks`, {
+      const tracksResponse = await axios.get(`${this.baseURL}/playlists/${playlistId}/items`, {
         headers: {
           'Authorization': `Bearer ${accessToken}`
         },
         params: {
-          limit: 100
+          limit: 50
         }
       });
 
-      const tracks = tracksResponse.data.items;
+      const tracks = (tracksResponse.data.items || []).map(entry => ({ ...entry, track: entry.track || entry.item || null }));
       
       
       const analytics = {
@@ -520,16 +519,7 @@ class SpotifyService {
         uniqueAlbums: new Set(tracks.map(item => 
           item.track?.album?.id
         ).filter(Boolean)).size,
-        genres: {},
-        popularity: {
-          average: tracks.length > 0 ? 
-            tracks.reduce((acc, item) => acc + (item.track?.popularity || 0), 0) / tracks.length : 0,
-          distribution: {
-            high: tracks.filter(item => (item.track?.popularity || 0) >= 80).length,
-            medium: tracks.filter(item => (item.track?.popularity || 0) >= 50 && (item.track?.popularity || 0) < 80).length,
-            low: tracks.filter(item => (item.track?.popularity || 0) < 50).length
-          }
-        }
+        genres: {}
       };
 
       
@@ -705,7 +695,7 @@ class SpotifyService {
       );
       
       if (result.newTokens) {
-        return { devices: result.data.devices, newTokens: result.newTokens };
+        return { devices: result.response?.data?.devices || [], newTokens: result.newTokens };
       }
       
       return result.data;
@@ -795,351 +785,48 @@ class SpotifyService {
     }
   }
 
-  async getRecommendations(accessToken, params) {
+  async getRecommendations(accessToken, params = {}) {
+    const limit = Math.min(Math.max(Number(params.limit) || 10, 1), 20);
+    const market = typeof params.market === 'string' && params.market.length === 2
+      ? params.market.toUpperCase()
+      : 'BR';
+
     try {
-      const validGenres = [
-        'acoustic', 'afrobeat', 'alt-rock', 'alternative', 'ambient', 'blues', 'bossanova', 
-        'brazil', 'breakbeat', 'british', 'chill', 'classical', 'club', 'country', 'dance', 
-        'dancehall', 'deep-house', 'disco', 'drum-and-bass', 'dub', 'dubstep', 'electronic', 
-        'folk', 'funk', 'garage', 'gospel', 'groove', 'grunge', 'hip-hop', 'house', 'indie', 
-        'indie-pop', 'jazz', 'j-dance', 'j-idol', 'j-pop', 'j-rock', 'k-pop', 'latin', 
-        'pop', 'r-n-b', 'reggae', 'rock', 'soul', 'world-music'
-      ];
-
-      const defaultMarket = (typeof params.market === 'string' && params.market.length === 2)
-        ? params.market.toUpperCase()
-        : 'BR';
-
-      const spotifyParams = {
-        limit: Math.min(parseInt(params.limit) || 20, 100),
-        market: defaultMarket
-      };
-      
-      let seedCount = 0;
-      const seeds = [];
-      
-      if (params.seed_tracks) {
-        const trackSeeds = params.seed_tracks.split(',').slice(0, 2);
-        if (trackSeeds.length > 0) {
-          spotifyParams.seed_tracks = trackSeeds.join(',');
-          seedCount += trackSeeds.length;
-          seeds.push(`tracks: ${trackSeeds.length}`);
-        }
-      }
-      
-      if (params.seed_artists && seedCount < 5) {
-        const artistSeeds = params.seed_artists.split(',').slice(0, Math.min(2, 5 - seedCount)); 
-        if (artistSeeds.length > 0) {
-          spotifyParams.seed_artists = artistSeeds.join(',');
-          seedCount += artistSeeds.length;
-          seeds.push(`artists: ${artistSeeds.length}`);
-        }
-      }
-      
-      if (params.seed_genres && seedCount < 5) {
-        const requestedGenres = params.seed_genres.split(',');
-        const validRequestedGenres = requestedGenres.filter(genre => 
-          validGenres.includes(genre.trim().toLowerCase())
-        );
-        
-        if (validRequestedGenres.length > 0) {
-          const genreSeeds = validRequestedGenres.slice(0, Math.min(1, 5 - seedCount));
-          spotifyParams.seed_genres = genreSeeds.join(',');
-          seedCount += genreSeeds.length;
-          seeds.push(`genres: ${genreSeeds.length}`);
-        }
-      }
-      
-      if (seedCount === 0) {
-        spotifyParams.seed_genres = 'pop';
-        seedCount = 1;
-        seeds.push('genres: 1 (default)');
-      }
-      
-      const audioFeatures = [
-        'min_acousticness', 'max_acousticness', 'target_acousticness',
-        'min_danceability', 'max_danceability', 'target_danceability',
-        'min_energy', 'max_energy', 'target_energy',
-        'min_instrumentalness', 'max_instrumentalness', 'target_instrumentalness',
-        'min_liveness', 'max_liveness', 'target_liveness',
-        'min_loudness', 'max_loudness', 'target_loudness',
-        'min_speechiness', 'max_speechiness', 'target_speechiness',
-        'min_valence', 'max_valence', 'target_valence',
-        'min_tempo', 'max_tempo', 'target_tempo',
-        'min_popularity', 'max_popularity', 'target_popularity'
-      ];
-      
-      audioFeatures.forEach(feature => {
-        if (params[feature] !== undefined && params[feature] !== null && params[feature] !== '') {
-          const value = parseFloat(params[feature]);
-          if (!isNaN(value)) {
-            if (feature.includes('tempo')) {
-              spotifyParams[feature] = Math.max(0, Math.min(value, 250));
-            } else if (feature.includes('loudness')) {
-              spotifyParams[feature] = Math.max(-60, Math.min(value, 0));
-            } else if (!feature.includes('popularity')) {
-              spotifyParams[feature] = Math.max(0, Math.min(value, 1));
-            } else {
-              spotifyParams[feature] = Math.max(0, Math.min(value, 100));
-            }
-          }
-        }
+      const spotifyParams = { ...params, limit, market };
+      const response = await axios.get(`${this.baseURL}/recommendations`, {
+        headers: { 'Authorization': `Bearer ${accessToken}` },
+        params: spotifyParams
       });
-
-  console.log(`Spotify recommendations - Total seeds: ${seedCount} (${seeds.join(', ')})`);
-  console.log('Final params:', spotifyParams);
+      return response.data;
+    } catch (error) {
+      // Recommendations and audio-analysis endpoints are unavailable to many
+      // Development Mode apps. Fall back to real user/catalog data rather than
+      // fabricating recommendations in the interface.
+      const status = error.response?.status;
+      if (![403, 404].includes(status)) throw this.handleSpotifyError(error);
 
       try {
-        const response = await axios.get(`${this.baseURL}/recommendations`, {
-          headers: { 'Authorization': `Bearer ${accessToken}` },
-          params: spotifyParams
-        });
-  return response.data;
-      } catch (firstError) {
-        const status = firstError?.response?.status;
-        console.warn('Recommendations call failed:', status, firstError?.message);
+        const top = await this.getTopTracks(accessToken, 'medium_term', Math.max(limit, 10));
+        const tracks = (top.items || []).slice(0, limit);
+        if (tracks.length) return { tracks, fallback: 'top-tracks' };
+      } catch (topError) {
+        console.warn('Top-tracks recommendation fallback unavailable:', topError.message);
+      }
 
-        if (status === 404) {
-          try {
-            const seedArtistIds = (spotifyParams.seed_artists || params.seed_artists || '').split(',').filter(Boolean);
-            const seedTrackIds = (spotifyParams.seed_tracks || params.seed_tracks || '').split(',').filter(Boolean);
-
-            const nameRequests = [];
-            seedArtistIds.forEach(id => nameRequests.push(
-              axios.get(`${this.baseURL}/artists/${id}`, { headers: { 'Authorization': `Bearer ${accessToken}` } }).catch(() => null)
-            ));
-            seedTrackIds.forEach(id => nameRequests.push(
-              axios.get(`${this.baseURL}/tracks/${id}`, { headers: { 'Authorization': `Bearer ${accessToken}` } }).catch(() => null)
-            ));
-            const nameResponses = await Promise.all(nameRequests);
-            const seedArtistNames = nameResponses
-              .map(r => r?.data?.name)
-              .filter(Boolean)
-              .slice(0, 2);
-            const seedTrackNames = nameResponses
-              .map(r => r?.data?.name || r?.data?.title)
-              .filter(Boolean)
-              .slice(0, 2);
-
-            const genre = (spotifyParams.seed_genres || 'pop').split(',')[0];
-            const queries = [];
-            if (seedArtistNames.length) queries.push(`${genre} ${seedArtistNames.join(' ')}`);
-            if (seedTrackNames.length) queries.push(`${genre} ${seedTrackNames.join(' ')}`);
-            queries.push(`${genre}`);
-            const poolLimit = Math.max(spotifyParams.limit, 20);
-            const perQuery = Math.min(50, poolLimit);
-            const searchReqs = queries.slice(0, 3).map(q => 
-              axios.get(`${this.baseURL}/search`, {
-                headers: { 'Authorization': `Bearer ${accessToken}` },
-                params: { q: q.slice(0, 250), type: 'track', limit: perQuery, market: defaultMarket }
-              }).catch(() => null)
-            );
-            const results = await Promise.all(searchReqs);
-            const items = results
-              .flatMap(r => r?.data?.tracks?.items || [])
-              .filter(Boolean);
-            const uniqueMap = new Map();
-            items.forEach(t => { if (t && t.id) uniqueMap.set(t.id, t); });
-            let candidates = Array.from(uniqueMap.values());
-
-            const minPop = typeof params.min_popularity !== 'undefined' ? parseFloat(params.min_popularity) : undefined;
-            const maxPop = typeof params.max_popularity !== 'undefined' ? parseFloat(params.max_popularity) : undefined;
-            if (!isNaN(minPop)) candidates = candidates.filter(t => (t.popularity ?? 0) >= minPop);
-            if (!isNaN(maxPop)) candidates = candidates.filter(t => (t.popularity ?? 0) <= maxPop);
-
-            const candidateIds = candidates.slice(0, 100).map(t => t.id);
-            const featuresRes = await this.getAudioFeatures(accessToken, candidateIds);
-            const featById = new Map();
-            (featuresRes.audio_features || []).forEach(f => { if (f && f.id) featById.set(f.id, f); });
-
-            const tolerance = 0.15;
-            const passes = (f) => {
-              if (!f) return false;
-              const checks = [];
-              Object.keys(params).forEach(k => {
-                if (k.startsWith('target_')) {
-                  const key = k.replace('target_', '');
-                  const v = parseFloat(params[k]);
-                  if (!isNaN(v) && typeof f[key] === 'number') {
-                    checks.push(Math.abs(f[key] - v) <= (key === 'tempo' ? 20 : key === 'loudness' ? 6 : tolerance));
-                  }
-                }
-              });
-              Object.keys(params).forEach(k => {
-                if (k.startsWith('min_') || k.startsWith('max_')) {
-                  const key = k.replace(/^min_|^max_/, '');
-                  const v = parseFloat(params[k]);
-                  if (!isNaN(v) && typeof f[key] === 'number') {
-                    if (k.startsWith('min_')) checks.push(f[key] >= v);
-                    if (k.startsWith('max_')) checks.push(f[key] <= v);
-                  }
-                }
-              });
-              return checks.every(Boolean);
-            };
-
-            let filtered = candidates.filter(t => passes(featById.get(t.id)));
-            if (filtered.length < spotifyParams.limit) {
-              filtered = candidates;
-            }
-
-            const targetKeys = Object.keys(params).filter(k => k.startsWith('target_'));
-            if (targetKeys.length) {
-              filtered.sort((a, b) => {
-                const fa = featById.get(a.id), fb = featById.get(b.id);
-                const score = (f) => targetKeys.reduce((acc, k) => {
-                  const key = k.replace('target_', '');
-                  const v = parseFloat(params[k]);
-                  if (f && typeof f[key] === 'number' && !isNaN(v)) {
-                    const diff = Math.abs(f[key] - v);
-                    const norm = key === 'tempo' ? diff / 250 : key === 'loudness' ? diff / 60 : diff;
-                    return acc + norm;
-                  }
-                  return acc + 1;
-                }, 0);
-                return score(fa) - score(fb);
-              });
-            }
-
-            return { tracks: filtered.slice(0, spotifyParams.limit), fallback: 'search+features' };
-          } catch (searchErr) {
-            console.error('Search fallback failed:', searchErr?.response?.status, searchErr?.message);
-            return { tracks: [], fallback: 'empty' };
-          }
-        }
-
-        const safeGenre = 'pop';
-  const fallbackParams = { seed_genres: safeGenre, limit: spotifyParams.limit, market: defaultMarket };
-
-        console.log('Attempting recommendations fallback with safe genre:', fallbackParams);
-
+      const genre = String(params.seed_genres || '').split(',')[0].trim();
+      if (genre) {
         try {
-          const fallbackResponse = await axios.get(`${this.baseURL}/recommendations`, {
-            headers: { 'Authorization': `Bearer ${accessToken}` },
-            params: fallbackParams
-          });
-          return { ...fallbackResponse.data, fallback: 'genre' };
-        } catch (fallbackError) {
-          console.warn('Recommendations fallback failed:', fallbackError?.response?.status, fallbackError?.message);
-
-          try {
-            const seedArtistIds = (spotifyParams.seed_artists || params.seed_artists || '').split(',').filter(Boolean);
-            const seedTrackIds = (spotifyParams.seed_tracks || params.seed_tracks || '').split(',').filter(Boolean);
-
-            const nameRequests = [];
-            seedArtistIds.forEach(id => nameRequests.push(
-              axios.get(`${this.baseURL}/artists/${id}`, { headers: { 'Authorization': `Bearer ${accessToken}` } }).catch(() => null)
-            ));
-            seedTrackIds.forEach(id => nameRequests.push(
-              axios.get(`${this.baseURL}/tracks/${id}`, { headers: { 'Authorization': `Bearer ${accessToken}` } }).catch(() => null)
-            ));
-            const nameResponses = await Promise.all(nameRequests);
-            const seedArtistNames = nameResponses
-              .map(r => r?.data?.name)
-              .filter(Boolean)
-              .slice(0, 2);
-            const seedTrackNames = nameResponses
-              .map(r => r?.data?.name || r?.data?.title)
-              .filter(Boolean)
-              .slice(0, 2);
-
-            const genre = (spotifyParams.seed_genres || 'pop').split(',')[0];
-            const queries = [];
-            if (seedArtistNames.length) queries.push(`${genre} ${seedArtistNames.join(' ')}`);
-            if (seedTrackNames.length) queries.push(`${genre} ${seedTrackNames.join(' ')}`);
-            queries.push(`${genre}`);
-
-            const poolLimit = Math.max(spotifyParams.limit, 20);
-            const perQuery = Math.min(50, poolLimit);
-            const searchReqs = queries.slice(0, 3).map(q => 
-              axios.get(`${this.baseURL}/search`, {
-                headers: { 'Authorization': `Bearer ${accessToken}` },
-                params: { q: q.slice(0, 250), type: 'track', limit: perQuery, market: defaultMarket }
-              }).catch(() => null)
-            );
-            const results = await Promise.all(searchReqs);
-            const items = results
-              .flatMap(r => r?.data?.tracks?.items || [])
-              .filter(Boolean);
-            const uniqueMap = new Map();
-            items.forEach(t => { if (t && t.id) uniqueMap.set(t.id, t); });
-            let candidates = Array.from(uniqueMap.values());
-
-            const minPop = typeof params.min_popularity !== 'undefined' ? parseFloat(params.min_popularity) : undefined;
-            const maxPop = typeof params.max_popularity !== 'undefined' ? parseFloat(params.max_popularity) : undefined;
-            if (!isNaN(minPop)) candidates = candidates.filter(t => (t.popularity ?? 0) >= minPop);
-            if (!isNaN(maxPop)) candidates = candidates.filter(t => (t.popularity ?? 0) <= maxPop);
-
-            const candidateIds = candidates.slice(0, 100).map(t => t.id);
-            const featuresRes = await this.getAudioFeatures(accessToken, candidateIds);
-            const featById = new Map();
-            (featuresRes.audio_features || []).forEach(f => { if (f && f.id) featById.set(f.id, f); });
-
-            const tolerance = 0.15;
-            const passes = (f) => {
-              if (!f) return false;
-              const checks = [];
-              Object.keys(params).forEach(k => {
-                if (k.startsWith('target_')) {
-                  const key = k.replace('target_', '');
-                  const v = parseFloat(params[k]);
-                  if (!isNaN(v) && typeof f[key] === 'number') {
-                    checks.push(Math.abs(f[key] - v) <= (key === 'tempo' ? 20 : key === 'loudness' ? 6 : tolerance));
-                  }
-                }
-              });
-              Object.keys(params).forEach(k => {
-                if (k.startsWith('min_') || k.startsWith('max_')) {
-                  const key = k.replace(/^min_|^max_/, '');
-                  const v = parseFloat(params[k]);
-                  if (!isNaN(v) && typeof f[key] === 'number') {
-                    if (k.startsWith('min_')) checks.push(f[key] >= v);
-                    if (k.startsWith('max_')) checks.push(f[key] <= v);
-                  }
-                }
-              });
-              return checks.every(Boolean);
-            };
-
-            let filtered = candidates.filter(t => passes(featById.get(t.id)));
-            if (filtered.length < spotifyParams.limit) {
-              filtered = candidates;
-            }
-
-            const targetKeys = Object.keys(params).filter(k => k.startsWith('target_'));
-            if (targetKeys.length) {
-              filtered.sort((a, b) => {
-                const fa = featById.get(a.id), fb = featById.get(b.id);
-                const score = (f) => targetKeys.reduce((acc, k) => {
-                  const key = k.replace('target_', '');
-                  const v = parseFloat(params[k]);
-                  if (f && typeof f[key] === 'number' && !isNaN(v)) {
-                    const diff = Math.abs(f[key] - v);
-                    const norm = key === 'tempo' ? diff / 250 : key === 'loudness' ? diff / 60 : diff;
-                    return acc + norm;
-                  }
-                  return acc + 1;
-                }, 0);
-                return score(fa) - score(fb);
-              });
-            }
-
-            return { tracks: filtered.slice(0, spotifyParams.limit), fallback: 'search+features' };
-          } catch (searchErr) {
-            console.error('Search fallback failed:', searchErr?.response?.status, searchErr?.message);
-            return { tracks: [], fallback: 'empty' };
-          }
+          const search = await this.searchTracks(accessToken, `genre:${genre}`, Math.min(limit, 10));
+          return { tracks: search.tracks?.items || [], fallback: 'search' };
+        } catch (searchError) {
+          console.warn('Search recommendation fallback unavailable:', searchError.message);
         }
       }
-      
-    } catch (error) {
-      console.error('Spotify recommendations error:', error.response?.data || error.message);
-      if (error.response?.status === 404) {
-        console.error('404 Error - possibly invalid genre or track/artist IDs');
-      }
-      throw this.handleSpotifyError(error);
+
+      return { tracks: [], fallback: 'unavailable' };
     }
   }
+
   handleSpotifyError(error) {
     if (error.response) {
       const { status, data } = error.response;
@@ -1154,7 +841,7 @@ class SpotifyService {
         case 404:
           return new Error('Not Found: Resource not found');
         case 429:
-          return new Error('Rate Limited: Too many requests');
+          return new Error(data?.reason === 'QUOTA_EXCEEDED' ? 'Spotify quota exceeded' : 'Spotify rate limit exceeded');
         case 500:
           return new Error('Spotify Server Error');
         default:

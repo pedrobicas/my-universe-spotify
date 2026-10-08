@@ -1,199 +1,162 @@
-# My Universe Spotify
+# My Universe
 
-Um projeto completo que integra com a API do Spotify, permitindo autenticação OAuth2 e acesso aos dados do usuário.
+Uma experiência pessoal para explorar sua biblioteca e seus hábitos no Spotify com uma interface escura, editorial e focada em música.
 
-## 🚀 Estrutura do Projeto
+O projeto é dividido em um frontend React/Vite e uma API Node/Express. Ele inclui login OAuth com Spotify, dashboard, biblioteca de playlists, descoberta, perfil, player persistente, configurações locais e um modo demonstração que funciona sem conta conectada.
 
-```
-my-universe-spotify/
-├── backend/          # API Node.js + Express
-├── frontend/         # Aplicação React + Vite
-└── README.md
-```
+## O que mudou nesta versão
 
-## 🛠️ Tecnologias Utilizadas
+- Novo sistema visual inspirado na lógica de produto do Spotify: superfícies escuras, conteúdo em primeiro plano, verde usado apenas para ação/estado e menos efeitos decorativos.
+- Navegação desktop com sidebar persistente, navegação móvel dedicada e player global integrado ao shell da aplicação.
+- Dashboard reconstruído para usar somente dados retornados pela API; métricas aleatórias/estimadas foram removidas.
+- Biblioteca de playlists redesenhada com busca, ordenação, grade/lista, detalhe editorial, edição e gerenciamento de faixas.
+- Descoberta reorganizada em seleções por momento, mood, mistura de gêneros e regiões, com fallback quando recursos de recomendação não estão disponíveis.
+- Perfil e configurações simplificados para não exibir informações inventadas ou campos que o Spotify não entrega mais.
+- Modo demo mais consistente: reprodução, playlists, inclusão, remoção e reordenação de faixas mantêm estado durante a sessão.
+- OAuth endurecido: tokens ficam em cookies `httpOnly`, não são enviados na URL nem persistidos em `localStorage`, e o parâmetro `state` é validado.
+- Sessão pode ser renovada pelo refresh token também durante o `checkAuth`.
+- Backend adaptado aos endpoints atuais de playlist (`/items`, `/me/playlists`) e remoção da biblioteca.
+- CORS, rate limiting, Helmet e validação de origem para requisições mutáveis.
+
+## Stack
+
+**Frontend:** React 18, Vite 5, React Router, Axios, Lucide React, Tailwind/PostCSS como pipeline de CSS.
+
+**Backend:** Node.js, Express, Axios, Spotify Web API, OAuth 2.0, cookies `httpOnly`, Helmet e express-rate-limit.
+
+## Requisitos
+
+- Node.js 20+ recomendado
+- npm
+- Uma aplicação criada no Spotify for Developers para usar o login real
+
+O modo demo não exige credenciais do Spotify.
+
+## Configuração
 
 ### Backend
-- Node.js + Express
-- OAuth2 com Spotify
-- Middlewares de autenticação
-- CORS configurado
-- Autentitação
 
-### Frontend
-- React + Vite
-- React Router DOM
-- TailwindCSS
-- Chart.js para gráficos
-- Axios para requisições
-
-## 📋 Pré-requisitos
-
-- Node.js
-- npm ou yarn
-- Conta no Spotify Developer
-
-## 🔧 Configuração
-
-### 1. Clone o repositório
-```bash
-git clone https://github.com/pedrobicas/spotify-project.git
-cd spotify-project
-```
-
-### 2. Configure as permissões do Spotify (IMPORTANTE!)
-
-**Antes de executar, configure as permissões necessárias:**
-
-1. Acesse [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
-2. Selecione sua aplicação `my-universe-spotify` ou crie uma
-3. Em **App Settings** > **Redirect URIs**, adicione:
-   ```
-   http://127.0.0.1:8080/auth/callback
-   ```
-
-
-### 3. Configure as variáveis de ambiente
-
-#### Backend (.env)
 ```bash
 cd backend
 cp env.example .env
+npm install
 ```
 
-Edite o arquivo `.env` com suas credenciais do Spotify:
+Preencha `backend/.env`:
+
 ```env
-SPOTIFY_CLIENT_ID=seu_client_aqui
-SPOTIFY_CLIENT_SECRET=seu_client_secret_aqui
+SPOTIFY_CLIENT_ID=your_spotify_client_id
+SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
 REDIRECT_URI=http://127.0.0.1:8080/auth/callback
 FRONTEND_URL=http://127.0.0.1:5173
+ALLOWED_ORIGINS=http://127.0.0.1:5173,http://localhost:5173
 PORT=8080
 NODE_ENV=development
-COOKIE_SECRET=uma_chave_secreta_aleatoria_aqui
+COOKIE_SECRET=replace_with_a_long_random_secret
 ```
 
-#### Frontend (.env.local)
+No painel do Spotify, cadastre exatamente o mesmo `REDIRECT_URI` usado acima.
+
+### Frontend
+
 ```bash
-cd ../frontend
-cp .env.example .env.local
+cd frontend
+cp env.example .env.local
+npm install
 ```
 
-Edite o arquivo `.env.local`:
-```env
-VITE_API_URL=http://localhost:8080
-VITE_APP_NAME=My Universe Spotify
-VITE_APP_VERSION=1.0.0
+`frontend/.env.local`:
 
-# Set to 'true' to disable Spotify login and force demo mode only
+```env
+VITE_API_URL=http://127.0.0.1:8080
 VITE_DEMO_ONLY=false
 ```
 
-### 4. Instale as dependências
+Use `VITE_DEMO_ONLY=true` quando quiser publicar uma versão que expõe somente a demonstração.
 
-#### Backend
-```bash
-cd ../backend
-npm install
-```
+## Executando
 
-#### Frontend
-```bash
-cd ../frontend
-npm install
-```
+Em dois terminais:
 
-## 🚀 Executando o Projeto
-
-### Backend
 ```bash
 cd backend
-npm run dev    # Desenvolvimento com nodemon
-npm start      # Produção
+npm run dev
 ```
 
-O backend estará rodando em: http://127.0.0.1:8080
-
-### Frontend
 ```bash
 cd frontend
 npm run dev
 ```
 
-O frontend estará rodando em: http://127.0.0.1:5173
+Frontend: `http://127.0.0.1:5173`  
+Backend: `http://127.0.0.1:8080`
 
-## 🔐 Autenticação
+Também existe o endpoint de saúde da API em `GET /health`.
 
-1. Acesse http://127.0.0.1:5173
-2. Clique em "Login with Spotify"
-3. Autorize o aplicativo no Spotify com as permissões solicitadas
-4. Você será redirecionado de volta para o dashboard
+## Scripts úteis
 
-**⚠️ Importante**: Se você encontrar erros de permissões insuficientes, verifique se configurou corretamente no Spotify Developer Dashboard.
+No frontend:
 
-## 🆘 Resolução de Problemas
-
-### Erro de CORS
-- Certifique-se de que o backend está rodando em `http://127.0.0.1:8080`
-- Verifique se o frontend está rodando em `http://127.0.0.1:5173`
-
-### Problemas de Autenticação
-- Verifique se o `REDIRECT_URI` está configurado como `http://127.0.0.1:8080/auth/callback`
-- Certifique-se de que o `COOKIE_SECRET` está definido no backend
-
-## 📁 Estrutura de Arquivos
-
-### Backend
-```
-backend/
-├── routes/           # Rotas da API
-├── controllers/      # Controladores
-├── services/         # Lógica de negócio
-├── middlewares/      # Middlewares (auth, CORS, etc.)
-├── .env.example      # Exemplo de variáveis de ambiente
-├── package.json      # Dependências e scripts
-└── server.js         # Arquivo principal
+```bash
+npm run dev
+npm run build
+npm run lint
+npm run preview
 ```
 
-### Frontend
-```
-frontend/
-├── src/
-│   ├── components/   # Componentes reutilizáveis
-│   ├── pages/        # Páginas da aplicação
-│   ├── services/     # Serviços de API
-│   ├── hooks/        # Hooks customizados
-│   └── styles/       # Estilos globais
-├── .env.example      # Exemplo de variáveis de ambiente
-├── package.json      # Dependências e scripts
-└── vite.config.js    # Configuração do Vite
+No backend:
+
+```bash
+npm run dev
+npm start
 ```
 
-## 🔒 Segurança
+## Estrutura
 
-- Tokens são armazenados em cookies httpOnly
-- CORS configurado com origin específico
-- Middleware de autenticação em todas as rotas protegidas
-- Variáveis de ambiente para credenciais sensíveis
+```text
+.
+├── backend/
+│   ├── controllers/
+│   ├── middlewares/
+│   ├── routes/
+│   ├── services/
+│   ├── env.example
+│   └── server.js
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── contexts/
+│   │   ├── data/
+│   │   ├── pages/
+│   │   ├── services/
+│   │   └── styles/
+│   ├── env.example
+│   └── vite.config.js
+└── README.md
+```
 
-## 📱 Funcionalidades
+## Autenticação e segurança
 
-- ✅ Autenticação OAuth2 com Spotify
-- ✅ Dashboard com informações do usuário
-- ✅ Listagem de playlists
-- ✅ Criação de novas playlists
-- ✅ Análise de features de áudio
-- ✅ Design responsivo com TailwindCSS
-- ✅ Gráficos interativos
-- ✅ Modo demonstração com dados simulados
+O backend realiza o Authorization Code flow. O navegador recebe apenas cookies de sessão `httpOnly`; access token e refresh token não são colocados em query string nem no armazenamento local do frontend. O `state` do OAuth é gerado de forma criptograficamente segura e conferido no callback.
 
-## 🤝 Contribuindo
+Em produção, frontend e backend devem ser servidos por HTTPS. Prefira hosts no mesmo site/domínio (por exemplo `app.seudominio.com` e `api.seudominio.com`) para evitar bloqueios modernos de cookies cross-site. Configure `FRONTEND_URL` e `ALLOWED_ORIGINS` com as origens públicas corretas.
 
-1. Fork o projeto
-2. Crie uma branch para sua feature
-3. Commit suas mudanças
-4. Push para a branch
-5. Abra um Pull Request
+## Compatibilidade com a Spotify Web API
 
-## 📄 Licença
+A Spotify Web API muda com frequência. Esta versão usa os endpoints atuais para criação e gerenciamento de playlists e inclui fallback para áreas que podem estar limitadas dependendo do tipo/idade da aplicação Spotify. Se um recurso não estiver disponível para sua aplicação, a UI tenta degradar de forma explícita em vez de fabricar dados.
 
-Este projeto está sob a licença MIT.
+Algumas operações de playback exigem um dispositivo Spotify ativo e podem depender das permissões/condições da conta conectada. No Development Mode atual, o Spotify também exige Premium do proprietário do app e aplica limites próprios a novos aplicativos/usuários autorizados.
+
+## Deploy
+
+O frontend pode ser publicado separadamente (por exemplo, Vercel) e o backend em um host Node. Para produção:
+
+- defina `VITE_API_URL` com a URL pública HTTPS do backend;
+- defina `FRONTEND_URL` com a URL pública HTTPS do frontend;
+- inclua a origem do frontend em `ALLOWED_ORIGINS`;
+- atualize `REDIRECT_URI` no `.env` e no Spotify Developer Dashboard;
+- não versione arquivos `.env` nem credenciais.
+
+## Licença
+
+MIT.

@@ -1,77 +1,53 @@
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useCallback, useContext, useMemo, useState } from 'react'
 import api from '../services/api'
 import demoAPI from '../services/demoAPI'
+import { demoUser } from '../data/demoData'
 
-const DemoContext = createContext()
+const DemoContext = createContext(null)
 
 export const useDemo = () => {
   const context = useContext(DemoContext)
-  if (!context) {
-    throw new Error('useDemo must be used within a DemoProvider')
-  }
+  if (!context) throw new Error('useDemo must be used within a DemoProvider')
   return context
 }
 
 export const DemoProvider = ({ children }) => {
   const [isDemoMode, setIsDemoMode] = useState(() => {
-    return localStorage.getItem('spotify_demo_mode') === 'true'
+    const forcedByUrl = new URLSearchParams(window.location.search).get('demo') === 'true'
+    return forcedByUrl || localStorage.getItem('spotify_demo_mode') === 'true'
   })
   const [showDemoDialog, setShowDemoDialog] = useState(false)
 
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search)
-    const demoParam = urlParams.get('demo')
-    
-    if (demoParam === 'true') {
-      enableDemoMode()
-    }
-  }, [])
-
-  const enableDemoMode = () => {
+  const enableDemoMode = useCallback(() => {
     setIsDemoMode(true)
     localStorage.setItem('spotify_demo_mode', 'true')
-    
-    import('../data/demoData').then(({ demoUser }) => {
-      localStorage.setItem('spotify_demo_user', JSON.stringify(demoUser))
-    })
-    
-    console.log('🎵 Modo Demo Ativado - Usando dados simulados')
-  }
+    localStorage.setItem('spotify_demo_user', JSON.stringify(demoUser))
+  }, [])
 
-  const disableDemoMode = () => {
+  const disableDemoMode = useCallback(() => {
     setIsDemoMode(false)
     localStorage.removeItem('spotify_demo_mode')
     localStorage.removeItem('spotify_demo_user')
-    console.log('🎵 Modo Demo Desativado - Voltando ao Spotify real')
-  }
+  }, [])
 
-  const toggleDemoMode = () => {
-    if (isDemoMode) {
-      disableDemoMode()
-    } else {
-      enableDemoMode()
-    }
-  }
+  const toggleDemoMode = useCallback(() => {
+    if (isDemoMode) disableDemoMode()
+    else enableDemoMode()
+  }, [disableDemoMode, enableDemoMode, isDemoMode])
 
-  const getAPI = () => {
-    return isDemoMode ? demoAPI : api
-  }
+  const getAPI = useCallback(() => isDemoMode ? demoAPI : api, [isDemoMode])
 
-  const value = {
+  const value = useMemo(() => ({
     isDemoMode,
     enableDemoMode,
     disableDemoMode,
     toggleDemoMode,
     getAPI,
     showDemoDialog,
-    setShowDemoDialog
-  }
+    setShowDemoDialog,
+  }), [isDemoMode, enableDemoMode, disableDemoMode, toggleDemoMode, getAPI, showDemoDialog])
 
-  return (
-    <DemoContext.Provider value={value}>
-      {children}
-    </DemoContext.Provider>
-  )
+  return <DemoContext.Provider value={value}>{children}</DemoContext.Provider>
 }
 
 export default DemoContext

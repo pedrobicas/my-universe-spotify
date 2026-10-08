@@ -1,277 +1,163 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useAuth } from '../hooks/useAuth';
+import { createContext, useContext, useEffect, useState } from 'react'
+import { useAuth } from '../hooks/useAuth'
 
-const SettingsContext = createContext();
+const STORAGE_KEY = 'myUniverse_settings'
+const SettingsContext = createContext(null)
+
+const baseSettings = {
+  displayName: '',
+  compactView: false,
+  language: 'pt-BR',
+  fontSize: 16,
+  autoSave: true,
+  showMiniPlayer: true,
+  animationsEnabled: true,
+  highContrastMode: false,
+  browserNotifications: true,
+  soundNotifications: false,
+  saveHistory: true,
+  shareActivity: false,
+}
 
 export const useSettings = () => {
-  const context = useContext(SettingsContext);
-  if (!context) {
-    throw new Error('useSettings must be used within a SettingsProvider');
-  }
-  return context;
-};
+  const context = useContext(SettingsContext)
+  if (!context) throw new Error('useSettings must be used within a SettingsProvider')
+  return context
+}
 
 export const SettingsProvider = ({ children }) => {
-  const { user } = useAuth();
-  
-  const [settings, setSettings] = useState({
-    displayName: '',
-    email: '',
-    
-    darkMode: true,
-    compactView: false,
-    language: 'pt-BR',
-    fontSize: 16,
-    
-    autoSave: true,
-    showMiniPlayer: true,
-    animationsEnabled: true,
-    highContrastMode: false,
-    
-    browserNotifications: true,
-    soundNotifications: false,
-    
-    saveHistory: true,
-    shareActivity: false
-  });
-
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const { user } = useAuth()
+  const [settings, setSettings] = useState(baseSettings)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
-    const loadSettings = () => {
-      try {
-        const savedSettings = localStorage.getItem('myUniverse_settings');
-        if (savedSettings) {
-          const parsed = JSON.parse(savedSettings);
-          setSettings(prevSettings => ({
-            ...prevSettings,
-            ...parsed,
-            displayName: user?.display_name || parsed.displayName || '',
-            email: user?.email || parsed.email || ''
-          }));
-        } else if (user) {
-          setSettings(prevSettings => ({
-            ...prevSettings,
-            displayName: user.display_name || '',
-            email: user.email || ''
-          }));
-        }
-      } catch (error) {
-        console.error('Erro ao carregar configurações:', error);
-        setError('Erro ao carregar configurações');
-      }
-    };
-
-    loadSettings();
-  }, [user]);
-
-  useEffect(() => {
-    if (settings.displayName || settings.email) {
-      try {
-        localStorage.setItem('myUniverse_settings', JSON.stringify(settings));
-      } catch (error) {
-        console.error('Erro ao salvar configurações:', error);
-      }
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}')
+      setSettings((current) => ({
+        ...current,
+        ...saved,
+        displayName: user?.display_name || saved.displayName || current.displayName,
+      }))
+    } catch (loadError) {
+      console.error('Settings load failed:', loadError)
+      setError('Não foi possível carregar suas preferências locais.')
     }
-  }, [settings]);
+  }, [user])
 
   useEffect(() => {
-    if (settings.darkMode) {
-      document.documentElement.classList.add('dark');
-      document.body.style.backgroundColor = '#000000';
-    } else {
-      document.documentElement.classList.remove('dark');
-      document.body.style.backgroundColor = '#ffffff';
+    if (!settings.autoSave) return
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(settings))
+    } catch (saveError) {
+      console.error('Settings persistence failed:', saveError)
     }
-  }, [settings.darkMode]);
+  }, [settings])
 
   useEffect(() => {
-    document.documentElement.lang = settings.language.split('-')[0];
-  }, [settings.language]);
+    document.documentElement.classList.add('dark')
+    document.documentElement.lang = settings.language.split('-')[0]
+    document.documentElement.style.fontSize = `${settings.fontSize}px`
+    document.body.classList.toggle('compact-view', settings.compactView)
+    document.body.classList.toggle('no-animations', !settings.animationsEnabled)
+    document.body.classList.toggle('high-contrast', settings.highContrastMode)
+  }, [settings.language, settings.fontSize, settings.compactView, settings.animationsEnabled, settings.highContrastMode])
 
-  useEffect(() => {
-    document.documentElement.style.fontSize = `${settings.fontSize}px`;
-  }, [settings.fontSize]);
-
-  useEffect(() => {
-    if (settings.compactView) {
-      document.body.classList.add('compact-view');
-    } else {
-      document.body.classList.remove('compact-view');
-    }
-  }, [settings.compactView]);
-
-  useEffect(() => {
-    if (settings.animationsEnabled) {
-      document.body.classList.remove('no-animations');
-    } else {
-      document.body.classList.add('no-animations');
-    }
-  }, [settings.animationsEnabled]);
-
-  useEffect(() => {
-    if (settings.highContrastMode) {
-      document.body.classList.add('high-contrast');
-    } else {
-      document.body.classList.remove('high-contrast');
-    }
-  }, [settings.highContrastMode]);
-
-  const updateSetting = (key, value) => {
-    setSettings(prevSettings => ({
-      ...prevSettings,
-      [key]: value
-    }));
-  };
-
-  const updateMultipleSettings = (newSettings) => {
-    setSettings(prevSettings => ({
-      ...prevSettings,
-      ...newSettings
-    }));
-  };
+  const updateSetting = (key, value) => setSettings((current) => ({ ...current, [key]: value }))
+  const updateMultipleSettings = (next) => setSettings((current) => ({ ...current, ...next }))
 
   const saveSettings = async () => {
-    setIsLoading(true);
-    setError(null);
-    
+    setIsLoading(true)
+    setError(null)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      localStorage.setItem('myUniverse_settings', JSON.stringify(settings));
-    
-      
-      return { success: true, message: 'Configurações salvas com sucesso!' };
-    } catch (error) {
-      console.error('Erro ao salvar configurações:', error);
-      setError('Erro ao salvar configurações');
-      return { success: false, message: 'Erro ao salvar configurações' };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(settings))
+      return { success: true, message: 'Preferências salvas.' }
+    } catch (saveError) {
+      console.error('Settings save failed:', saveError)
+      setError('Não foi possível salvar as preferências.')
+      return { success: false, message: 'Não foi possível salvar as preferências.' }
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   const resetSettings = () => {
-    const defaultSettings = {
-      displayName: user?.display_name || '',
-      email: user?.email || '',
-      darkMode: true,
-      compactView: false,
-      language: 'pt-BR',
-      fontSize: 16,
-      autoSave: true,
-      showLyrics: true,
-      showMiniPlayer: true,
-      animationsEnabled: true,
-      highContrastMode: false,
-      browserNotifications: true,
-      soundNotifications: false,
-      saveHistory: true,
-      shareActivity: false
-    };
-    
-    setSettings(defaultSettings);
-    localStorage.setItem('myUniverse_settings', JSON.stringify(defaultSettings));
-  };
+    const defaults = { ...baseSettings, displayName: user?.display_name || '' }
+    setSettings(defaults)
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(defaults))
+  }
 
   const clearCache = async () => {
-    setIsLoading(true);
+    setIsLoading(true)
     try {
-      const keysToRemove = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && (key.startsWith('spotify_') || key.startsWith('music_cache_'))) {
-          keysToRemove.push(key);
-        }
+      const keysToRemove = []
+      for (let index = 0; index < localStorage.length; index += 1) {
+        const key = localStorage.key(index)
+        if (key && (key.startsWith('music_cache_') || key.startsWith('myUniverse_cache_'))) keysToRemove.push(key)
       }
-      
-      keysToRemove.forEach(key => localStorage.removeItem(key));
-  
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      return { success: true, message: 'Cache limpo com sucesso!' };
-    } catch (error) {
-      console.error('Erro ao limpar cache:', error);
-      return { success: false, message: 'Erro ao limpar cache' };
+      keysToRemove.forEach((key) => localStorage.removeItem(key))
+      return { success: true, message: 'Cache local limpo.' }
+    } catch (cacheError) {
+      console.error('Cache clear failed:', cacheError)
+      return { success: false, message: 'Não foi possível limpar o cache.' }
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   const getStorageUsage = () => {
     try {
-      let totalSize = 0;
-      for (let key in localStorage) {
-        if (localStorage.hasOwnProperty(key)) {
-          totalSize += localStorage[key].length;
-        }
+      let totalSize = 0
+      for (let index = 0; index < localStorage.length; index += 1) {
+        const key = localStorage.key(index)
+        const value = key ? localStorage.getItem(key) : null
+        if (value) totalSize += value.length
       }
-      
-      const sizeMB = (totalSize / 1024 / 1024).toFixed(2);
       return {
-        totalSizeMB: sizeMB,
+        totalSizeMB: (totalSize / 1024 / 1024).toFixed(2),
         totalSizeBytes: totalSize,
-        itemCount: Object.keys(localStorage).length
-      };
-    } catch (error) {
-      console.error('Erro ao calcular uso de armazenamento:', error);
-      return { totalSizeMB: '0.00', totalSizeBytes: 0, itemCount: 0 };
+        itemCount: localStorage.length,
+      }
+    } catch (storageError) {
+      console.error('Storage usage failed:', storageError)
+      return { totalSizeMB: '0.00', totalSizeBytes: 0, itemCount: 0 }
     }
-  };
+  }
 
   const exportSettings = () => {
     try {
-      const dataStr = JSON.stringify(settings, null, 2);
-      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-      
-      const exportFileDefaultName = `myuniverse-settings-${new Date().toISOString().split('T')[0]}.json`;
-      
-      const linkElement = document.createElement('a');
-      linkElement.setAttribute('href', dataUri);
-      linkElement.setAttribute('download', exportFileDefaultName);
-      linkElement.click();
-      
-      return { success: true, message: 'Configurações exportadas com sucesso!' };
-    } catch (error) {
-      console.error('Erro ao exportar configurações:', error);
-      return { success: false, message: 'Erro ao exportar configurações' };
+      const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(JSON.stringify(settings, null, 2))}`
+      const link = document.createElement('a')
+      link.href = dataUri
+      link.download = `my-universe-settings-${new Date().toISOString().split('T')[0]}.json`
+      link.click()
+      return { success: true, message: 'Preferências exportadas.' }
+    } catch (exportError) {
+      console.error('Settings export failed:', exportError)
+      return { success: false, message: 'Não foi possível exportar as preferências.' }
     }
-  };
+  }
 
-  const importSettings = (file) => {
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const importedSettings = JSON.parse(e.target.result);
-          
-          const validKeys = Object.keys(settings);
-          const filteredSettings = {};
-          
-          for (const key of validKeys) {
-            if (importedSettings.hasOwnProperty(key)) {
-              filteredSettings[key] = importedSettings[key];
-            }
-          }
-          
-          filteredSettings.displayName = user?.display_name || settings.displayName;
-          filteredSettings.email = user?.email || settings.email;
-          
-          setSettings(prevSettings => ({
-            ...prevSettings,
-            ...filteredSettings
-          }));
-          
-          resolve({ success: true, message: 'Configurações importadas com sucesso!' });
-        } catch (error) {
-          console.error('Erro ao importar configurações:', error);
-          resolve({ success: false, message: 'Arquivo de configurações inválido' });
-        }
-      };
-      reader.readAsText(file);
-    });
-  };
+  const importSettings = (file) => new Promise((resolve) => {
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      try {
+        const imported = JSON.parse(event.target.result)
+        const filtered = Object.fromEntries(
+          Object.keys(baseSettings)
+            .filter((key) => Object.prototype.hasOwnProperty.call(imported, key))
+            .map((key) => [key, imported[key]])
+        )
+        filtered.displayName = user?.display_name || filtered.displayName || settings.displayName
+        setSettings((current) => ({ ...current, ...filtered }))
+        resolve({ success: true, message: 'Preferências importadas.' })
+      } catch (importError) {
+        console.error('Settings import failed:', importError)
+        resolve({ success: false, message: 'Arquivo de preferências inválido.' })
+      }
+    }
+    reader.readAsText(file)
+  })
 
   const value = {
     settings,
@@ -285,12 +171,8 @@ export const SettingsProvider = ({ children }) => {
     importSettings,
     isLoading,
     error,
-    setError
-  };
+    setError,
+  }
 
-  return (
-    <SettingsContext.Provider value={value}>
-      {children}
-    </SettingsContext.Provider>
-  );
-};
+  return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>
+}

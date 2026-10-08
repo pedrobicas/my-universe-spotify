@@ -12,105 +12,87 @@ const errorMiddleware = require('./middlewares/error');
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-    
-    const allowedOrigins = process.env.ALLOWED_ORIGINS 
-      ? process.env.ALLOWED_ORIGINS.split(',')
-      : ['http://localhost:5173', 'http://127.0.0.1:5173'];
-    
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.log('CORS blocked origin:', origin);
-      console.log('Allowed origins:', allowedOrigins);
-      callback(new Error('Not allowed by CORS'));
-    }
+const allowedOrigins = [...new Set([
+  ...(process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://127.0.0.1:5173').split(','),
+  process.env.FRONTEND_URL
+].map((origin) => origin?.trim()).filter(Boolean))];
+
+const corsOptions = {
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error('Origin not allowed by CORS'));
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', 'X-Requested-With'],
-  exposedHeaders: ['Set-Cookie']
-}));
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+};
 
-app.options('*', cors());
-
-app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path} - Origin: ${req.headers.origin || 'No origin'} - User-Agent: ${req.headers['user-agent']?.substring(0, 50) || 'No user-agent'}`);
-  next();
-});
-
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" },
-  contentSecurityPolicy: false
-}));
-
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-app.use(cookieParser(process.env.COOKIE_SECRET || 'default-secret'));
+app.disable('x-powered-by');
+app.set('trust proxy', 1);
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
+app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+app.use(process.env.COOKIE_SECRET ? cookieParser(process.env.COOKIE_SECRET) : cookieParser());
 
 app.use((req, res, next) => {
-  res.setCookie = function(name, value, options = {}) {
-    const cookieOptions = {
-      ...options,
+  res.setCookie = function setCookie(name, value, options = {}) {
+    return this.cookie(name, value, {
       path: '/',
+      ...options,
       httpOnly: options.httpOnly !== false,
       secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       domain: undefined
-    };
-    
-    return this.cookie(name, value, cookieOptions);
+    });
   };
-  
   next();
 });
 
-app.use('/auth', authRoutes);
-app.use('/api', apiRoutes);
-
-app.get('/', (req, res) => {
-  const { code, state, error } = req.query;
-  
-  if (code) {
-    console.log('Spotify callback received at root, redirecting to /auth/callback');
-    res.redirect(`/auth/callback?code=${code}&state=${state || ''}`);
-  } else if (error) {
-    console.log('Spotify error received at root:', error);
-    res.redirect(`${process.env.FRONTEND_URL}/login?error=auth_failed`);
-  } else {
-    res.redirect(process.env.FRONTEND_URL);
+// Cookies are intentionally cross-site in production when frontend/backend live on
+// different hosts. Reject state-changing browser requests from unknown origins.
+app.use((req, res, next) => {
+  if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) return next();
+  const origin = req.headers.origin;
+  if (origin && !allowedOrigins.includes(origin)) {
+    return res.status(403).json({ error: 'Origin not allowed' });
   }
+  return next();
 });
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 60,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false
+});
+
+const apiLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 180,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false
+});
+
+app.use('/auth', authLimiter, authRoutes);
+app.use('/api', apiLimiter, apiRoutes);
 
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
+  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-app.get('/test-cors', (req, res) => {
-  res.status(200).json({ 
-    message: 'CORS test successful', 
-    origin: req.headers.origin,
-    timestamp: new Date().toISOString() 
-  });
+app.get('/', (req, res) => {
+  res.redirect(process.env.FRONTEND_URL || 'http://localhost:5173');
 });
 
 app.use(errorMiddleware);
+app.use('*', (req, res) => res.status(404).json({ error: 'Route not found' }));
 
-app.use('*', (req, res) => {
-  res.status(404).json({ error: 'Route not found' });
-});
-
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
-  console.log(`Spotify Redirect URI: ${process.env.REDIRECT_URI}`);
-  console.log(`Server accessible at:`);
-  console.log(`   - http://127.0.0.1:${PORT}`);
-  console.log(`   - http://localhost:${PORT}`);
-  console.log(`   - http://172.21.74.86:${PORT}`);
-});
+if (require.main === module) {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`My Universe API listening on port ${PORT}`);
+  });
+}
 
 module.exports = app;

@@ -128,7 +128,7 @@ class ApiController {
 
   async createPlaylist(req, res) {
     try {
-      const { name, description = '', isPublic = false } = req.body;
+      const { name, description = '', public: isPublic = false, collaborative = false } = req.body;
       
       if (!name) {
         return res.status(400).json({ 
@@ -138,11 +138,11 @@ class ApiController {
       }
 
       const playlist = await spotifyService.createPlaylist(
-        req.accessToken, 
-        req.user.id, 
-        name, 
-        description, 
-        isPublic
+        req.accessToken,
+        name,
+        description,
+        isPublic,
+        collaborative
       );
       
       res.status(201).json(playlist);
@@ -189,7 +189,7 @@ class ApiController {
       
       await spotifyService.deletePlaylist(req.accessToken, playlistId);
       
-      res.json({ message: 'Playlist deleted successfully' });
+      res.json({ message: 'Playlist removed from your library' });
     } catch (error) {
       console.error('Delete playlist error:', error);
       res.status(500).json({ 
@@ -346,7 +346,7 @@ class ApiController {
 
   async searchTracks(req, res) {
     try {
-      const { q, limit = 20 } = req.query;
+      const { q, limit = 10 } = req.query;
       
       if (!q) {
         return res.status(400).json({ 
@@ -358,7 +358,7 @@ class ApiController {
       const searchResults = await spotifyService.searchTracks(
         req.accessToken, 
         q, 
-        parseInt(limit)
+        Math.min(parseInt(limit) || 5, 10)
       );
       
       res.json(searchResults);
@@ -373,7 +373,7 @@ class ApiController {
 
   async searchPlaylists(req, res) {
     try {
-      const { q, limit = 20 } = req.query;
+      const { q, limit = 10 } = req.query;
       
       if (!q) {
         return res.status(400).json({ 
@@ -385,7 +385,7 @@ class ApiController {
       const searchResults = await spotifyService.searchPlaylists(
         req.accessToken, 
         q, 
-        parseInt(limit)
+        Math.min(parseInt(limit) || 5, 10)
       );
       
       res.json(searchResults);
@@ -481,7 +481,7 @@ class ApiController {
         res.setCookie('spotify_refresh_token', newTokens.refresh_token, {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',
-          maxAge: 30 * 24 * 60 * 60 * 1000 
+          maxAge: 180 * 24 * 60 * 60 * 1000 
         });
       }
     }
@@ -565,25 +565,10 @@ class ApiController {
 
   async startPlayback(req, res) {
     try {
-      const refreshToken = req.refreshToken;
+      const refreshToken = req.cookies.spotify_refresh_token;
       const result = await spotifyService.startPlayback(req.accessToken, refreshToken, req.body);
-      
-      if (result.newTokens) {
-        res.cookie('accessToken', result.newTokens.access_token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          maxAge: result.newTokens.expires_in * 1000
-        });
-        
-        if (result.newTokens.refresh_token) {
-          res.cookie('refreshToken', result.newTokens.refresh_token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            maxAge: 30 * 24 * 60 * 60 * 1000
-          });
-        }
-      }
-      
+      if (result.newTokens) this.updateTokenCookies(res, result.newTokens);
+
       res.json({ success: true });
     } catch (error) {
       console.error('Start playback error:', error);
@@ -596,25 +581,10 @@ class ApiController {
 
   async getDevices(req, res) {
     try {
-      const refreshToken = req.refreshToken;
+      const refreshToken = req.cookies.spotify_refresh_token;
       const result = await spotifyService.getDevices(req.accessToken, refreshToken);
-      
-      if (result.newTokens) {
-        res.cookie('accessToken', result.newTokens.access_token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          maxAge: result.newTokens.expires_in * 1000
-        });
-        
-        if (result.newTokens.refresh_token) {
-          res.cookie('refreshToken', result.newTokens.refresh_token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            maxAge: 30 * 24 * 60 * 60 * 1000 
-          });
-        }
-      }
-      
+      if (result.newTokens) this.updateTokenCookies(res, result.newTokens);
+
       res.json(result.devices || result);
     } catch (error) {
       res.status(500).json({ 
